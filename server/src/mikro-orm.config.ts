@@ -1,5 +1,5 @@
 import { __prod__ } from "./constants";
-import { Post } from "./entities/Post";
+import { Post, User } from "./entities";
 import { MikroORM } from "@mikro-orm/core";
 import path from "path";
 require('dotenv').config()
@@ -10,7 +10,7 @@ export default {
         path: path.join(__dirname, "./migrations"),
     },
     allowGlobalContext: true,
-    entities: [Post],
+    entities: [Post, User],
     dbName: 'reddit-clone',
     user: process.env.POSTGRES_USERNAME,
     password: process.env.POSTGRES_PASSWORD,
