@@ -6,16 +6,15 @@ import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { PostResolver, UserResolver } from './resolvers'
-
 import RedisStore from "connect-redis"
 import session from "express-session"
 import { createClient } from "redis"
-import { MyContext } from './types'
+import cors from 'cors'
 
 
 const main = async () => {
     const orm = await MikroORM.init(mikroOrmConfig);
-    await orm.getMigrator().up()
+    // await orm.getMigrator().up()
     const app = express()
 
     // Initialize client.
@@ -29,6 +28,10 @@ const main = async () => {
         disableTouch: true
     })
 
+    app.use(cors({
+        origin: ['http://localhost:3000', 'https://studio.apollographql.com'],
+        credentials: true
+    }))
     // Initialize sesssion storage.
     app.use(
         session({
@@ -52,11 +55,11 @@ const main = async () => {
             resolvers: [PostResolver, UserResolver],
             validate: false
         }),
-        context: ({ req, res }: MyContext): MyContext => ({ em: orm.em, req, res })
+        context: ({ req, res }) => ({ em: orm.em, req, res })
     })
 
     await apolloServer.start()
-    apolloServer.applyMiddleware({ app })
+    apolloServer.applyMiddleware({ app, cors: false })
 
     app.listen(4000, () => {
         console.log('server is listening on localhost:4000')
