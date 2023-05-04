@@ -26,11 +26,14 @@ module.exports = {
         tsconfigRootDir: __dirname,
         project: ['./tsconfig.json'], // Specify it only for TypeScript files
       },
+      rules: {
+        "import/extensions": 0
+      }
     },
   ],
   rules: {
     "arrow-body-style": "off",
-    "prefer-arrow-callback": "off"
+    "prefer-arrow-callback": "off",
   },
-  ignorePatterns: ["src/**/*.test.ts", "src/frontend/generated/*"]
+  ignorePatterns: ["src/**/*.test.ts", "src/generated/*"]
 }

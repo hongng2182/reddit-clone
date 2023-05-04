@@ -2,6 +2,7 @@ import { User } from "../entities";
 import { MyContext } from "../types";
 import { Arg, Ctx, Resolver, Mutation, InputType, Field, ObjectType, Query } from "type-graphql";
 import argon2 from 'argon2'
+import { COOKIE_NAME } from "../constants";
 
 @InputType()
 class UserInfoInput {
@@ -33,7 +34,6 @@ export class UserResolver {
     @Query(() => User, { nullable: true })
     async me(
         @Ctx() { em, req }: MyContext) {
-        console.log('me request', req.session.userId)
         if (!req.session.userId) {
             return null
         }
@@ -44,7 +44,7 @@ export class UserResolver {
     @Mutation(() => UserResponse)
     async register(
         @Arg('options', () => UserInfoInput) options: UserInfoInput,
-        @Ctx() { em }: MyContext): Promise<UserResponse> {
+        @Ctx() { em, req }: MyContext): Promise<UserResponse> {
         if (options.username.length <= 8) {
             return {
                 errors: [{ field: "username", message: "Username must be at least 8 characters" }]
@@ -67,6 +67,7 @@ export class UserResolver {
             }
             console.error(err)
         }
+        req.session.userId = user.id
         return { user }
     }
 
@@ -96,4 +97,21 @@ export class UserResolver {
             user
         }
     }
+
+    @Mutation(() => Boolean)
+    logout(@Ctx() { req, res }: MyContext): Promise<boolean> {
+        return new Promise((resolve, _reject) => {
+            res.clearCookie(COOKIE_NAME)
+            req.session.destroy(error => {
+                if (error) {
+                    console.log("Error destroy cookie", error)
+                    resolve(false)
+                    return;
+                }
+                resolve(true)
+            })
+
+        })
+    }
+
 }

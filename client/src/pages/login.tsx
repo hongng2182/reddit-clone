@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { FieldError, useRegisterMutation } from '../generated/graphql'
+import { FieldError, MeDocument, MeQuery, useLoginMutation } from '../generated/graphql'
 
-function Register() {
+function Login() {
   const router = useRouter()
   const [form, setForm] = useState({ username: '', password: '' })
-  const [register, { loading, error }] = useRegisterMutation()
+  const [login, { loading, error }] = useLoginMutation()
 
   const [errorState, setError] = useState({ field: '', message: '' })
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,22 +41,31 @@ function Register() {
 
   return (
     <div>
-      <h1 className='font-bold text-center text-xl'>Register Page</h1>
+      <h1 className='font-bold text-center text-xl'>Login Page</h1>
       <form
         className='flex flex-col gap-[10px]'
         // method="POST"
         onSubmit={async (e) => {
           e.preventDefault()
-          const response = await register({ variables: form })
-          if (response.data?.register.errors) {
-            const fieldName = response.data.register.errors
+          const response = await login({
+            variables: form, update(cache, { data }) {
+              if (data?.login) {
+                cache.writeQuery<MeQuery>({
+                  query: MeDocument,
+                  data: { me: data.login.user }
+                })
+              }
+            }
+          })
+          if (response.data?.login.errors) {
+            const fieldName = response.data.login.errors
             const errorMap = toErrorMap(fieldName)
             setError(prev => ({
               ...prev,
               field: Object.keys(errorMap)[0],
               message: errorMap[Object.keys(errorMap)[0]]
             }))
-          } else if (response.data?.register.user) {
+          } else if (response.data?.login.user) {
             router.push('/')
           }
         }
@@ -79,10 +88,10 @@ function Register() {
           />
           {errorState.field === "password" && <p className='text-red-500'>{errorState.message}</p>}
         </label>
-        <button type="submit" className='bg-blue-500  w-[5rem] rounded-xl p-1 text-white'>Register</button>
+        <button type="submit" className='bg-blue-500  w-[5rem] rounded-xl p-1 text-white'>Login</button>
       </form>
     </div>
   )
 }
 
-export default Register
+export default Login
