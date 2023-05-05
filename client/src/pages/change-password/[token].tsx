@@ -54,7 +54,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }: { token: string 
                     <input id="newPassword" type="password" name="newPassword" value={password}
                         onChange={(e) => setPassword(e.target.value)} />
                 </label>
-                {errorState.field === "newPassword" && <p className='text-red-500'>{errorState.message}</p>}
+                {errorState.field !== "" && <p className='text-red-500'>{errorState.message}</p>}
 
                 <button type="submit" className='bg-blue-500  w-[5rem] rounded-xl p-1 text-white'>Change Password</button>
             </form>

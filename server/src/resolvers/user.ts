@@ -37,18 +37,17 @@ export class UserResolver {
 
     @Query(() => User, { nullable: true })
     async me(
-        @Ctx() { em, req }: MyContext) {
+        @Ctx() { req }: MyContext) {
         if (!req.session.userId) {
             return null
         }
-        const user = await em.findOne(User, { id: req.session.userId })
-        return user
+        return User.findOne({ where: { id: req.session.userId } })
     }
 
     @Mutation(() => UserResponse)
     async register(
         @Arg('options', () => UserInfoInput) options: UserInfoInput,
-        @Ctx() { em, req }: MyContext): Promise<UserResponse> {
+        @Ctx() { req }: MyContext): Promise<UserResponse> {
         const emailPattern = new RegExp(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)
         if (!emailPattern.test(options.email)) {
             return {
@@ -75,9 +74,9 @@ export class UserResolver {
             }
         }
         const hashedPassword = await argon2.hash(options.password)
-        const user = em.create(User, { email: options.email, username: options.username, password: hashedPassword, createdAt: new Date(), updatedAt: '' })
+        const user = User.create({ email: options.email, username: options.username, password: hashedPassword })
         try {
-            await em.persistAndFlush(user);
+            await user.save()
         } catch (err) {
             if (err.code === '23505') {
                 return { errors: [{ field: "username", message: "Username already exists!" }] }
@@ -92,8 +91,8 @@ export class UserResolver {
     async login(
         @Arg('usernameOrEmail', () => String) usernameOrEmail: string,
         @Arg('password', () => String) password: string,
-        @Ctx() { em, req }: MyContext): Promise<UserResponse> {
-        const user = await em.findOne(User, usernameOrEmail.includes('@') ? { email: usernameOrEmail } : { username: usernameOrEmail })
+        @Ctx() { req }: MyContext): Promise<UserResponse> {
+        const user = await User.findOne({ where: usernameOrEmail.includes('@') ? { email: usernameOrEmail } : { username: usernameOrEmail } })
         if (!user) {
             return {
                 errors: [{
@@ -135,15 +134,15 @@ export class UserResolver {
     @Mutation(() => Boolean)
     async forgotPassword(
         @Arg('email', () => String) email: string,
-        @Ctx() { em, redisClient }: MyContext): Promise<boolean> {
-        const user = await em.findOne(User, { email })
+        @Ctx() { redisClient }: MyContext): Promise<boolean> {
+        const user = await User.findOne({ where: { email } })
         if (!user) {
             return true
         }
         const token = uuidv4()
 
         await redisClient.set(FORGOT_PASSWORD_PREFIX + token, user.id, {
-            EX: 1000 * 60 * 60 * 24,
+            EX: 1000 * 20,
         }) // 1 day
         const emailContent = `<a href="http://localhost:3000/change-password/${token}">Reset your password</a>`
 
@@ -155,7 +154,7 @@ export class UserResolver {
     async changePassword(
         @Arg('token', () => String) token: string,
         @Arg('newPassword', () => String) newPassword: string,
-        @Ctx() { em, redisClient, req }: MyContext): Promise<UserResponse> {
+        @Ctx() { redisClient, req }: MyContext): Promise<UserResponse> {
         const regex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/);
 
         if (!regex.test(newPassword)) {
@@ -164,23 +163,25 @@ export class UserResolver {
             }
         }
 
-        const userId = await redisClient.get(FORGOT_PASSWORD_PREFIX + token)
+        const key = FORGOT_PASSWORD_PREFIX + token
+        const userId = await redisClient.get(key)
 
         if (!userId) {
             return {
-                errors: [{ field: "token", message: "Error while changing password" }]
+                errors: [{ field: "token", message: "Token expired!" }]
             }
         } else {
-            const user = await em.findOne(User, { id: parseInt(userId) })
+            const userIdInt = parseInt(userId)
+            const user = await User.findOne({ where: { id: userIdInt } })
 
             if (!user) {
                 return {
                     errors: [{ field: "token", message: "User no longer exists!" }]
                 }
             }
-            user.password = await argon2.hash(newPassword)
-            await em.persistAndFlush(user)
+            User.update({ id: userIdInt }, { password: await argon2.hash(newPassword) })
 
+            await redisClient.del([key])
             // logIn user after change pasword
             req.session.userId = user.id
             return { user }
