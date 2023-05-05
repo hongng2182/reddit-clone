@@ -14,13 +14,12 @@ import cors from 'cors'
 
 const main = async () => {
     const orm = await MikroORM.init(mikroOrmConfig);
-    // await orm.getMigrator().up()
+    await orm.getMigrator().up()
     const app = express()
 
     // Initialize client.
     let redisClient = createClient()
     redisClient.connect().catch(console.error)
-
     // Initialize store.
     let redisStore = new RedisStore({
         client: redisClient,
@@ -55,7 +54,7 @@ const main = async () => {
             resolvers: [PostResolver, UserResolver],
             validate: false
         }),
-        context: ({ req, res }) => ({ em: orm.em, req, res })
+        context: ({ req, res }) => ({ em: orm.em, req, res, redisClient })
     })
 
     await apolloServer.start()

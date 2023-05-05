@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { FieldError, MeDocument, MeQuery, useLoginMutation } from '../generated/graphql'
+import Link from 'next/link'
+import { MeDocument, MeQuery, useLoginMutation } from '../generated/graphql'
+import toErrorMap from './utils'
 
 function Login() {
   const router = useRouter()
-  const [form, setForm] = useState({ username: '', password: '' })
+  const [form, setForm] = useState({ usernameOrEmail: '', password: '' })
   const [login, { loading, error }] = useLoginMutation()
 
   const [errorState, setError] = useState({ field: '', message: '' })
@@ -30,21 +32,12 @@ function Login() {
     return <div>An error has happened!</div>
   }
 
-  const toErrorMap = (errors: FieldError[]) => {
-    const errorMap: Record<string, string> = {};
-    errors.forEach(({ field, message }) => {
-      errorMap[field] = message
-    })
-    return errorMap
-  }
-
 
   return (
     <div>
       <h1 className='font-bold text-center text-xl'>Login Page</h1>
       <form
         className='flex flex-col gap-[10px]'
-        // method="POST"
         onSubmit={async (e) => {
           e.preventDefault()
           const response = await login({
@@ -71,10 +64,10 @@ function Login() {
         }
         }
       >
-        <label htmlFor='username'>Username
-          <input id="username" type="text" name="username" value={form.username}
+        <label htmlFor='usernameOrEmail'>Username
+          <input id="usernameOrEmail" type="text" name="usernameOrEmail" value={form.usernameOrEmail}
             onChange={(e) => handleChange(e)} />
-          {errorState.field === "username" && <p className='text-red-500'>{errorState.message}</p>}
+          {errorState.field === "usernameOrEmail" && <p className='text-red-500'>{errorState.message}</p>}
         </label>
 
 
@@ -88,6 +81,7 @@ function Login() {
           />
           {errorState.field === "password" && <p className='text-red-500'>{errorState.message}</p>}
         </label>
+        <Link href="/forgot-password">Forgot Password</Link>
         <button type="submit" className='bg-blue-500  w-[5rem] rounded-xl p-1 text-white'>Login</button>
       </form>
     </div>

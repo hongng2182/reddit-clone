@@ -2,10 +2,14 @@ import { User } from "../entities";
 import { MyContext } from "../types";
 import { Arg, Ctx, Resolver, Mutation, InputType, Field, ObjectType, Query } from "type-graphql";
 import argon2 from 'argon2'
-import { COOKIE_NAME } from "../constants";
+import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
+import { sendEmail } from "../utils/sendEmail";
+import { v4 as uuidv4 } from 'uuid';
 
 @InputType()
 class UserInfoInput {
+    @Field()
+    email: string
     @Field()
     username: string
     @Field()
@@ -45,11 +49,24 @@ export class UserResolver {
     async register(
         @Arg('options', () => UserInfoInput) options: UserInfoInput,
         @Ctx() { em, req }: MyContext): Promise<UserResponse> {
+        const emailPattern = new RegExp(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)
+        if (!emailPattern.test(options.email)) {
+            return {
+                errors: [{ field: "email", message: "Invalid email!" }]
+            }
+        }
         if (options.username.length <= 8) {
             return {
                 errors: [{ field: "username", message: "Username must be at least 8 characters" }]
             }
         }
+
+        if (options.username.includes('@')) {
+            return {
+                errors: [{ field: "username", message: "Username can't include special characters" }]
+            }
+        }
+
         const regex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/);
 
         if (!regex.test(options.password)) {
@@ -58,7 +75,7 @@ export class UserResolver {
             }
         }
         const hashedPassword = await argon2.hash(options.password)
-        const user = em.create(User, { username: options.username, password: hashedPassword, createdAt: new Date(), updatedAt: '' })
+        const user = em.create(User, { email: options.email, username: options.username, password: hashedPassword, createdAt: new Date(), updatedAt: '' })
         try {
             await em.persistAndFlush(user);
         } catch (err) {
@@ -73,18 +90,19 @@ export class UserResolver {
 
     @Mutation(() => UserResponse)
     async login(
-        @Arg('options', () => UserInfoInput) options: UserInfoInput,
+        @Arg('usernameOrEmail', () => String) usernameOrEmail: string,
+        @Arg('password', () => String) password: string,
         @Ctx() { em, req }: MyContext): Promise<UserResponse> {
-        const user = await em.findOne(User, { username: options.username })
+        const user = await em.findOne(User, usernameOrEmail.includes('@') ? { email: usernameOrEmail } : { username: usernameOrEmail })
         if (!user) {
             return {
                 errors: [{
-                    field: "username",
+                    field: "usernameOrEmail",
                     message: "Username doesn't exists"
                 }]
             }
         }
-        const validUser = await argon2.verify(user.password, options.password)
+        const validUser = await argon2.verify(user.password, password)
         if (!validUser) {
             return {
                 errors: [{ field: "password", message: "Incorect password!" }]
@@ -113,5 +131,63 @@ export class UserResolver {
 
         })
     }
+
+    @Mutation(() => Boolean)
+    async forgotPassword(
+        @Arg('email', () => String) email: string,
+        @Ctx() { em, redisClient }: MyContext): Promise<boolean> {
+        const user = await em.findOne(User, { email })
+        if (!user) {
+            return true
+        }
+        const token = uuidv4()
+
+        await redisClient.set(FORGOT_PASSWORD_PREFIX + token, user.id, {
+            EX: 1000 * 60 * 60 * 24,
+        }) // 1 day
+        const emailContent = `<a href="http://localhost:3000/change-password/${token}">Reset your password</a>`
+
+        await sendEmail(email, emailContent)
+        return true
+    }
+
+    @Mutation(() => UserResponse)
+    async changePassword(
+        @Arg('token', () => String) token: string,
+        @Arg('newPassword', () => String) newPassword: string,
+        @Ctx() { em, redisClient, req }: MyContext): Promise<UserResponse> {
+        const regex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/);
+
+        if (!regex.test(newPassword)) {
+            return {
+                errors: [{ field: "newPassword", message: "Password must be at least eight characters, one uppercase letter, one lowercase letter, one number and one special character" }]
+            }
+        }
+
+        const userId = await redisClient.get(FORGOT_PASSWORD_PREFIX + token)
+
+        if (!userId) {
+            return {
+                errors: [{ field: "token", message: "Error while changing password" }]
+            }
+        } else {
+            const user = await em.findOne(User, { id: parseInt(userId) })
+
+            if (!user) {
+                return {
+                    errors: [{ field: "token", message: "User no longer exists!" }]
+                }
+            }
+            user.password = await argon2.hash(newPassword)
+            await em.persistAndFlush(user)
+
+            // logIn user after change pasword
+            req.session.userId = user.id
+            return { user }
+        }
+
+
+    }
+
 
 }

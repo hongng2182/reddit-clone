@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { FieldError, useRegisterMutation } from '../generated/graphql'
+import { MeDocument, MeQuery, useRegisterMutation } from '../generated/graphql'
+import toErrorMap from './utils'
 
 function Register() {
   const router = useRouter()
-  const [form, setForm] = useState({ username: '', password: '' })
+  const [form, setForm] = useState({ username: '', password: '', email: '' })
   const [register, { loading, error }] = useRegisterMutation()
 
   const [errorState, setError] = useState({ field: '', message: '' })
@@ -30,24 +31,23 @@ function Register() {
     return <div>An error has happened!</div>
   }
 
-  const toErrorMap = (errors: FieldError[]) => {
-    const errorMap: Record<string, string> = {};
-    errors.forEach(({ field, message }) => {
-      errorMap[field] = message
-    })
-    return errorMap
-  }
-
-
   return (
     <div>
       <h1 className='font-bold text-center text-xl'>Register Page</h1>
       <form
         className='flex flex-col gap-[10px]'
-        // method="POST"
         onSubmit={async (e) => {
           e.preventDefault()
-          const response = await register({ variables: form })
+          const response = await register({
+            variables: { options: form }, update(cache, { data }) {
+              if (data?.register) {
+                cache.writeQuery<MeQuery>({
+                  query: MeDocument,
+                  data: { me: data.register.user }
+                })
+              }
+            }
+          })
           if (response.data?.register.errors) {
             const fieldName = response.data.register.errors
             const errorMap = toErrorMap(fieldName)
@@ -62,6 +62,12 @@ function Register() {
         }
         }
       >
+        <label htmlFor='email'>Email
+          <input id="email" type="email" name="email" value={form.email}
+            onChange={(e) => handleChange(e)} />
+          {errorState.field === "email" && <p className='text-red-500'>{errorState.message}</p>}
+        </label>
+
         <label htmlFor='username'>Username
           <input id="username" type="text" name="username" value={form.username}
             onChange={(e) => handleChange(e)} />
