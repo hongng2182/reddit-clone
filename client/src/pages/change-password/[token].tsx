@@ -1,11 +1,13 @@
 /* eslint-disable react/function-component-definition */
 import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { MeDocument, MeQuery, useChangePasswordMutation } from '@/generated/graphql'
 import toErrorMap from '../utils'
 
-const ChangePassword: NextPage<{ token: string }> = ({ token }: { token: string }) => {
+
+const ChangePassword: NextPage = () => {
     const router = useRouter()
     const [password, setPassword] = useState('')
     const [errorState, setError] = useState({ field: '', message: '' })
@@ -27,7 +29,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }: { token: string 
                 onSubmit={async (e) => {
                     e.preventDefault()
                     const response = await changePassword({
-                        variables: { newPassword: password, token }, update(cache, { data }) {
+                        variables: { newPassword: password, token: typeof router.query.token === "string" ? router.query.token : '' }, update(cache, { data }) {
                             if (data?.changePassword) {
                                 cache.writeQuery<MeQuery>({
                                     query: MeDocument,
@@ -54,18 +56,17 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }: { token: string 
                     <input id="newPassword" type="password" name="newPassword" value={password}
                         onChange={(e) => setPassword(e.target.value)} />
                 </label>
-                {errorState.field !== "" && <p className='text-red-500'>{errorState.message}</p>}
+                {errorState.field !== "" &&
+                    <>
+                        <p className='text-red-500'>{errorState.message}</p>
+                        <Link href='/forgot-pasword'>Click  here to renew your token</Link>
+                    </>
+                }
 
                 <button type="submit" className='bg-blue-500  w-[5rem] rounded-xl p-1 text-white'>Change Password</button>
             </form>
         </div>
     )
 }
-
-
-ChangePassword.getInitialProps = ({ query }) => ({
-    token: query.token as string
-})
-
 
 export default ChangePassword

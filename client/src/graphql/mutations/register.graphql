@@ -5,7 +5,7 @@ mutation Register ($options: UserInfoInput!) {
       message
     }
     user {
-      ...CommonUserFields
+      ...UserInfo
     }
   }
 }

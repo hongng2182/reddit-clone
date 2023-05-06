@@ -16,7 +16,7 @@ const main = async () => {
     // Connect db
     const AppDataSource = new DataSource(typeOrmConfig)
     await AppDataSource.initialize()
-
+    
     const app = express()
 
     // Initialize client.

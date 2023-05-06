@@ -1,5 +1,0 @@
-fragment CommonUserFields on User {
-    id
-    username
-    email
-}

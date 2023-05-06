@@ -41,7 +41,7 @@ export type MutationChangePasswordArgs = {
 
 
 export type MutationCreatePostArgs = {
-  title: Scalars['String'];
+  input: PostInput;
 };
 
 
@@ -67,7 +67,7 @@ export type MutationRegisterArgs = {
 
 
 export type MutationUpdatePostArgs = {
-  id: Scalars['Int'];
+  id: Scalars['Float'];
   title?: InputMaybe<Scalars['String']>;
 };
 
@@ -75,8 +75,16 @@ export type Post = {
   __typename?: 'Post';
   createdAt: Scalars['String'];
   id: Scalars['Float'];
+  ownerId: Scalars['Float'];
+  points: Scalars['Float'];
+  text: Scalars['String'];
   title: Scalars['String'];
   updatedAt: Scalars['String'];
+};
+
+export type PostInput = {
+  text: Scalars['String'];
+  title: Scalars['String'];
 };
 
 export type Query = {
@@ -88,7 +96,7 @@ export type Query = {
 
 
 export type QueryPostArgs = {
-  id: Scalars['Int'];
+  id: Scalars['Float'];
 };
 
 export type User = {
@@ -113,7 +121,9 @@ export type UserResponse = {
   user?: Maybe<User>;
 };
 
-export type CommonUserFieldsFragment = { __typename?: 'User', id: number, username: string, email: string };
+export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string };
+
+export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string };
 
 export type ChangePasswordMutationVariables = Exact<{
   newPassword: Scalars['String'];
@@ -122,6 +132,13 @@ export type ChangePasswordMutationVariables = Exact<{
 
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string } | null } };
+
+export type CreatePostMutationVariables = Exact<{
+  input: PostInput;
+}>;
+
+
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string } };
 
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars['String'];
@@ -160,8 +177,19 @@ export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string }> };
 
-export const CommonUserFieldsFragmentDoc = gql`
-    fragment CommonUserFields on User {
+export const PostInfoFragmentDoc = gql`
+    fragment PostInfo on Post {
+  id
+  title
+  text
+  points
+  ownerId
+  createdAt
+  updatedAt
+}
+    `;
+export const UserInfoFragmentDoc = gql`
+    fragment UserInfo on User {
   id
   username
   email
@@ -175,11 +203,11 @@ export const ChangePasswordDocument = gql`
       message
     }
     user {
-      ...CommonUserFields
+      ...UserInfo
     }
   }
 }
-    ${CommonUserFieldsFragmentDoc}`;
+    ${UserInfoFragmentDoc}`;
 export type ChangePasswordMutationFn = Apollo.MutationFunction<ChangePasswordMutation, ChangePasswordMutationVariables>;
 
 /**
@@ -207,6 +235,39 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const CreatePostDocument = gql`
+    mutation CreatePost($input: PostInput!) {
+  createPost(input: $input) {
+    ...PostInfo
+  }
+}
+    ${PostInfoFragmentDoc}`;
+export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+
+/**
+ * __useCreatePostMutation__
+ *
+ * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
+      }
+export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
+export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
   forgotPassword(email: $email)
@@ -246,11 +307,11 @@ export const LoginDocument = gql`
       message
     }
     user {
-      ...CommonUserFields
+      ...UserInfo
     }
   }
 }
-    ${CommonUserFieldsFragmentDoc}`;
+    ${UserInfoFragmentDoc}`;
 export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
@@ -316,11 +377,11 @@ export const RegisterDocument = gql`
       message
     }
     user {
-      ...CommonUserFields
+      ...UserInfo
     }
   }
 }
-    ${CommonUserFieldsFragmentDoc}`;
+    ${UserInfoFragmentDoc}`;
 export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
 
 /**
@@ -350,10 +411,10 @@ export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutatio
 export const MeDocument = gql`
     query Me {
   me {
-    ...CommonUserFields
+    ...UserInfo
   }
 }
-    ${CommonUserFieldsFragmentDoc}`;
+    ${UserInfoFragmentDoc}`;
 
 /**
  * __useMeQuery__

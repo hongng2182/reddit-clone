@@ -5,7 +5,7 @@ mutation Login($password: String!, $usernameOrEmail: String!)  {
       message
     }
     user {
-      ...CommonUserFields
+      ...UserInfo
     }
   }
 }
