@@ -1,7 +1,8 @@
 import { MyContext } from "src/types";
-import { Post } from "../entities/Post";
-import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware } from "type-graphql";
+import { Post, User } from "../entities";
+import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware, FieldResolver, Root, ObjectType } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
+import { AppDataSource } from "../index";
 
 @InputType()
 class PostInput {
@@ -11,11 +12,71 @@ class PostInput {
     text: string
 }
 
-@Resolver()
+@ObjectType()
+class PageInfo {
+    @Field(() => String, { nullable: true })
+    endCursor: string | null
+
+    @Field()
+    hasNextPage: boolean
+
+
+    @Field()
+    hasPreviousPage: boolean
+}
+
+
+@ObjectType()
+class PaginatedPosts {
+    @Field(() => [Post])
+    paginatedPosts: Post[]
+
+    @Field()
+    pageInfo: PageInfo
+}
+@Resolver(_of => Post)
 export class PostResolver {
-    @Query(() => [Post])
-    posts(): Promise<Post[]> {
-        return Post.find()
+
+    @FieldResolver(() => String)
+    textSnippet(@Root() root: Post) {
+        return root.text.slice(0, 50)
+    }
+
+    @FieldResolver(() => User)
+    async user(@Root() root: Post) {
+        return await User.findOne({ where: { id: root.ownerId } })
+    }
+
+    @Query(() => PaginatedPosts)
+    async posts(
+        @Arg("after", () => String, { nullable: true }) after: string | null,
+        @Arg("first", () => Int) first: number
+    ): Promise<PaginatedPosts> {
+
+        // Calculate offset and limit based on the "after" and "first" parameters
+        const offset = after ? parseInt(Buffer.from(after, 'base64').toString(), 10) : 0;
+        const limit = Math.min(20, first);
+
+        // Get posts with pagination
+        const [posts, totalCount] = await AppDataSource.getRepository(Post).findAndCount({
+            order: { createdAt: 'DESC' },
+            skip: offset,
+            take: limit,
+        })
+
+        // Calculate endCursor, and encode 
+        const hasNextPage = offset + limit < totalCount
+        const endCursor = hasNextPage ? Buffer.from((offset + limit).toString()).toString('base64') : null
+
+        // Calculate pageInfo
+        const pageInfo = {
+            endCursor,
+            hasNextPage,
+            hasPreviousPage: offset > 0,
+        };
+
+        return { paginatedPosts: posts, pageInfo: pageInfo }
+
     }
 
     @Query(() => Post, { nullable: true })

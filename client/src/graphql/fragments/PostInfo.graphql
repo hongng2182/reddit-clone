@@ -3,6 +3,7 @@ fragment PostInfo on Post {
     title
     text
     points
+    textSnippet
     ownerId
     createdAt
     updatedAt

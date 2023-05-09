@@ -11,12 +11,11 @@ import session from "express-session"
 import { createClient } from "redis"
 import cors from 'cors'
 
+export const AppDataSource = new DataSource(typeOrmConfig)
 
 const main = async () => {
     // Connect db
-    const AppDataSource = new DataSource(typeOrmConfig)
     await AppDataSource.initialize()
-    
     const app = express()
 
     // Initialize client.

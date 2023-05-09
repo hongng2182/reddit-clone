@@ -1,8 +1,22 @@
-query Posts {
-  posts {
-    id
-    createdAt
-    updatedAt
-    title
+query Posts($first: Int!, $after: String) {
+  posts(first: $first, after: $after) {
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    paginatedPosts {
+      id
+      title
+      text
+      points
+      ownerId
+      createdAt
+      updatedAt
+      textSnippet
+      user {
+        username
+      }
+    }
   }
 }
