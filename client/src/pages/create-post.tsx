@@ -26,7 +26,7 @@ function CreatePost() {
 
     return (
         <div>
-            <h1 className='font-bold text-center text-xl'>Login Page</h1>
+            <h1 className='font-bold text-center text-xl'>Create Post</h1>
             <form
                 className='flex flex-col gap-[10px]'
                 onSubmit={async (e) => {

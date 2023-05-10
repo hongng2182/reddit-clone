@@ -17,6 +17,9 @@ function Navbar() {
         </>
     } else {
         body = <>
+            <button type="button" className='bg-blue-500  w-[10rem] rounded-xl p-1 text-white'>
+                <Link href="/create-post">Create Post</Link>
+            </button>
             <li>{data.me.username}</li>
             <li><button
                 type="button"

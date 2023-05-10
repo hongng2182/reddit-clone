@@ -97,24 +97,34 @@ export class PostResolver {
     }
 
     @Mutation(() => Post, { nullable: true })
+    @UseMiddleware(isAuth)
     async updatePost(
-        @Arg("id") id: number,
-        @Arg("title", () => String, { nullable: true }) title: string): Promise<Post | null> {
+        @Arg("id", () => Int) id: number,
+        @Arg("input", () => PostInput) input: PostInput): Promise<Post | null> {
         const post = await Post.findOne({ where: { id } })
         if (!post) {
             return null
         }
-        if (typeof title !== 'undefined') {
-            await Post.update({ id }, { title })
+
+        if (input.text === '' || input.title === '') {
+            return null
         }
+
+        post.title = input.title
+        post.text = input.text
+
+        await post.save()
         return post
     }
 
     @Mutation(() => Boolean)
+    @UseMiddleware(isAuth)
     async deletePost(
-        @Arg("id", () => Int) id: number): Promise<boolean> {
+        @Arg("id", () => Int) id: number,
+        @Ctx() { req }: MyContext
+    ): Promise<boolean> {
         try {
-            await Post.delete(id)
+            await Post.delete({ id, ownerId: req.session.userId })
             return true
         } catch (e) {
             return false
