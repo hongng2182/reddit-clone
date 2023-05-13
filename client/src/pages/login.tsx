@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import { initializeApollo } from '@/lib/apolloClient'
 import { MeDocument, MeQuery, useLoginMutation } from '../generated/graphql'
 import toErrorMap from './utils'
 
@@ -59,6 +60,9 @@ function Login() {
               message: errorMap[Object.keys(errorMap)[0]]
             }))
           } else if (response.data?.login.user) {
+
+            const apolloClient = initializeApollo()
+            await apolloClient.resetStore()
             router.push('/')
           }
         }

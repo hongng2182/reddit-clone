@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import { Reference, gql } from '@apollo/client'
 import { MeDocument, MeQuery, useLogoutMutation, useMeQuery } from '@/generated/graphql'
 
 function Navbar() {
@@ -30,6 +31,28 @@ function Navbar() {
                                 cache.writeQuery<MeQuery>({
                                     query: MeDocument,
                                     data: { me: null }
+                                })
+
+                                cache.modify({
+                                    fields: {
+                                        posts(existing) {
+                                            existing.paginatedPosts.forEach((post: Reference) => {
+                                                cache.writeFragment({
+                                                    // eslint-disable-next-line no-underscore-dangle
+                                                    id: post.__ref,
+                                                    fragment: gql`
+                                                fragment voteStatus on Post {
+                                                    voteStatus
+                                                }
+                                                `,
+                                                    data: {
+                                                        voteStatus: 0
+                                                    }
+                                                })
+                                            })
+                                            return existing
+                                        }
+                                    }
                                 })
                             }
                         }

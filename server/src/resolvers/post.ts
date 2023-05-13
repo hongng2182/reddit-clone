@@ -1,8 +1,13 @@
-import { MyContext } from "src/types";
-import { Post, User } from "../entities";
-import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware, FieldResolver, Root, ObjectType } from "type-graphql";
+import { MyContext, VoteType } from "../types/index";
+import { Post, User, Vote } from "../entities";
+import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware, FieldResolver, Root, ObjectType, registerEnumType } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../index";
+import { UserInputError } from "apollo-server-express";
+
+registerEnumType(VoteType, {
+    name: 'VoteType'
+})
 
 @InputType()
 class PostInput {
@@ -20,7 +25,6 @@ class PageInfo {
     @Field()
     hasNextPage: boolean
 
-
     @Field()
     hasPreviousPage: boolean
 }
@@ -34,6 +38,7 @@ class PaginatedPosts {
     @Field()
     pageInfo: PageInfo
 }
+
 @Resolver(_of => Post)
 export class PostResolver {
 
@@ -47,11 +52,26 @@ export class PostResolver {
         return await User.findOne({ where: { id: root.ownerId } })
     }
 
+    @FieldResolver(() => Int)
+    async voteStatus(@Root() root: Post,
+        @Ctx() { req }: MyContext) {
+        console.log('voteStatus run')
+
+        console.log('userId', req.session.userId)
+
+        if (!req.session.userId) { return 0 }
+        const voteStatus = await Vote.findOne({ where: { postId: root.id, userId: req.session.userId } })
+        console.log('voteStatus', voteStatus)
+
+        return voteStatus ? voteStatus.value : 0
+    }
+
     @Query(() => PaginatedPosts)
     async posts(
         @Arg("after", () => String, { nullable: true }) after: string | null,
         @Arg("first", () => Int) first: number
     ): Promise<PaginatedPosts> {
+        console.log('post query run')
 
         // Calculate offset and limit based on the "after" and "first" parameters
         const offset = after ? parseInt(Buffer.from(after, 'base64').toString(), 10) : 0;
@@ -129,5 +149,70 @@ export class PostResolver {
         } catch (e) {
             return false
         }
+    }
+
+
+    @Mutation(() => Post)
+    @UseMiddleware(isAuth)
+    async vote(
+        @Arg("postId", () => Int) postId: number,
+        @Arg("voteValue", () => VoteType) voteValue: VoteType,
+        @Ctx() { req }: MyContext
+    ): Promise<Post> {
+        const { userId } = req.session
+        return await AppDataSource.transaction(async (transactionalEntityManager) => {
+            // find Post to add points
+            let post = await transactionalEntityManager.findOne(Post, { where: { id: postId } })
+            console.log('existing post', post)
+            console.log('voteValue', voteValue)
+
+            // if no post found, throw Error
+            if (!post) {
+                throw new UserInputError('No post found')
+            }
+
+            // check if user has voted post
+            const existingVote = await transactionalEntityManager.findOne(Vote, {
+                where: {
+                    postId,
+                    userId
+                }
+            })
+            console.log('existing vote', existingVote)
+
+            // Case: user has voted and now change voteType : save new vote and update points
+            if (existingVote && existingVote.value !== voteValue) {
+                await transactionalEntityManager.save(Vote, {
+                    ...existingVote,
+                    value: voteValue
+                })
+                console.log('POINTS if have ', post.points + 2 * voteValue)
+
+                post = await transactionalEntityManager.save(Post, {
+                    ...post,
+                    points: post.points + 2 * voteValue
+                })
+                console.log('post saved', post)
+
+            }
+
+            // Case: user not voted before: create new record in Vote table + update points
+            if (!existingVote) {
+                const newVote = transactionalEntityManager.create(Vote, {
+                    userId,
+                    postId,
+                    value: voteValue
+                })
+                await transactionalEntityManager.save(newVote)
+                console.log('POINTS if npt have ', post.points + voteValue)
+                post.points = post.points + voteValue
+                post = await transactionalEntityManager.save(post)
+                console.log('post saved', post)
+
+            }
+
+            return post
+
+        })
     }
 }

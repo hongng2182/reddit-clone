@@ -4,6 +4,7 @@ import { onError } from '@apollo/client/link/error'
 import { concatPagination } from '@apollo/client/utilities'
 import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
+import { IncomingHttpHeaders } from 'http'
 import { Post } from '@/generated/graphql'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
@@ -24,12 +25,25 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (networkError) console.log(`[Network error]: ${networkError}`)
 })
 
-const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_API_URL as string, // Server URL (must be absolute)
-    credentials: 'include', // Additional fetch() options like `credentials` or `headers`
-})
 
-function createApolloClient() {
+
+function createApolloClient(headers: IncomingHttpHeaders | null = null) {
+    const enhancedFetch = (url: RequestInfo, init: RequestInit) => fetch(url, {
+        ...init,
+        headers: {
+            ...init.headers,
+            'Access-Control-Allow-Origin': '*',
+            // here we pass the cookie along for each request
+            Cookie: headers?.cookie ?? ''
+        }
+    })
+
+    const httpLink = new HttpLink({
+        uri: process.env.NEXT_PUBLIC_API_URL as string, // Server URL (must be absolute)
+        credentials: 'include', // Additional fetch() options like `credentials` or `headers`
+        fetch: enhancedFetch
+    })
+
     return new ApolloClient({
         ssrMode: typeof window === 'undefined',
         link: from([errorLink, httpLink]),
@@ -60,9 +74,15 @@ function createApolloClient() {
     })
 }
 
-export function initializeApollo(initialState: NormalizedCacheObject | null = null) {
+export function initializeApollo({
+    headers,
+    initialState
+}: {
+    headers?: IncomingHttpHeaders | null
+    initialState?: NormalizedCacheObject | null
+} = { headers: null, initialState: null }) {
     // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle
-    const _apolloClient = apolloClient ?? createApolloClient()
+    const _apolloClient = apolloClient ?? createApolloClient(headers)
 
     // If your page has Next.js data fetching methods that use Apollo Client, the initial state
     // gets hydrated here
@@ -105,6 +125,6 @@ export function addApolloState(
 
 export function useApollo(pageProps: IApolloStateProps) {
     const state = pageProps[APOLLO_STATE_PROP_NAME]
-    const store = useMemo(() => initializeApollo(state), [state])
+    const store = useMemo(() => initializeApollo({ initialState: state }), [state])
     return store
 }

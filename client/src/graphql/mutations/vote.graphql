@@ -1,0 +1,19 @@
+# mutation Vote($voteValue: VoteType!, $postId: Int!) {
+#   vote(voteValue: $voteValue, postId: $postId)
+# }
+
+mutation Vote($voteValue: VoteType!, $postId: Int!) {
+  vote(voteValue: $voteValue, postId: $postId) {
+    id
+    title
+    text
+    points
+    ownerId
+    createdAt
+    updatedAt
+    voteStatus
+    user {
+      username
+    }
+  }
+}

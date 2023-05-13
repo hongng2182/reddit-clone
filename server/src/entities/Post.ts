@@ -1,6 +1,7 @@
 import { Field, ObjectType } from "type-graphql";
-import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./User";
+import { Vote } from "./Vote";
 
 @ObjectType()
 @Entity()
@@ -23,11 +24,17 @@ export class Post extends BaseEntity {
     points!: number;
 
     @Field()
+    voteStatus!: number;
+
+    @Field()
     @Column()
     ownerId!: number;
 
     @ManyToOne(() => User, (user) => user.posts)
     owner: User
+
+    @OneToMany(() => Vote, (upvote) => upvote.post)
+    upvotes: Vote[]
 
     @Field(() => String)
     @CreateDateColumn({ type: 'timestamptz' })
@@ -38,5 +45,5 @@ export class Post extends BaseEntity {
     updatedAt: Date;
 
 
- 
+
 }

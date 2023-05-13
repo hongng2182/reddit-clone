@@ -17,6 +17,7 @@ query Posts($first: Int!, $after: String) {
       user {
         username
       }
+      voteStatus
     }
   }
 }

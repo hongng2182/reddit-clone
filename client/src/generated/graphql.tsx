@@ -31,6 +31,7 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   register: UserResponse;
   updatePost?: Maybe<Post>;
+  vote: Post;
 };
 
 
@@ -71,6 +72,12 @@ export type MutationUpdatePostArgs = {
   input: PostInput;
 };
 
+
+export type MutationVoteArgs = {
+  postId: Scalars['Int'];
+  voteValue: VoteType;
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   endCursor?: Maybe<Scalars['String']>;
@@ -95,6 +102,7 @@ export type Post = {
   title: Scalars['String'];
   updatedAt: Scalars['String'];
   user: User;
+  voteStatus: Scalars['Float'];
 };
 
 export type PostInput = {
@@ -141,6 +149,11 @@ export type UserResponse = {
   errors?: Maybe<Array<FieldError>>;
   user?: Maybe<User>;
 };
+
+export enum VoteType {
+  Downvote = 'DOWNVOTE',
+  Upvote = 'UPVOTE'
+}
 
 export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string };
 
@@ -203,6 +216,14 @@ export type UpdatePostMutationVariables = Exact<{
 
 export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, textSnippet: string, user: { __typename?: 'User', username: string } } | null };
 
+export type VoteMutationVariables = Exact<{
+  voteValue: VoteType;
+  postId: Scalars['Int'];
+}>;
+
+
+export type VoteMutation = { __typename?: 'Mutation', vote: { __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } } };
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -221,7 +242,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, textSnippet: string, user: { __typename?: 'User', username: string } }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, textSnippet: string, voteStatus: number, user: { __typename?: 'User', username: string } }> } };
 
 export const PostInfoFragmentDoc = gql`
     fragment PostInfo on Post {
@@ -530,6 +551,50 @@ export function useUpdatePostMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UpdatePostMutationHookResult = ReturnType<typeof useUpdatePostMutation>;
 export type UpdatePostMutationResult = Apollo.MutationResult<UpdatePostMutation>;
 export type UpdatePostMutationOptions = Apollo.BaseMutationOptions<UpdatePostMutation, UpdatePostMutationVariables>;
+export const VoteDocument = gql`
+    mutation Vote($voteValue: VoteType!, $postId: Int!) {
+  vote(voteValue: $voteValue, postId: $postId) {
+    id
+    title
+    text
+    points
+    ownerId
+    createdAt
+    updatedAt
+    voteStatus
+    user {
+      username
+    }
+  }
+}
+    `;
+export type VoteMutationFn = Apollo.MutationFunction<VoteMutation, VoteMutationVariables>;
+
+/**
+ * __useVoteMutation__
+ *
+ * To run a mutation, you first call `useVoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [voteMutation, { data, loading, error }] = useVoteMutation({
+ *   variables: {
+ *      voteValue: // value for 'voteValue'
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function useVoteMutation(baseOptions?: Apollo.MutationHookOptions<VoteMutation, VoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<VoteMutation, VoteMutationVariables>(VoteDocument, options);
+      }
+export type VoteMutationHookResult = ReturnType<typeof useVoteMutation>;
+export type VoteMutationResult = Apollo.MutationResult<VoteMutation>;
+export type VoteMutationOptions = Apollo.BaseMutationOptions<VoteMutation, VoteMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -629,6 +694,7 @@ export const PostsDocument = gql`
       user {
         username
       }
+      voteStatus
     }
   }
 }

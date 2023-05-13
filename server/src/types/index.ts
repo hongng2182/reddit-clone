@@ -7,3 +7,8 @@ export type MyContext = {
     res: Response
     redisClient: RedisClientType
 }
+
+export enum VoteType {
+    UPVOTE = 1,
+    DOWNVOTE = -1
+}
