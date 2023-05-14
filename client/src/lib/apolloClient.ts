@@ -5,6 +5,7 @@ import { concatPagination } from '@apollo/client/utilities'
 import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
 import { IncomingHttpHeaders } from 'http'
+import router from 'next/router'
 import { Post } from '@/generated/graphql'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
@@ -14,14 +15,33 @@ let apolloClient: ApolloClient<NormalizedCacheObject>
 interface IApolloStateProps {
     [APOLLO_STATE_PROP_NAME]?: NormalizedCacheObject
 }
+const INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR'
+const AUTHENTICATE_ERROR = 'NOT_AUTHENTICATED'
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-    if (graphQLErrors)
+const errorLink = onError(({ graphQLErrors, networkError, response }) => {
+    if (graphQLErrors) {
+        if (response) {
+            graphQLErrors.forEach(({ message, extensions }) => {
+                switch (extensions.code) {
+                    case INTERNAL_SERVER_ERROR:
+                        if (message === AUTHENTICATE_ERROR) {
+                            response.errors = undefined
+                            router.push('/login')
+                        }
+                        break
+                    default:
+                        break
+                }
+            })
+            return
+        }
         graphQLErrors.forEach(({ message, locations, path }) =>
             console.log(
                 `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
             )
         )
+    }
+
     if (networkError) console.log(`[Network error]: ${networkError}`)
 })
 
