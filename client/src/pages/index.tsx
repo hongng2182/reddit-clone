@@ -87,11 +87,11 @@ export default function Home() {
           <div className="flex gap-[10px]">
             <div className="flex flex-col gap-2 justify-center items-center">
               <button onClick={() => upVote(post.voteStatus, post.id)}
-                style={{ backgroundColor: post.voteStatus === VoteStatusValues.Upvote ? 'green' : 'none' }}
+                className={`${post.voteStatus === VoteStatusValues.Upvote ? 'bg-green-500' : ''}`}
                 type="button">Upvote</button>
               <p className="font-bold text-[18px]">{post.points}</p>
               <button onClick={() => downVote(post.voteStatus, post.id)} type="button"
-                style={{ backgroundColor: post.voteStatus === VoteStatusValues.Downvote ? 'red' : 'none' }}
+                className={`${post.voteStatus === VoteStatusValues.Downvote ? 'bg-red-500' : ''}`}
               >Downvote</button>
             </div>
             < Link href={`/posts/${post.id}`}>

@@ -48,20 +48,19 @@ export class PostResolver {
     }
 
     @FieldResolver(() => User)
-    async user(@Root() root: Post) {
-        return await User.findOne({ where: { id: root.ownerId } })
+    async user(@Root() root: Post,
+        @Ctx() { dataLoaders: { userLoader } }: MyContext
+    ) {
+        return await userLoader.load(root.ownerId)
     }
 
     @FieldResolver(() => Int)
     async voteStatus(@Root() root: Post,
-        @Ctx() { req }: MyContext) {
-        console.log('voteStatus run')
-
-        console.log('userId', req.session.userId)
+        @Ctx() { req, dataLoaders: { voteTypeLoader } }: MyContext) {
 
         if (!req.session.userId) { return 0 }
-        const voteStatus = await Vote.findOne({ where: { postId: root.id, userId: req.session.userId } })
-        console.log('voteStatus', voteStatus)
+        // const voteStatus = await Vote.findOne({ where: { postId: root.id, userId: req.session.userId } })
+        const voteStatus = await voteTypeLoader.load({ postId: root.id, userId: req.session.userId })
 
         return voteStatus ? voteStatus.value : 0
     }
@@ -71,7 +70,6 @@ export class PostResolver {
         @Arg("after", () => String, { nullable: true }) after: string | null,
         @Arg("first", () => Int) first: number
     ): Promise<PaginatedPosts> {
-        console.log('post query run')
 
         // Calculate offset and limit based on the "after" and "first" parameters
         const offset = after ? parseInt(Buffer.from(after, 'base64').toString(), 10) : 0;
@@ -163,8 +161,6 @@ export class PostResolver {
         return await AppDataSource.transaction(async (transactionalEntityManager) => {
             // find Post to add points
             let post = await transactionalEntityManager.findOne(Post, { where: { id: postId } })
-            console.log('existing post', post)
-            console.log('voteValue', voteValue)
 
             // if no post found, throw Error
             if (!post) {
@@ -178,7 +174,6 @@ export class PostResolver {
                     userId
                 }
             })
-            console.log('existing vote', existingVote)
 
             // Case: user has voted and now change voteType : save new vote and update points
             if (existingVote && existingVote.value !== voteValue) {
@@ -186,14 +181,10 @@ export class PostResolver {
                     ...existingVote,
                     value: voteValue
                 })
-                console.log('POINTS if have ', post.points + 2 * voteValue)
-
                 post = await transactionalEntityManager.save(Post, {
                     ...post,
                     points: post.points + 2 * voteValue
                 })
-                console.log('post saved', post)
-
             }
 
             // Case: user not voted before: create new record in Vote table + update points
@@ -204,10 +195,8 @@ export class PostResolver {
                     value: voteValue
                 })
                 await transactionalEntityManager.save(newVote)
-                console.log('POINTS if npt have ', post.points + voteValue)
                 post.points = post.points + voteValue
                 post = await transactionalEntityManager.save(post)
-                console.log('post saved', post)
 
             }
 

@@ -10,6 +10,7 @@ import RedisStore from "connect-redis"
 import session from "express-session"
 import { createClient } from "redis"
 import cors from 'cors'
+import { buildDataLoaders } from './utils/dataLoaders'
 
 export const AppDataSource = new DataSource(typeOrmConfig)
 
@@ -55,7 +56,7 @@ const main = async () => {
             resolvers: [PostResolver, UserResolver],
             validate: false
         }),
-        context: ({ req, res }) => ({ req, res, redisClient })
+        context: ({ req, res }) => ({ req, res, redisClient, dataLoaders: buildDataLoaders() })
     })
 
     await apolloServer.start()
