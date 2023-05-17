@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import { DataSource } from "typeorm"
 import { COOKIE_NAME, __prod__ } from './constants'
-import typeOrmConfig from './type-orm.config'
+import { typeOrmConfigDev, typeOrmConfigProd } from './type-orm.config'
 import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
@@ -12,15 +12,21 @@ import { createClient } from "redis"
 import cors from 'cors'
 import { buildDataLoaders } from './utils/dataLoaders'
 
-export const AppDataSource = new DataSource(typeOrmConfig)
+export const AppDataSource = new DataSource(__prod__ ? typeOrmConfigProd : typeOrmConfigDev)
 
 const main = async () => {
     // Connect db
     await AppDataSource.initialize()
+    if (!__prod__) {
+        await AppDataSource.runMigrations()
+    }
+
     const app = express()
 
     // Initialize client.
-    let redisClient = createClient()
+    let redisClient = __prod__ ? createClient({
+        url: process.env.REDIS_DB_URL
+    }) : createClient()
     redisClient.connect().catch(console.error)
     // Initialize store.
     let redisStore = new RedisStore({
@@ -28,9 +34,9 @@ const main = async () => {
         prefix: "reddit-clone:",
         disableTouch: true
     })
-
+    app.set("trust proxy", 1);
     app.use(cors({
-        origin: ['http://localhost:3000', 'https://studio.apollographql.com'],
+        origin: __prod__ ? process.env.CORS_ORIGIN_PROD : process.env.CORS_ORIGIN_DEV,
         credentials: true
     }))
     // Initialize sesssion storage.
@@ -40,12 +46,13 @@ const main = async () => {
             store: redisStore,
             resave: false, // required: force lightweight session keep alive (touch)
             saveUninitialized: false, // recommended: only save session when data exists
-            secret: "aBckerl1dlfnHwYDmsdgjs284gdsgM",
+            secret: process.env.SESSION_SECRET as string,
             cookie: {
                 maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
                 httpOnly: true,
                 secure: __prod__, // cookie only works in https
                 sameSite: 'lax', // csrf
+                domain: __prod__ ? ".onrender.com" : undefined,
             },
         })
     )
@@ -62,9 +69,11 @@ const main = async () => {
     await apolloServer.start()
     apolloServer.applyMiddleware({ app, cors: false })
 
-    app.listen(4000, () => {
+    app.listen(process.env.PORT || 4000, () => {
         console.log('server is listening on localhost:4000')
     })
 }
 
-main()
+main().catch((err) => {
+    console.error("SERVER ERROR", err);
+});
