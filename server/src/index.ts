@@ -36,10 +36,13 @@ const main = async () => {
         prefix: "reddit-clone:",
         disableTouch: true
     })
+
     app.set("trust proxy", 1);
+
+    console.log('origin', process.env.CORS_ORIGIN)
     app.use(cors({
-        origin: __prod__ ? process.env.CORS_ORIGIN_PROD : process.env.CORS_ORIGIN_DEV,
-        credentials: true
+        origin: process.env.CORS_ORIGIN,
+        credentials: true,
     }))
     // Initialize sesssion storage.
     app.use(
