@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { MeDocument, MeQuery, useChangePasswordMutation } from '@/generated/graphql'
-import toErrorMap from '../utils'
+import toErrorMap from '../../utils'
 
 
 const ChangePassword: NextPage = () => {
