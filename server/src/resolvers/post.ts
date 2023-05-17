@@ -143,6 +143,7 @@ export class PostResolver {
     ): Promise<boolean> {
         try {
             await Post.delete({ id, ownerId: req.session.userId })
+            await Vote.delete({ postId: id })
             return true
         } catch (e) {
             return false

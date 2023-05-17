@@ -56,8 +56,8 @@ const main = async () => {
                 maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
                 httpOnly: true,
                 secure: __prod__, // cookie only works in https
-                sameSite: 'lax', // csrf
-                domain: __prod__ ? ".onrender.com" : undefined,
+                sameSite: 'none', // csrf
+                // domain: __prod__ ? ".onrender.com" : undefined,
             },
         })
     )
