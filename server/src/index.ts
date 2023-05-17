@@ -17,7 +17,9 @@ export const AppDataSource = new DataSource(__prod__ ? typeOrmConfigProd : typeO
 const main = async () => {
     // Connect db
     await AppDataSource.initialize()
-    if (!__prod__) {
+
+    if (__prod__) {
+        console.log('migration run')
         await AppDataSource.runMigrations()
     }
 
