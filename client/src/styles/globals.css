@@ -3,26 +3,63 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-  width: 90%;
-  margin: 0 auto;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  --color-black: #1C1C1C;
+  --color-gray: #7C7C7C;
+  --color-primary: #39B5E0;
+  --color-secondary: #FF6363;
+  --color-tertiary: #1EAE98;
+  --color-background: #DAE0E6;
+  --color-background-light: #F8F9FA;
+  --color-hover: #B2B7B8;
+  --color-category-green: #62D878;
+  --color-category-blue: #287DBE;
+  --color-category-purple: #A55F8D;
+  --color-category-yellow: #FFDC53;
+  --color-category-pink: #FF66AC;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: transparent;
+  color: var(--color-black);
+  background-color: var(--color-background);
+  box-sizing: border-box;
+  overflow-y: scroll;
 }
 
 input {
-  border: 1px solid black
+  background: transparent;
+  border: none
+}
+
+input:focus {
+  outline: none;
+}
+
+@layer components {
+  .flex-center {
+    @apply flex justify-center items-center
+  }
+
+  .flex-between {
+    @apply flex justify-between items-center
+  }
+
+  .flex-start {
+    @apply flex items-center
+  }
+
+  .flex-end {
+    @apply flex justify-end items-center
+  }
+
+  .button-main {
+    @apply bg-primary rounded-3xl text-white font-bold py-1 px-8
+  }
+
+  .hover-border-blue {
+    @apply hover:border hover:border-blue-600 hover:bg-white
+  }
+
+  .feed-tab {
+    @apply py-2 pl-[20px] pr-3
+  }
 }
