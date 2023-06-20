@@ -1,11 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Mulish:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  --font-family: 'Mulish', sans-serif;
   --color-black: #1C1C1C;
+  --color-black-light: #363938;
   --color-gray: #7C7C7C;
   --color-primary: #39B5E0;
+  --color-primary-light: #f5fafc;
   --color-secondary: #FF6363;
   --color-tertiary: #1EAE98;
   --color-background: #DAE0E6;
@@ -19,6 +23,7 @@
 }
 
 body {
+  font-family: var(--font-family);
   color: var(--color-black);
   background-color: var(--color-background);
   box-sizing: border-box;
@@ -34,6 +39,24 @@ input:focus {
   outline: none;
 }
 
+@layer base {
+  html {
+    font-family: var(--font-family)
+  }
+
+  h2 {
+    @apply text-xl font-bold
+  }
+
+  h3 {
+    @apply text-lg font-bold
+  }
+
+  p {
+    @apply text-base leading-[18px]
+  }
+}
+
 @layer components {
   .flex-center {
     @apply flex justify-center items-center
@@ -43,8 +66,20 @@ input:focus {
     @apply flex justify-between items-center
   }
 
+  .flex-between-10 {
+    @apply flex justify-between items-center gap-[10px]
+  }
+
   .flex-start {
     @apply flex items-center
+  }
+
+  .flex-start-10 {
+    @apply flex items-center gap-[10px]
+  }
+
+  .flex-col-start-10 {
+    @apply flex flex-col gap-[10px] items-start
   }
 
   .flex-end {
@@ -52,7 +87,7 @@ input:focus {
   }
 
   .button-main {
-    @apply bg-primary rounded-3xl text-white font-bold py-1 px-8
+    @apply bg-primary rounded-3xl text-white font-bold py-1 hover:opacity-90 px-8
   }
 
   .hover-border-blue {
@@ -61,5 +96,13 @@ input:focus {
 
   .feed-tab {
     @apply py-2 pl-[20px] pr-3
+  }
+
+  .label-sm {
+    @apply text-xs text-gray font-bold
+  }
+
+  .label-md {
+    @apply text-sm text-black-light font-bold
   }
 }

@@ -9,8 +9,10 @@ module.exports = {
     extend: {
       colors: {
         black: 'var(--color-black)',
+        'black-light': 'var(--color-black-light)',
         gray: 'var(--color-gray)',
         primary: 'var(--color-primary)',
+        'primary-light': 'var(--color-primary-light)',
         secondary: 'var(--color-secondary)',
         tertiary: 'var(--color-tertiary)',
         medium: 'var(--color-background)',
@@ -23,10 +25,14 @@ module.exports = {
           yellow: 'var(--color-category-yellow)',
           pink: 'var(--color-category-pink)'
         }
+      },
+      backgroundColor: {
+        'image-filter': "var(--image-filter)"
       }
     },
     screens: {
       'xs': '375px',
+      'xs1': '560px',
       'sm': '640px',
       'smM': { max: '640px' },
       'md': '768px',
@@ -34,6 +40,7 @@ module.exports = {
       '_995M': { max: '995px' },
       '_995-1280': { 'min': '995px', 'max': '1280px' },
       'lg': '1024px',
+      'lgM': { max: '1024px' },
       'xl': '1280px',
       'xlM': { 'max': '1280px' },
       '2xl': '1536px',

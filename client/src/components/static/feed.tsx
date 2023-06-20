@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { DropdownIcon } from '../icons'
@@ -36,35 +34,36 @@ function Feed() {
         icon: string,
         name: string
     }>({
-        icon: 'home',
-        name: 'Home'
+        icon: 'arrow',
+        name: 'Popular'
     })
 
     const [showTab, setShowTab] = useState(false)
 
     return (
         <div className="bg-white relative _995:w-[270px]">
-            <div className={`w-full font-bold h-[40px] border hover:border-medium rounded-[4px] p-[5px] flex-between gap-[10px] cursor-pointer ${showTab ? 'border-medium' : 'border-transparent'}`}
+            <div className={`w-full font-bold h-[40px] border hover:border-medium rounded-[4px] p-[5px] flex-between-10 cursor-pointer ${showTab ? 'border-medium' : 'border-transparent'}`}
                 onClick={() => setShowTab(!showTab)}
             >
-                <span className='flex gap-[10px]'>
+                <span className='flex-start-10'>
                     <Image
                         alt='img'
                         width='20'
                         height='20'
                         src={`/icons/${activeTab.icon}-fill.svg`}
+                        className='min-w-[20px]'
                     />
                     <span className='_995M:hidden'>{activeTab.name}</span>
                 </span>
                 <span><DropdownIcon width={20} fill='#000' /></span>
             </div>
-            {showTab && <div className="w-[270px] absolute top-[38px] h-[400px] flex flex-col gap-[10px] bg-white border border-medium border-t-0 z-0">
+            {showTab && <div className="w-[270px] absolute top-[38px] h-[400px] flex-col-start-10 bg-white border border-medium border-t-0 z-0 overflow-y-scroll">
                 {constants.map(menu =>
                     <>
-                        <h4 className='feed-tab'>{menu.title}</h4>
+                        <h4 className='feed-tab label-sm'>{menu.title}</h4>
                         {menu.sub_feed.map(item => <button
                             type='button'
-                            className="feed-tab flex-start gap-[10px] hover:bg-light cursor-pointer"
+                            className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
                             onClick={() => {
                                 setActiveTab(item)
                                 setShowTab(false)
@@ -81,7 +80,7 @@ function Feed() {
                         {menu.communities &&
                             menu.communities.map(community => <button
                                 type='button'
-                                className="feed-tab flex gap-[10px] cursor-pointer hover:bg-light"
+                                className="feed-tab w-full flex-start-10 cursor-pointer hover:bg-light"
                             >
                                 <div className='w-[24px] h-[24px]'>
                                     <Image
@@ -90,7 +89,7 @@ function Feed() {
                                         height='0'
                                         src={community.imgSrc}
                                         sizes='100%'
-                                        className='w-auto rounded-full'
+                                        className='w-[24px] rounded-full'
                                     />
                                 </div>
                                 <span>{community.name}</span>

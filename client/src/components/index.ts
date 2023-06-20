@@ -2,7 +2,7 @@ import Navbar from './navbar'
 import Header from './static/navbar'
 import Feed from './static/feed'
 import Posts from './static/posts'
+import TrendingPosts from './static/trending-posts'
+import SearchBar from './static/search-bar'
 
-
-// eslint-disable-next-line import/prefer-default-export
-export { Navbar, Header, Feed, Posts }
+export { Navbar, Header, Feed, Posts, TrendingPosts, SearchBar }

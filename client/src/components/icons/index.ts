@@ -6,4 +6,4 @@ export { default as SearchIcon } from './search'
 export { default as ProfileIcon } from './profile'
 export { default as SideLayoutIcon } from './side-layout'
 export { default as LogOutIcon } from './logout'
-
+export { default as GoogleIcon } from './google'
