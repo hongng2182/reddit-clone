@@ -1,5 +1,5 @@
 import React from 'react'
-import { Header, TrendingPosts } from '@/components'
+import { Header, TrendingPosts, Posts } from '@/components'
 
 function HomePage() {
     // TODO: show feed when screen large on the left, with no title show
@@ -11,7 +11,7 @@ function HomePage() {
                 <div className='flex-col-10 xl:ml-[270px] w-full'>
                     <div className='2xl:w-[1020px] w-[90%] mx-auto'>
                         <TrendingPosts />
-                        {/* <Posts /> */}
+                        <Posts />
                         {/* <Feed /> */}
                     </div>
                 </div>

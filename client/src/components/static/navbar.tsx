@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Feed from './feed'
 import { DropdownIcon, ProfileIcon, LogOutIcon } from '../icons'
 import SearchBar from './search-bar'
-import  AuthenticatePopup from './authenticate-popup.tsx'
+import AuthenticatePopup from './authenticate-popup'
 import Modal, { useModal } from './modal'
 
 function Header() {
@@ -48,7 +48,7 @@ function Header() {
                 <div className="relative flex-start-10 border border-transparent hover:border-medium p-1 rounded-md cursor-pointer"
                     onClick={() => setProfileFocus(!profileFocus)}>
                     <ProfileIcon />
-                    <DropdownIcon />
+                    <DropdownIcon width={12} />
                     {profileFocus && <div className="absolute h-auto bg-white top-[40px] right-0 py-[10px]">
                         <button
                             type='button'
@@ -84,7 +84,7 @@ function Header() {
         <Modal
             isOpen={isOpen}
             closeModal={closeModal}
-            modalContent={<AuthenticatePopup/>}
+            modalContent={<AuthenticatePopup />}
         />
     </>
     )

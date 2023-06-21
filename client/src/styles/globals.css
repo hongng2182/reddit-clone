@@ -7,6 +7,7 @@
   --font-family: 'Mulish', sans-serif;
   --color-black: #1C1C1C;
   --color-black-light: #363938;
+  --color-light-gray: #CCC;
   --color-gray: #7C7C7C;
   --color-primary: #39B5E0;
   --color-primary-light: #f5fafc;
@@ -90,6 +91,10 @@ input:focus {
     @apply bg-primary rounded-3xl text-white font-bold py-1 hover:opacity-90 px-8
   }
 
+  .button-light {
+    @apply bg-light rounded-full py-1 px-3 font-bold
+  }
+
   .hover-border-blue {
     @apply hover:border hover:border-blue-600 hover:bg-white
   }
@@ -105,7 +110,20 @@ input:focus {
   .label-md {
     @apply text-sm text-black-light font-bold
   }
-    .link {
-      @apply text-primary hover:opacity-90 cursor-pointer
-    }
+
+  .link {
+    @apply text-primary hover:opacity-90 cursor-pointer
+  }
+
+  .filter-post {
+    @apply py-2 px-5 rounded-3xl flex-start-10
+  }
+
+  .white-gray-rounded {
+    @apply bg-white border border-light-gray rounded-sm
+  }
+
+  .post-action{
+    @apply flex-start gap-[5px] hover:bg-medium rounded-sm p-2 font-bold text-gray
+  }
 }
