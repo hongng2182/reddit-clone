@@ -12,7 +12,9 @@ function TrendingPosts() {
         <div className='flex-col-10 my-3'>
             <h4 className='label-md mb-3'>Trending today</h4>
             <div className="card grid grid-cols-1 xs1:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 h-[186px] overflow-hidden cursor-pointer">
-                {trending_posts.map(item => <div style={{
+                {trending_posts.map(item => <div
+                    key={item.id}
+                    style={{
                     background: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${item.imgUrl})`,
                     backgroundPosition: 'center'
                 }}

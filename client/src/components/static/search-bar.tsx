@@ -24,6 +24,7 @@ function SearchBar() {
                   <h4 className='label-sm px-3 py-2'>TRENDING TODAY</h4>
                   {trending_posts.map(post => <button type="submit"
                       className="hover:bg-light cursor-pointer"
+                      key={post.id}
                   >
                       <div className="p-3 flex-start" onClick={() => setValue(post.topic)}>
                           <div className="flex-[4] flex-col-start-10 items-start mr-2">
