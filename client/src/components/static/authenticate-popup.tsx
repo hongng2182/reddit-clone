@@ -4,7 +4,7 @@ import { GoogleIcon } from '../icons'
 function AuthenticatePopup() {
     const [active, setActive] = useState<'login' | 'signup' | 'forgot'>('login')
 
-    // TODO: handle login function and error
+    // TODO: handle login function and error, limit username character
 
     return (
         <div className='w-[380px] h-[500px] my-7'>

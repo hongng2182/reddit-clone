@@ -14,4 +14,7 @@ export { default as ArrowUpDown } from './arrow-up-down'
 export { default as CommentIcon } from './comments'
 export { default as ShareIcon } from './share'
 export { default as SaveIcon } from './save'
-
+export { default as PictureIcon } from './picture'
+export { default as LinkIcon } from './link'
+export { default as RestrictedIcon } from './restricted'
+export { default as LockIcon } from './lock'

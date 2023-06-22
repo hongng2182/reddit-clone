@@ -8,10 +8,10 @@ function SearchBar() {
     const [value, setValue] = useState('')
 
   return (
-      <div className={`max-w-[690px] min-w-[200px] w-full relative z-[2] ${inputFocus && 'rounded-b-none'}`}>
+      <div className={`max-w-[690px] min-w-[40px] w-full relative z-[2] ${inputFocus && 'rounded-b-none'}`}>
           <form action='/static/search' autoComplete='off' >
               <div
-                  className={`flex-start border bg-light border-medium hover-border-blue rounded-3xl py-1 px-3 ${inputFocus && 'rounded-b-none'}`}
+                  className={`flex-start bg-light hover-border-blue rounded-3xl py-1 px-3 ${inputFocus && 'rounded-b-none'}`}
               >
                   <SearchIcon />
                   <input name="q" id='q' type="text" placeholder='Search' className='border-none w-full p-1'

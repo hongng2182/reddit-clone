@@ -67,6 +67,10 @@ input:focus {
     @apply flex justify-between items-center
   }
 
+  .flex-around {
+    @apply flex justify-around items-center
+  }
+
   .flex-between-10 {
     @apply flex justify-between items-center gap-[10px]
   }
@@ -90,13 +94,16 @@ input:focus {
   .button-main {
     @apply bg-primary rounded-3xl text-white font-bold py-1 hover:opacity-90 px-8
   }
+    .button-main-outline {
+      @apply bg-light rounded-3xl text-primary font-bold py-1 border border-primary hover:bg-primary-light px-8
+    }
 
   .button-light {
     @apply bg-light rounded-full py-1 px-3 font-bold
   }
 
   .hover-border-blue {
-    @apply hover:border hover:border-blue-600 hover:bg-white
+    @apply border border-medium hover:border hover:border-blue-600 hover:bg-white
   }
 
   .feed-tab {
@@ -123,7 +130,10 @@ input:focus {
     @apply bg-white border border-light-gray rounded-sm
   }
 
-  .post-action{
+  .post-action {
     @apply flex-start gap-[5px] hover:bg-medium rounded-sm p-2 font-bold text-gray
+  }
+  .img-35 {
+    @apply w-[35px] h-[35px] rounded-full
   }
 }

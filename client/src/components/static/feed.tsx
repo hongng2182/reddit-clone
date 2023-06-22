@@ -1,33 +1,50 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
+import Modal, { useModal } from './modal'
 import { DropdownIcon } from '../icons'
+import CommunityCreatePopup from './community-create-popup'
 
-const constants = [{
+type Feeds = {
+    title: string,
+    sub_feed:
+    { icon: string, name: string, link: string }[],
+}
+
+const feeds: Feeds = {
     title: 'FEEDS',
     sub_feed: [{
         icon: 'home',
-        name: 'Home'
+        name: 'Home',
+        link: '/'
     },
-    { icon: 'arrow', name: 'Popular' }],
-},
-{
-    title: 'YOUR COMMUNITIES',
-    sub_feed: [{
-        icon: 'add',
-        name: 'Create Community'
+    {
+        icon: 'arrow',
+        name: 'Popular',
+        link: '/r/popular'
     }],
-    communities: [{
-        imgSrc: '/logo-cat.png',
-        name: 'r/community'
+}
+
+const constants = [
+    {
+        title: 'YOUR COMMUNITIES',
+        sub_feed: [{
+            icon: 'add',
+            name: 'Create Community',
+
+        }],
+        communities: [{
+            imgSrc: '/logo-cat.png',
+            name: 'r/community'
+        }]
+    },
+    {
+        title: 'OTHER',
+        sub_feed: [{
+            icon: 'add',
+            name: 'Create Post',
+            link: '/submit'
+        }],
     }]
-},
-{
-    title: 'OTHER',
-    sub_feed: [{
-        icon: 'add',
-        name: 'Create Post'
-    }],
-}]
 
 function Feed() {
     const [activeTab, setActiveTab] = useState<{
@@ -39,6 +56,8 @@ function Feed() {
     })
 
     const [showTab, setShowTab] = useState(false)
+    const { isOpen, openModal, closeModal } = useModal()
+
 
     return (
         <div className="bg-white relative _995:w-[270px]">
@@ -58,6 +77,27 @@ function Feed() {
                 <span><DropdownIcon width={20} fill='#000' /></span>
             </div>
             {showTab && <div className="w-[270px] absolute top-[38px] h-[400px] flex-col-start-10 bg-white border border-medium border-t-0 z-0 overflow-y-scroll">
+                {/* FEEDS */}
+                <h4 className='feed-tab label-sm'>{feeds.title}</h4>
+                {feeds.sub_feed.map(item =>
+                    <button
+                        type='button'
+                        className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
+                        onClick={() => {
+                            setActiveTab(item)
+                            setShowTab(false)
+                        }}
+                    >
+                        <Image
+                            alt='img'
+                            width='20'
+                            height='20'
+                            src={`/icons/${item.icon}-outline.svg`}
+                        />
+                        <span>{item.name}</span>
+                    </button >
+                )}
+                {/* COMMUNITIES */}
                 {constants.map(menu =>
                     <>
                         <h4 className='feed-tab label-sm'>{menu.title}</h4>
@@ -67,6 +107,7 @@ function Feed() {
                             onClick={() => {
                                 setActiveTab(item)
                                 setShowTab(false)
+                                if (item.name === 'Create Community') openModal()
                             }}
                         >
                             <Image
@@ -98,6 +139,10 @@ function Feed() {
                     </>
                 )}
             </div>}
+            <Modal isOpen={isOpen}
+                closeModal={closeModal}
+                modalContent={<CommunityCreatePopup closeModal={closeModal} />}
+            />
         </div >
     )
 }
