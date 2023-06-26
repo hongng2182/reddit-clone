@@ -18,7 +18,7 @@ function CreatePostFragment() {
             />
             <div className='h-[40px] w-[70%] bg-light  hover-border-blue rounded-sm px-2'>
                 <input name="create-post" className='h-[95%] my-auto font-light pl-2' placeholder='Create Post' readOnly
-                    onFocus={() => router.push('/submit')} />
+                    onFocus={() => router.push('/static/submit')} />
             </div>
             <div className="p-2 hover:bg-medium cursor-pointer rounded-sm"><PictureIcon /></div>
             <div className="p-2 hover:bg-medium cursor-pointer rounded-sm"><LinkIcon /></div>

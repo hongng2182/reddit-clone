@@ -8,5 +8,11 @@ import AuthenticatePopup from './static/authenticate-popup'
 import CommunityCreatePopup from './static/community-create-popup'
 import CreatePostFragment from './static/create-post-fragment'
 import FilterBox from './static/filter-box'
+import PageContentLayout from './static/page-content-layout'
+import PageContainer from './static/page-container'
+import PostBox from './static/post-box'
+import CommunityBanner from './static/community-banner'
+import CommunityInfo from './static/community-info'
+import CommentSection from './static/comment-section'
 
-export { Navbar, Header, Feed, Posts, TrendingPosts, SearchBar, AuthenticatePopup, CommunityCreatePopup, CreatePostFragment, FilterBox }
+export { Navbar, Header, Feed, Posts, TrendingPosts, SearchBar, AuthenticatePopup, CommunityCreatePopup, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, CommunityInfo, CommentSection }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import Feed from './feed'
 import { DropdownIcon, ProfileIcon, LogOutIcon } from '../icons'
 import SearchBar from './search-bar'
@@ -17,7 +18,7 @@ function Header() {
     return (<>
         <nav className='flex-start smM:px-[5px] px-[20px] bg-white h-[48px]'>
             <div className="grow-[1] flex gap-[7px] md:gap-[20px]">
-                <div className="flex-start-10 min-w-[37px]">
+                <Link href='/static' className="flex-start-10 min-w-[37px]">
                     <Image
                         height='0'
                         width='0'
@@ -34,7 +35,7 @@ function Header() {
                         sizes='80%'
                         className='h-auto w-[150px] lgM:hidden'
                     />
-                </div>
+                </Link>
                 <div className="flex-center">
                     <Feed />
                 </div>

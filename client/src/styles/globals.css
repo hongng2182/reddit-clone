@@ -45,6 +45,10 @@ input:focus {
     font-family: var(--font-family)
   }
 
+  h1 {
+    @apply text-3xl font-bold
+  }
+
   h2 {
     @apply text-xl font-bold
   }
@@ -55,6 +59,10 @@ input:focus {
 
   p {
     @apply text-base leading-[18px]
+  }
+
+  .main-container {
+    @apply 2xl:w-[1020px] w-[90%] mx-auto
   }
 }
 
@@ -94,9 +102,10 @@ input:focus {
   .button-main {
     @apply bg-primary rounded-3xl text-white font-bold py-1 hover:opacity-90 px-8
   }
-    .button-main-outline {
-      @apply bg-light rounded-3xl text-primary font-bold py-1 border border-primary hover:bg-primary-light px-8
-    }
+
+  .button-main-outline {
+    @apply bg-light rounded-3xl text-primary font-bold py-1 border border-primary hover:bg-primary-light px-8
+  }
 
   .button-light {
     @apply bg-light rounded-full py-1 px-3 font-bold
@@ -131,9 +140,17 @@ input:focus {
   }
 
   .post-action {
-    @apply flex-start gap-[5px] hover:bg-medium rounded-sm p-2 font-bold text-gray
+    @apply flex-start gap-[5px] hover:bg-medium rounded-sm p-2 font-bold text-gray cursor-pointer
   }
+    .post-action-disable {
+      @apply flex-start gap-[5px] rounded-sm p-2 font-bold text-gray
+    }
+
   .img-35 {
     @apply w-[35px] h-[35px] rounded-full
+  }
+
+  .username{
+    @apply text-xs text-black-light font-bold
   }
 }

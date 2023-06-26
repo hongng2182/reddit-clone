@@ -4,6 +4,7 @@ import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { ApolloProvider } from '@apollo/client'
 import { useApollo } from '@/lib/apolloClient'
+import { Header } from '@/components'
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -11,6 +12,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ApolloProvider client={apolloClient}>
+      <Header />
       <Component {...pageProps} />
     </ApolloProvider>
   )
