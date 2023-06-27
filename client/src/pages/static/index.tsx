@@ -5,7 +5,7 @@ function HomePage() {
     // TODO: show feed when screen large on the left, with no title show
 
     return (
-        <PageContainer>
+        <PageContainer withFeed>
             <TrendingPosts />
             <Posts />
             {/* <Feed /> */}

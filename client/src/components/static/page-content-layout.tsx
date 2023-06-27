@@ -1,12 +1,13 @@
 import React, { ReactNode } from 'react'
 
 type PageProps = {
+    containerClassname?: string
     left: ReactNode,
     right?: ReactNode
 }
-function PageContentLayout({ left, right }: PageProps) {
+function PageContentLayout({ left, right, containerClassname }: PageProps) {
     return (
-        <div className='flex justify-between mb-5'>
+        <div className={`flex justify-between mb-5 ${containerClassname && containerClassname}`}>
             <div className='_995:max-w-[640px]  _995:w-[calc(100%-330px)] w-full flex-col-start-10'>
                 {left}
             </div>
@@ -18,7 +19,8 @@ function PageContentLayout({ left, right }: PageProps) {
 }
 
 PageContentLayout.defaultProps = {
-    right: null
+    right: null,
+    containerClassname: ''
 };
 
 export default PageContentLayout

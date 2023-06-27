@@ -14,5 +14,8 @@ import PostBox from './static/post-box'
 import CommunityBanner from './static/community-banner'
 import CommunityInfo from './static/community-info'
 import CommentSection from './static/comment-section'
+import Modal from './static/modal'
+import CommunitySelect from './static/community-select'
+import CreatePost from './static/create-post'
 
-export { Navbar, Header, Feed, Posts, TrendingPosts, SearchBar, AuthenticatePopup, CommunityCreatePopup, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, CommunityInfo, CommentSection }
+export { Navbar, Header, Feed, Posts, TrendingPosts, SearchBar, AuthenticatePopup, CommunityCreatePopup, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, CommunityInfo, CommentSection, Modal, CommunitySelect, CreatePost }

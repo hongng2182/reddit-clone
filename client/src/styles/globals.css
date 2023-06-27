@@ -110,6 +110,10 @@ input:focus {
   .button-light {
     @apply bg-light rounded-full py-1 px-3 font-bold
   }
+  
+  .button-hover {
+    @apply bg-white rounded-3xl text-cate-blue font-bold py-1 hover:bg-medium px-3
+  }
 
   .hover-border-blue {
     @apply border border-medium hover:border hover:border-blue-600 hover:bg-white

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
-import Modal, { useModal } from './modal'
+import { useModal } from '@/hooks'
+import Modal from './modal'
 import { DropdownIcon } from '../icons'
 import CommunityCreatePopup from './community-create-popup'
 

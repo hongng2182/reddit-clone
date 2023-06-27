@@ -18,3 +18,33 @@ export const mockup_post_data = {
     community: 'ressit101',
     createdAt: '16 hours'
 }
+
+export const communities_mockup = [{
+    imgSrc: '/logo-cat.png',
+    name: 'r/community1',
+    numOfMember: 125015
+}, {
+    imgSrc: '/logo-cat.png',
+    name: 'r/community2',
+    numOfMember: 1584
+}, {
+    imgSrc: '/logo-cat.png',
+    name: 'r/community3',
+    numOfMember: 36521
+},
+{
+    imgSrc: '/logo-cat.png',
+    name: 'r/community1',
+    numOfMember: 125015
+}, {
+    imgSrc: '/logo-cat.png',
+    name: 'r/community2',
+    numOfMember: 1584
+}, {
+    imgSrc: '/logo-cat.png',
+    name: 'r/community3',
+    numOfMember: 36521
+}]
+
+
+export const postingRules = ['1. Remember the human', '2. Behave like you would in real life', '3. Look for the original source of content', '4. Search for duplicates before posting', '5. Read the community’s rules']

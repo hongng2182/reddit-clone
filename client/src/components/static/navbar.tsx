@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useModal } from '@/hooks'
 import Feed from './feed'
 import { DropdownIcon, ProfileIcon, LogOutIcon } from '../icons'
 import SearchBar from './search-bar'
 import AuthenticatePopup from './authenticate-popup'
-import Modal, { useModal } from './modal'
+import Modal from './modal'
 
 function Header() {
     const [profileFocus, setProfileFocus] = useState(false)
