@@ -9,13 +9,13 @@ import AuthenticatePopup from './authenticate-popup'
 import Modal from './modal'
 
 function Header() {
+    const username = 'hongng2182'
     const [profileFocus, setProfileFocus] = useState(false)
     const { isOpen, openModal, closeModal } = useModal()
     const isLogin = true
     // TODO: click outside to hide search results, feed and profile
 
     // TODO: click login show popup, username when login
-
     return (<>
         <nav className='flex-start smM:px-[5px] px-[20px] bg-white h-[48px]'>
             <div className="grow-[1] flex gap-[7px] md:gap-[20px]">
@@ -48,7 +48,9 @@ function Header() {
                 {!isLogin && <button type="button" className='button-main smM:hidden'
                     onClick={openModal}>Login</button>}
                 <div className="relative flex-start gap-[5px] border border-transparent hover:border-medium p-1 rounded-md cursor-pointer"
-                    onClick={() => setProfileFocus(!profileFocus)}>
+                    onMouseEnter={() => setProfileFocus(true)}
+                    onMouseLeave={() => setProfileFocus(false)}
+                >
                     {!isLogin && <ProfileIcon type='outline' />}
                     {isLogin && <div className='flex-start gap-[5px] min-w-[30px]'>
                         <Image
@@ -58,22 +60,23 @@ function Header() {
                             height='35'
                             sizes='100%'
                             className='rounded-full w-[35px] h-[35px]' />
-                        <span className='label-md smM:hidden'>rosie2182</span>
+                        <span className='label-md smM:hidden'>{username}</span>
                     </div>}
                     <DropdownIcon width={12} />
                     {profileFocus && <div className="absolute h-auto bg-white top-[40px] right-0 py-[10px]">
-                        <button
-                            type='button'
+                        <Link
+                            href={`/static/user/${username}`}
                             className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
                         >
                             <div className='w-[24px] h-[24px]'>
                                 <ProfileIcon fill='#212121' type='outline' />
                             </div>
                             <span>My Profile</span>
-                        </button>
+                        </Link>
                         <button
                             type='button'
                             className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
+                            onClick={openModal}
                         >
                             <div className='w-[24px] h-[24px]'>
                                 <LogOutIcon />

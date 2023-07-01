@@ -1,16 +1,20 @@
 import React from 'react'
-import { TrendingPosts, Posts, PageContainer } from '@/components'
+import { PageContainer, PageContentLayout, CreatePostFragment, FilterBox, PostBox } from '@/components'
+import { mockup_post_data } from '@/mockup'
 
 function HomePage() {
-    // TODO: show feed when screen large on the left, with no title show
-
     return (
-        <PageContainer withFeed>
-            <TrendingPosts />
-            <Posts />
-            {/* <Feed /> */}
+        <PageContainer>
+            <PageContentLayout
+                containerClassname='mt-[40px]'
+                left={<><CreatePostFragment />
+                    <FilterBox />
+                    {/* POSTS */}
+                    <div className='flex-col-start-10 w-full'>
+                        {[mockup_post_data, mockup_post_data, mockup_post_data].map(post => <PostBox post={post} />)}
+                    </div></>}
+                right={<p>Try, create post</p>} />
         </PageContainer>
-
     )
 }
 

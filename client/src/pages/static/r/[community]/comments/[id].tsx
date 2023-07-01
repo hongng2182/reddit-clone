@@ -5,7 +5,7 @@ import { PageContentLayout, PageContainer, PostBox, CommunityInfo, CommentSectio
 function CommunitySinglePostPage() {
 
     return (
-        <PageContainer withFeed={false}>
+        <PageContainer>
             <div className='h-[30px]' />
             <PageContentLayout
                 left={<PostBox

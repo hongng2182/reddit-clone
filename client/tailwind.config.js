@@ -37,6 +37,7 @@ module.exports = {
       'sm': '640px',
       'smM': { max: '640px' },
       'md': '768px',
+      'mdM': { max: '768px' },
       '_995': '995px',
       '_995M': { max: '995px' },
       '_995-1280': { 'min': '995px', 'max': '1280px' },

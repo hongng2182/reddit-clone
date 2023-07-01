@@ -150,9 +150,12 @@ input:focus {
       @apply flex-start gap-[5px] rounded-sm p-2 font-bold text-gray
     }
 
-  .img-35 {
-    @apply w-[35px] h-[35px] rounded-full
+  .img-24 {
+@apply w-[24px] h-[24px] rounded-full object-cover object-[center,top]
   }
+
+.img-35 {
+  @apply w-[35px] h-[35px] rounded-full object-cover object-[center,top]}
 
   .username{
     @apply text-xs text-black-light font-bold
