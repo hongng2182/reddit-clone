@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { PageContainer, PageContentLayout, PostBox } from '@/components'
-import { mockup_post_data } from '@/mockup'
+import { usePostsQuery } from '@/generated/graphql'
 
 type Tabs = {
     name: string, icon: string
@@ -28,6 +28,8 @@ const tabs: Tabs[] = [
 function UserPage() {
     const [active, setActive] = useState('OVERVIEW')
     const [showTab, setshowTab] = useState(false)
+    const { data } = usePostsQuery({ variables: { first: 10, after: null }, notifyOnNetworkStatusChange: true })
+
     return (
         <>
             <div className='border-t border-medium bg-white'>
@@ -60,7 +62,7 @@ function UserPage() {
                     left={<>
                         {/* POSTS */}
                         <div className='flex-col-start w-full'>
-                            {active === 'POSTS' && [mockup_post_data].map(post => <PostBox post={post} />)}
+                            {active === 'POSTS' && data?.posts.paginatedPosts.map(post => <PostBox post={post} />)}
                             {active === 'COMMENTS' && <><div className='border-transparent hover:border-gray cursor-pointer white-gray-rounded w-full'>
                                 <span>user</span> commented on <span>post</span> <span>community</span> posted by <span>username</span>
                             </div>

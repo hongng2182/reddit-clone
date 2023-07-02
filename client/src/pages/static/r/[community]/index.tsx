@@ -1,18 +1,22 @@
 import React from 'react'
 import { CreatePostFragment, PageContentLayout, PageContainer, FilterBox, PostBox, CommunityBanner, CommunityInfo } from '@/components'
-import { mockup_post_data } from '@/mockup'
+import { usePostsQuery } from '@/generated/graphql'
+
+const FETCH_LIMIT = 10
 
 function CommunityPage() {
+    const { data } = usePostsQuery({ variables: { first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
+
     return (
         <>
             <CommunityBanner />
-            <PageContainer withFeed={false}>
+            <PageContainer>
                 <PageContentLayout
                     left={<>
                         <CreatePostFragment />
                         <FilterBox />
                         <div className='flex-col-start-10 w-full'>
-                            {[mockup_post_data, mockup_post_data, mockup_post_data].map(post => <PostBox post={post} hideCommunity hideJoinBtn />)}
+                            {data?.posts.paginatedPosts.map(post => <PostBox post={post} hideCommunity hideJoinBtn />)}
                         </div>
                     </>}
                     right={<CommunityInfo />}

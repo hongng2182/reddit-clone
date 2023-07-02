@@ -2,12 +2,15 @@ import React from 'react'
 import Image from 'next/image';
 import { useRouter } from 'next/router'
 import { PageContainer, PageContentLayout, PostBox } from '@/components';
-import { communities_mockup, mockup_post_data } from '@/mockup';
+import { communities_mockup } from '@/mockup';
+import { usePostsQuery } from '@/generated/graphql';
 
 // TODO: create FE for search page
 function SearchPage() {
     const router = useRouter();
     const { q } = router.query;
+    const { data } = usePostsQuery({ variables: { first: 10, after: null }, notifyOnNetworkStatusChange: true })
+
 
     return <PageContainer>
         <h3 className='w-fit bg-light px-4 py-2 mt-[25px] mb-[10px] rounded-full h-[45px]'>Posts on {q}</h3>
@@ -15,7 +18,7 @@ function SearchPage() {
             containerClassname='mt-[20px]'
             left={<div className='flex-col-start'>
                 <div className='w-full'>
-                    {[mockup_post_data, mockup_post_data, mockup_post_data].map(post => <PostBox post={post}
+                    {data?.posts.paginatedPosts.map(post => <PostBox post={post}
                         hideJoinBtn
                         isTrendingPost
                     />)}
