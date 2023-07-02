@@ -155,7 +155,7 @@ export enum VoteType {
   Upvote = 'UPVOTE'
 }
 
-export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string };
+export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number };
 
 export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string };
 
@@ -172,7 +172,7 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number } };
 
 export type DeletePostMutationVariables = Exact<{
   deletePostId: Scalars['Int'];
@@ -214,7 +214,7 @@ export type UpdatePostMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, textSnippet: string, user: { __typename?: 'User', username: string } } | null };
+export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } } | null };
 
 export type VoteMutationVariables = Exact<{
   voteValue: VoteType;
@@ -222,7 +222,7 @@ export type VoteMutationVariables = Exact<{
 }>;
 
 
-export type VoteMutation = { __typename?: 'Mutation', vote: { __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } } };
+export type VoteMutation = { __typename?: 'Mutation', vote: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -234,7 +234,7 @@ export type PostQueryVariables = Exact<{
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, textSnippet: string, user: { __typename?: 'User', username: string } } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } } | null };
 
 export type PostsQueryVariables = Exact<{
   first: Scalars['Int'];
@@ -242,7 +242,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, textSnippet: string, voteStatus: number, user: { __typename?: 'User', username: string } }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } }> } };
 
 export const PostInfoFragmentDoc = gql`
     fragment PostInfo on Post {
@@ -254,6 +254,7 @@ export const PostInfoFragmentDoc = gql`
   ownerId
   createdAt
   updatedAt
+  voteStatus
 }
     `;
 export const UserInfoFragmentDoc = gql`
@@ -510,20 +511,13 @@ export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutatio
 export const UpdatePostDocument = gql`
     mutation UpdatePost($input: PostInput!, $updatePostId: Int!) {
   updatePost(input: $input, id: $updatePostId) {
-    id
-    title
-    text
-    points
-    ownerId
-    createdAt
-    updatedAt
-    textSnippet
+    ...PostInfo
     user {
       username
     }
   }
 }
-    `;
+    ${PostInfoFragmentDoc}`;
 export type UpdatePostMutationFn = Apollo.MutationFunction<UpdatePostMutation, UpdatePostMutationVariables>;
 
 /**
@@ -554,20 +548,13 @@ export type UpdatePostMutationOptions = Apollo.BaseMutationOptions<UpdatePostMut
 export const VoteDocument = gql`
     mutation Vote($voteValue: VoteType!, $postId: Int!) {
   vote(voteValue: $voteValue, postId: $postId) {
-    id
-    title
-    text
-    points
-    ownerId
-    createdAt
-    updatedAt
-    voteStatus
+    ...PostInfo
     user {
       username
     }
   }
 }
-    `;
+    ${PostInfoFragmentDoc}`;
 export type VoteMutationFn = Apollo.MutationFunction<VoteMutation, VoteMutationVariables>;
 
 /**
@@ -632,20 +619,13 @@ export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const PostDocument = gql`
     query Post($postId: Float!) {
   post(id: $postId) {
-    id
-    title
-    text
-    points
-    ownerId
-    createdAt
-    updatedAt
-    textSnippet
+    ...PostInfo
     user {
       username
     }
   }
 }
-    `;
+    ${PostInfoFragmentDoc}`;
 
 /**
  * __usePostQuery__
@@ -683,22 +663,14 @@ export const PostsDocument = gql`
       hasPreviousPage
     }
     paginatedPosts {
-      id
-      title
-      text
-      points
-      ownerId
-      createdAt
-      updatedAt
-      textSnippet
+      ...PostInfo
       user {
         username
       }
-      voteStatus
     }
   }
 }
-    `;
+    ${PostInfoFragmentDoc}`;
 
 /**
  * __usePostsQuery__

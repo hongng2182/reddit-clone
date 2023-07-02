@@ -1,10 +1,11 @@
 fragment PostInfo on Post {
-    id
-    title
-    text
-    points
-    textSnippet
-    ownerId
-    createdAt
-    updatedAt
+  id
+  title
+  text
+  points
+  textSnippet
+  ownerId
+  createdAt
+  updatedAt
+  voteStatus
 }

@@ -6,18 +6,10 @@ query Posts($first: Int!, $after: String) {
       hasPreviousPage
     }
     paginatedPosts {
-      id
-      title
-      text
-      points
-      ownerId
-      createdAt
-      updatedAt
-      textSnippet
+      ...PostInfo
       user {
         username
       }
-      voteStatus
     }
   }
 }

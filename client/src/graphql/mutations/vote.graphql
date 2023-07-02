@@ -4,14 +4,7 @@
 
 mutation Vote($voteValue: VoteType!, $postId: Int!) {
   vote(voteValue: $voteValue, postId: $postId) {
-    id
-    title
-    text
-    points
-    ownerId
-    createdAt
-    updatedAt
-    voteStatus
+    ...PostInfo
     user {
       username
     }

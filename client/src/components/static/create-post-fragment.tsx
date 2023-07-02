@@ -16,13 +16,19 @@ function CreatePostFragment() {
                 sizes='100%'
                 className='w-[40px] h-[40px] rounded-full mr-2'
             />
-            <div className='h-[40px] w-[70%] bg-light  hover-border-blue rounded-sm px-2'>
-                <input name="create-post" className='h-[95%] my-auto font-light pl-2' placeholder='Create Post' readOnly
+            <div className='h-[40px] w-[70%] bg-light  hover-border-blue rounded-sm'>
+                <input name="create-post" className='h-full my-auto font-light w-full pl-2' placeholder='Create Post' readOnly
                     onFocus={() => router.push('/static/submit')} />
             </div>
-            <div className="p-2 hover:bg-medium cursor-pointer rounded-sm"><PictureIcon /></div>
-            <div className="p-2 hover:bg-medium cursor-pointer rounded-sm"><LinkIcon /></div>
-        </div>
+            <div className="p-2 hover:bg-medium cursor-pointer rounded-sm" onClick={() => router.push({
+                pathname: '/static/submit',
+                query: { media: true },
+            })}><PictureIcon /></div>
+            <div className="p-2 hover:bg-medium cursor-pointer rounded-sm" onClick={() => router.push({
+                pathname: '/static/submit',
+                query: { url: true },
+            })}><LinkIcon /></div>
+        </div >
     )
 }
 

@@ -16,6 +16,7 @@ import CommentSection from './static/comment-section'
 import Modal from './static/modal'
 import CommunitySelect from './static/community-select'
 import CreatePost from './static/create-post'
+import EditPost from './static/edit-post'
 import PopularCommunity from './static/popular-community'
 
-export { Navbar, Header, Feed, TrendingPosts, SearchBar, AuthenticatePopup, CommunityCreatePopup, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, CommunityInfo, CommentSection, Modal, CommunitySelect, CreatePost, PopularCommunity }
+export { Navbar, Header, Feed, TrendingPosts, SearchBar, AuthenticatePopup, CommunityCreatePopup, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, CommunityInfo, CommentSection, Modal, CommunitySelect, CreatePost, PopularCommunity, EditPost }

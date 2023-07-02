@@ -85,6 +85,7 @@ function Feed() {
                 <h4 className='feed-tab label-sm'>{feeds.title}</h4>
                 {feeds.sub_feed.map(item =>
                     <button
+                        key={item.name}
                         type='button'
                         className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
                         onClick={() => {
@@ -105,15 +106,16 @@ function Feed() {
                 )}
                 {/* COMMUNITIES */}
                 {constants.map(menu =>
-                    <>
+                    <div key={menu.title}>
                         <h4 className='feed-tab label-sm'>{menu.title}</h4>
                         {menu.sub_feed.map(item => <button
+                            key={item.name}
                             type='button'
                             className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
                             onClick={() => {
                                 setActiveTab(item)
                                 if (item.name === 'Create Community') { openModal() }
-                                else if(item.link) { router.push(item.link) }
+                                else if (item.link) { router.push(item.link) }
                             }}
                         >
                             <Image
@@ -127,6 +129,7 @@ function Feed() {
                         </button >)}
                         {menu.communities &&
                             menu.communities.map(community => <button
+                                key={community.name}
                                 type='button'
                                 className="feed-tab w-full flex-start-10 cursor-pointer hover:bg-light"
                                 onClick={() => {
@@ -148,7 +151,7 @@ function Feed() {
                                 <span>r/{community.name}</span>
                             </button>)
                         }
-                    </>
+                    </div>
                 )}
             </div>}
             <Modal isOpen={isOpen}

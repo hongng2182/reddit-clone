@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/require-default-props */
 import React, { useState } from 'react'
 import Image from 'next/image'
@@ -41,7 +40,7 @@ function SingleComment({ comment }: { comment: Comment }) {
         <div className='relative box-border' style={{ paddingLeft: `${depth * 20}px` }} >
             <div className='absolute left-0 top-0 z-[2] h-full'>
                 <div style={{ width: `${depth * 20}px` }} className="inline-block h-full box-border">
-                    {Array.from(Array(depth).keys()).map(_ => <div
+                    {Array.from(Array(depth).keys()).map(_ => <div key={_}
                         style={{ width: depth > 0 ? `calc(100% / ${depth})` : '100%' }} className='h-full inline-block'>
                         <div className='h-full w-[2px] bg-medium' />
                     </div>)}
@@ -68,9 +67,9 @@ function SingleComment({ comment }: { comment: Comment }) {
                         <p >{media && media.richtextContent}</p>
                         <div className='text-xs flex-start-10 mb-3'>
                             <div className='flex-start gap-[5px] rounded-sm p-2 font-bold cursor-pointer'>
-                                <ArrowUpDown type='up' className='mx-auto hover:bg-medium hover:fill-secondary' />
+                                <ArrowUpDown variant='outline' type='up' className='mx-auto hover:bg-medium hover:fill-secondary' />
                                 <span className='mx-auto'>{score}</span>
-                                <ArrowUpDown type='down' className='mx-auto hover:bg-medium hover:fill-primary' />
+                                <ArrowUpDown variant='outline' type='down' className='mx-auto hover:bg-medium hover:fill-primary' />
                             </div>
                             <button type='button' className='post-action'
                                 onClick={() => { setShowComment(!showComment) }}>
