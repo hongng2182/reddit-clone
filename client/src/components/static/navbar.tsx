@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Reference, gql } from '@apollo/client'
 import { useModal } from '@/hooks'
+import { MeDocument, MeQuery, useLogoutMutation, useMeQuery } from '@/generated/graphql'
 import Feed from './feed'
 import { DropdownIcon, ProfileIcon, LogOutIcon } from '../icons'
 import SearchBar from './search-bar'
@@ -9,13 +11,47 @@ import AuthenticatePopup from './authenticate-popup'
 import Modal from './modal'
 
 function Header() {
-    const username = 'hongng2182'
+    const { data } = useMeQuery()
     const [profileFocus, setProfileFocus] = useState(false)
     const { isOpen, openModal, closeModal } = useModal()
-    const isLogin = true
-    // TODO: click outside to hide search results, feed and profile
+    const [logout] = useLogoutMutation()
 
-    // TODO: click login show popup, username when login
+    const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault()
+        logout({
+            update(cache, { data: logoutData }) {
+                if (logoutData?.logout) {
+                    cache.writeQuery<MeQuery>({
+                        query: MeDocument,
+                        data: { me: null }
+                    })
+
+                    cache.modify({
+                        fields: {
+                            posts(existing) {
+                                existing.paginatedPosts.forEach((post: Reference) => {
+                                    cache.writeFragment({
+                                        // eslint-disable-next-line no-underscore-dangle
+                                        id: post.__ref,
+                                        fragment: gql`
+                                                fragment voteStatus on Post {
+                                                    voteStatus
+                                                }
+                                                `,
+                                        data: {
+                                            voteStatus: 0
+                                        }
+                                    })
+                                })
+                                return existing
+                            }
+                        }
+                    })
+                }
+            }
+        })
+    }
+
     return (<>
         <nav className='flex-start smM:px-[5px] px-[20px] bg-white h-[48px]'>
             <div className="grow-[1] flex gap-[7px] md:gap-[20px]">
@@ -45,14 +81,14 @@ function Header() {
                 </div>
             </div>
             <div className="grow-0 flex-end gap-[1.5rem]">
-                {!isLogin && <button type="button" className='button-main smM:hidden'
+                {!data?.me && <button type="button" className='button-main smM:hidden'
                     onClick={openModal}>Login</button>}
-                <div className="relative flex-start gap-[5px] border border-transparent hover:border-medium p-1 rounded-md cursor-pointer"
+                <div className="relative flex-start gap-[5px] border border-transparent hover:border-medium p-1 rounded-md cursor-pointer min-h-[40px]"
                     onMouseEnter={() => setProfileFocus(true)}
                     onMouseLeave={() => setProfileFocus(false)}
                 >
-                    {!isLogin && <ProfileIcon type='outline' />}
-                    {isLogin && <div className='flex-start gap-[5px] min-w-[30px]'>
+                    {!data?.me && <ProfileIcon type='outline' />}
+                    {data && data.me && <div className='flex-start gap-[5px] min-w-[30px]'>
                         <Image
                             src='/demo.png'
                             alt='avatar'
@@ -60,12 +96,12 @@ function Header() {
                             height='35'
                             sizes='100%'
                             className='rounded-full w-[35px] h-[35px]' />
-                        <span className='label-md smM:hidden'>{username}</span>
+                        <span className='label-md smM:hidden'>{data.me.username}</span>
                     </div>}
                     <DropdownIcon width={12} />
                     {profileFocus && <div className="absolute h-auto bg-white top-[40px] right-0 py-[10px]">
-                        <Link
-                            href={`/static/user/${username}`}
+                        {data && data.me && <><Link
+                            href={`/static/user/${data.me.username}`}
                             className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
                         >
                             <div className='w-[24px] h-[24px]'>
@@ -73,7 +109,18 @@ function Header() {
                             </div>
                             <span>My Profile</span>
                         </Link>
-                        <button
+                            <button
+                                type='button'
+                                className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
+                                onClick={handleLogout}
+                            >
+                                <div className='w-[24px] h-[24px]'>
+                                    <LogOutIcon />
+                                </div>
+                                <span>Log Out</span>
+                            </button>
+                        </>}
+                        {!data?.me && <button
                             type='button'
                             className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
                             onClick={openModal}
@@ -82,16 +129,7 @@ function Header() {
                                 <LogOutIcon />
                             </div>
                             <span>Log In/ Sign Up</span>
-                        </button>
-                        <button
-                            type='button'
-                            className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
-                        >
-                            <div className='w-[24px] h-[24px]'>
-                                <LogOutIcon />
-                            </div>
-                            <span>Log Out</span>
-                        </button>
+                        </button>}
                     </div>}
                 </div>
             </div >
@@ -99,7 +137,7 @@ function Header() {
         <Modal
             isOpen={isOpen}
             closeModal={closeModal}
-            modalContent={<AuthenticatePopup />}
+            modalContent={<AuthenticatePopup closeModal={closeModal} />}
         />
     </>
     )
