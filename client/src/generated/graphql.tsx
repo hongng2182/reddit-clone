@@ -15,6 +15,18 @@ export type Scalars = {
   Float: number;
 };
 
+export type Community = {
+  __typename?: 'Community';
+  communityIconUrl: Scalars['String'];
+  createdAt: Scalars['String'];
+  creatorId: Scalars['Float'];
+  description: Scalars['String'];
+  id: Scalars['Float'];
+  name: Scalars['String'];
+  numMembers: Scalars['Float'];
+  privacyType: Scalars['String'];
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
@@ -93,14 +105,19 @@ export type PaginatedPosts = {
 
 export type Post = {
   __typename?: 'Post';
+  community: Community;
+  communityId: Scalars['Float'];
   createdAt: Scalars['String'];
   id: Scalars['Float'];
+  imageUrl: Scalars['String'];
+  numComments: Scalars['Float'];
   ownerId: Scalars['Float'];
   points: Scalars['Float'];
   text: Scalars['String'];
   textSnippet: Scalars['String'];
   title: Scalars['String'];
   updatedAt: Scalars['String'];
+  urlLink: Scalars['String'];
   user: User;
   voteStatus: Scalars['Float'];
 };
@@ -134,6 +151,7 @@ export type User = {
   email: Scalars['String'];
   id: Scalars['Float'];
   password: Scalars['String'];
+  profileUrl: Scalars['String'];
   updatedAt: Scalars['String'];
   username: Scalars['String'];
 };
@@ -155,9 +173,9 @@ export enum VoteType {
   Upvote = 'UPVOTE'
 }
 
-export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number };
+export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number };
 
-export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string };
+export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string, profileUrl: string };
 
 export type ChangePasswordMutationVariables = Exact<{
   newPassword: Scalars['String'];
@@ -165,14 +183,14 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string } | null } };
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null } };
 
 export type CreatePostMutationVariables = Exact<{
   input: PostInput;
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number } };
 
 export type DeletePostMutationVariables = Exact<{
   deletePostId: Scalars['Int'];
@@ -194,7 +212,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string } | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -206,7 +224,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string } | null } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null } };
 
 export type UpdatePostMutationVariables = Exact<{
   input: PostInput;
@@ -214,7 +232,7 @@ export type UpdatePostMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } } | null };
+export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string } } | null };
 
 export type VoteMutationVariables = Exact<{
   voteValue: VoteType;
@@ -222,19 +240,19 @@ export type VoteMutationVariables = Exact<{
 }>;
 
 
-export type VoteMutation = { __typename?: 'Mutation', vote: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } } };
+export type VoteMutation = { __typename?: 'Mutation', vote: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string } } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string, email: string } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null };
 
 export type PostQueryVariables = Exact<{
   postId: Scalars['Float'];
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } } | null };
 
 export type PostsQueryVariables = Exact<{
   first: Scalars['Int'];
@@ -242,7 +260,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, user: { __typename?: 'User', username: string } }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } }> } };
 
 export const PostInfoFragmentDoc = gql`
     fragment PostInfo on Post {
@@ -255,6 +273,10 @@ export const PostInfoFragmentDoc = gql`
   createdAt
   updatedAt
   voteStatus
+  urlLink
+  imageUrl
+  numComments
+  communityId
 }
     `;
 export const UserInfoFragmentDoc = gql`
@@ -262,6 +284,7 @@ export const UserInfoFragmentDoc = gql`
   id
   username
   email
+  profileUrl
 }
     `;
 export const ChangePasswordDocument = gql`
@@ -623,6 +646,9 @@ export const PostDocument = gql`
     user {
       username
     }
+    community {
+      name
+    }
   }
 }
     ${PostInfoFragmentDoc}`;
@@ -666,6 +692,9 @@ export const PostsDocument = gql`
       ...PostInfo
       user {
         username
+      }
+      community {
+        name
       }
     }
   }

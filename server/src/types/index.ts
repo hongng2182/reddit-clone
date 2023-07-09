@@ -4,7 +4,7 @@ import { RedisClientType } from "redis";
 import { buildDataLoaders } from "src/utils/dataLoaders";
 
 export type MyContext = {
-    req: Request & { session: Session & { userId: number } }
+    req: Request & { session: Session & { userId?: number } }
     res: Response
     redisClient: RedisClientType
     dataLoaders: ReturnType<typeof buildDataLoaders>

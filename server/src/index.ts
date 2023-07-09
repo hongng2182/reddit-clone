@@ -11,6 +11,7 @@ import session from "express-session"
 import { createClient } from "redis"
 import cors from 'cors'
 import { buildDataLoaders } from './utils/dataLoaders'
+import { MyContext } from './types'
 
 export const AppDataSource = new DataSource(__prod__ ? typeOrmConfigProd : typeOrmConfigDev)
 
@@ -18,11 +19,11 @@ const main = async () => {
     // Connect db
     await AppDataSource.initialize()
 
-    if (__prod__) {
-        console.log('migration run')
-        await AppDataSource.runMigrations()
-    }
-
+    // if (__prod__) {
+    // console.log('migration run')
+    // await AppDataSource.runMigrations()
+ 
+    
     const app = express()
 
     // Initialize client.
@@ -41,7 +42,7 @@ const main = async () => {
 
     console.log('origin', process.env.CORS_ORIGIN)
     app.use(cors({
-        origin: process.env.CORS_ORIGIN,
+        origin: [`${process.env.CORS_ORIGIN}`, 'https://studio.apollographql.com'],
         credentials: true,
     }))
     // Initialize sesssion storage.
@@ -56,14 +57,13 @@ const main = async () => {
                 maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
                 httpOnly: true,
                 secure: __prod__, // cookie only works in https
-                sameSite: 'none', // csrf
+                sameSite: __prod__ ? 'none' : 'lax', // csrf
                 // domain: __prod__ ? ".onrender.com" : undefined,
             },
         })
     )
 
-
-    const apolloServer = new ApolloServer({
+    const apolloServer = new ApolloServer<MyContext>({
         schema: await buildSchema({
             resolvers: [PostResolver, UserResolver],
             validate: false

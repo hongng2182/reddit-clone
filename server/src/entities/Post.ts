@@ -2,6 +2,7 @@ import { Field, ObjectType } from "type-graphql";
 import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./User";
 import { Vote } from "./Vote";
+import { Comment } from "./Comment";
 
 @ObjectType()
 @Entity()
@@ -16,25 +17,44 @@ export class Post extends BaseEntity {
 
 
     @Field()
-    @Column()
+    @Column({ nullable: true })
     text!: string;
 
     @Field()
-    @Column({ type: 'int', default: 0 })
+    @Column({ type: 'int', default: 1 })
     points!: number;
-
-    @Field()
-    voteStatus!: number;
 
     @Field()
     @Column()
     ownerId!: number;
+
+    @Field()
+    @Column({ nullable: true })
+    urlLink!: string;
+
+    @Field()
+    @Column()
+    communityId!: number;
+
+    @Field()
+    @Column({ nullable: true })
+    imageUrl!: string;
+
+    @Field()
+    @Column({ type: 'int', default: 0 })
+    numComments!: number;
+
+    @Field()
+    voteStatus!: number;
 
     @ManyToOne(() => User, (user) => user.posts)
     owner: User
 
     @OneToMany(() => Vote, (upvote) => upvote.post)
     upvotes: Vote[]
+
+    @OneToMany(() => Comment, (comment) => comment.post, { cascade: true })
+    comments: Comment[]
 
     @Field(() => String)
     @CreateDateColumn({ type: 'timestamptz' })
@@ -43,7 +63,5 @@ export class Post extends BaseEntity {
     @Field(() => String)
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
-
-
 
 }

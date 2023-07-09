@@ -1,7 +1,9 @@
 import { Field, ObjectType } from "type-graphql";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BaseEntity, OneToMany } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToMany } from "typeorm";
 import { Post } from "./Post";
 import { Vote } from "./Vote";
+import { Comment } from "./Comment";
+import { UserCommunity } from "./UserCommunity";
 
 @ObjectType()
 @Entity()
@@ -23,11 +25,21 @@ export class User extends BaseEntity {
     @Column()
     password!: string;
 
+    @Field()
+    @Column({ nullable: true, default: null })
+    profileUrl!: string;
+
     @OneToMany(() => Post, (post) => post.owner)
     posts: Post[]
 
     @OneToMany(() => Vote, (upvote) => upvote.user)
     upvotes: Vote[]
+
+    @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
+    comments: Comment[]
+
+    @ManyToMany(() => UserCommunity, (userCommunity) => userCommunity.user)
+    userCommunities: UserCommunity[]
 
     @Field(() => String)
     @CreateDateColumn()
@@ -36,5 +48,6 @@ export class User extends BaseEntity {
     @Field(() => String)
     @UpdateDateColumn()
     updatedAt: Date;
+
 
 }

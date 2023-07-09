@@ -1,5 +1,5 @@
 import { MyContext, VoteType } from "../types/index";
-import { Post, User, Vote } from "../entities";
+import { Community, Post, User, Vote } from "../entities";
 import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware, FieldResolver, Root, ObjectType, registerEnumType } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../index";
@@ -15,6 +15,7 @@ class PostInput {
     title: string
     @Field()
     text: string
+    //communityId, urlLink, imageUrl
 }
 
 @ObjectType()
@@ -52,6 +53,13 @@ export class PostResolver {
         @Ctx() { dataLoaders: { userLoader } }: MyContext
     ) {
         return await userLoader.load(root.ownerId)
+    }
+
+    @FieldResolver(() => Community)
+    async community(@Root() root: Post,
+        @Ctx() { dataLoaders: { communityLoader } }: MyContext
+    ) {
+        return await communityLoader.load(root.communityId)
     }
 
     @FieldResolver(() => Int)
@@ -98,8 +106,9 @@ export class PostResolver {
     }
 
     @Query(() => Post, { nullable: true })
-    post(@Arg("id") id: number): Promise<Post | null> {
-        return Post.findOne({ where: { id } })
+    async post(@Arg("id") id: number): Promise<Post | null> {
+        return await AppDataSource.getRepository(Post).findOneBy({ id })
+        // Post.findOne({ where: { id } })
     }
 
     @Mutation(() => Post)
@@ -110,7 +119,10 @@ export class PostResolver {
     ): Promise<Post> {
         return Post.create({
             ...input,
-            ownerId: req.session.userId
+            ownerId: req.session.userId,
+            //urlLink
+            //communityId
+            // imageUrl
         }).save()
     }
 
@@ -142,8 +154,8 @@ export class PostResolver {
         @Ctx() { req }: MyContext
     ): Promise<boolean> {
         try {
-            await Post.delete({ id, ownerId: req.session.userId })
             await Vote.delete({ postId: id })
+            await Post.delete({ id, ownerId: req.session.userId })
             return true
         } catch (e) {
             return false

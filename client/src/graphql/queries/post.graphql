@@ -4,5 +4,8 @@ query Post($postId: Float!) {
     user {
       username
     }
+    community {
+      name
+    }
   }
 }

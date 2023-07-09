@@ -8,4 +8,8 @@ fragment PostInfo on Post {
   createdAt
   updatedAt
   voteStatus
+  urlLink
+  imageUrl
+  numComments
+  communityId
 }

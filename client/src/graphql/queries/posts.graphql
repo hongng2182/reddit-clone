@@ -10,6 +10,9 @@ query Posts($first: Int!, $after: String) {
       user {
         username
       }
+      community {
+        name
+      }
     }
   }
 }

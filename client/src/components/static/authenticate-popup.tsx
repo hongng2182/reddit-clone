@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { MeDocument, MeQuery, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from '@/generated/graphql'
 import toErrorMap from '@/utils'
 import { initializeApollo } from '@/lib/apolloClient'
-import { GoogleIcon } from '../icons'
 
 function AuthenticatePopup({ closeModal }: { closeModal: () => void }) {
     const [active, setActive] = useState<'login' | 'signup' | 'forgot'>('login')
@@ -108,23 +107,6 @@ function AuthenticatePopup({ closeModal }: { closeModal: () => void }) {
                         :
                         <>Tell us your email address associated with your Reddit account, and we&apos;ll send you an email with a link to reset your password.</>
                     }</p>
-                {/* LogIn with Google */}
-                {active !== 'forgot' &&
-                    <>
-                        <div
-                            className='flex-start gap-[50px] w-full border bg-light border-transparent hover:border-medium hover:bg-primary-light rounded-3xl py-1 px-3 cursor-pointer'
-                        >
-                            <GoogleIcon />
-                            <p className='p-2 text-gray font-bold'>Log In with Google</p>
-                        </div>
-                        {/* Divider Line */}
-                        <div className='flex-start h-auto w-full'>
-                            <div className='h-[1px] bg-medium w-2/5' />
-                            <span className='w-1/5 text-center text-gray font-bold'>OR</span>
-                            <div className='h-[1px] bg-medium w-2/5' />
-                        </div>
-                    </>
-                }
                 {/* Email input */}
                 {active !== 'login' && <div
                     className='w-full border bg-light border-transparent hover:border-medium rounded-3xl py-1 px-3'

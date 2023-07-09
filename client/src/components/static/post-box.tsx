@@ -9,7 +9,7 @@ import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon } f
 import EditPost from './edit-post'
 
 type PostBoxProps = {
-    post: { __typename?: 'Post', id: number, title: string, text: string, points: number, ownerId: number, createdAt: string, updatedAt: string, textSnippet: string, voteStatus: number, user: { __typename?: 'User', username: string } },
+    post: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } },
     hideCommunity?: boolean,
     hideJoinBtn?: boolean,
     comments?: ReactNode,
@@ -35,14 +35,14 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
     const { data: meData } = useMeQuery()
     const [delelePost, { loading: isDeleteLoading }] = useDeletePostMutation()
     const [showEdit, setShowEdit] = useState(false)
-    // TODO: add field numOfComments, community to Post
-    const community = 'mini-reddit'
-    const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt } = post
+    const [isLoading, setLoading] = useState(true);
+    // TODO: add field urlLink Post
+    const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt, community: { name: communityName }, numComments, imageUrl } = post
     const pointsClassname = getPointsColorClassname(voteStatus)
 
     const handlePostClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation()
-        if (!comments) router.push(`/static/r/${community}/comments/${id}`)
+        if (!comments) router.push(`/static/r/${communityName}/comments/${id}`)
     }
 
     const handleDeletePost = async (postId: number) => {
@@ -136,7 +136,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                 <div className='flex-between w-full'>
                     <div className='text-xs md:flex-start flex-col-start'>
                         {!hideCommunity && <Link
-                            href={`/static/r/${community}`}
+                            href={`/static/r/${communityName}`}
                             onClick={(e) => e.stopPropagation()}
                             className='flex-start gap-[5px]'>
                             <Image
@@ -146,14 +146,14 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                                 src='/logo-cat.png'
                                 className='w-[14px] h-[14px] rounded-full'
                             />
-                            <span className='font-bold hover:underline'>r/{community}</span>
+                            <span className='font-bold hover:underline'>r/{communityName}</span>
                             <span className='text-gray'>•</span>
                         </Link>}
                         <div>
                             <span className='text-gray'>&nbsp;Posted by <Link
                                 href={`/static/user/${username}`}
                                 onClick={(e) => e.stopPropagation()} className='hover:underline'>
-                                u/{username}</Link> {createdAt} ago</span>
+                                u/{username}</Link> {createdAt} ago - id: {id}</span>
                         </div>
                     </div>
                     {!hideJoinBtn && <button type="button" className='text-sm button-light hover:bg-medium'>Join</button>}
@@ -163,10 +163,24 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                     : <h2 className='pr-3'>{title}</h2>}
                 {!isTrendingPost && <>
                     {!isEditing && <p>{isSinglePost ? text : textSnippet}</p>}
+                    {imageUrl &&
+                        <div className="relative max-h-[500px] h-auto w-full bg-gray-200">
+                            <Image
+                                alt="post-image"
+                                src={imageUrl}
+                                priority
+                                width="500"
+                                height="500"
+                                sizes='100%'
+                                className={`w-auto h-auto mx-auto duration-700 max-h-[500px] ease-in-out group-hover:opacity-75 ${isLoading ? "blur-2xl grayscale" : "blur-0 grayscale-0"})`}
+                                onLoadingComplete={() => setLoading(false)}
+                            />
+                        </div>
+                    }
                     <div className='text-xs flex-start-10'>
                         <div className={`${comments ? 'post-action-disable' : 'post-action'}`}>
                             <CommentIcon />
-                            25 Comments
+                            {numComments} Comments
                         </div>
                         <div className='post-action'>
                             <ShareIcon />
@@ -185,7 +199,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                                     e.stopPropagation()
                                     if (!options) {
                                         router.push({
-                                            pathname: `/static/r/${community}/comments/${id}`,
+                                            pathname: `/static/r/${communityName}/comments/${id}`,
                                             query: { options: 'edit' }
                                         })
                                     } else {
@@ -214,7 +228,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                             {points} upvotes
                         </p>
                         <p className='text-gray text-xs'>
-                            35 comments
+                            {numComments} comments
                         </p>
                     </div>
                 }

@@ -90,7 +90,7 @@ function Header() {
                     {!data?.me && <ProfileIcon type='outline' />}
                     {data && data.me && <div className='flex-start gap-[5px] min-w-[30px]'>
                         <Image
-                            src='/demo.png'
+                            src={data.me.profileUrl ? data.me.profileUrl : '/default-profile.jpg'}
                             alt='avatar'
                             width='35'
                             height='35'

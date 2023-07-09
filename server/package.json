@@ -9,9 +9,9 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "watch": "tsc -w",
-    "dev": "nodemon dist/index.js",
+    "dev": "nodemon dist/src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "create:migration": "mikro-orm migration:create"
+    "create:migration": "typeorm migration:create src/migrations/Initial"
   },
   "keywords": [],
   "author": "",

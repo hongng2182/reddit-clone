@@ -1,9 +1,10 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React from 'react'
 import { useRouter } from 'next/router'
+import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { PostDocument, usePostQuery } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
-import { PageContentLayout, PageContainer, PostBox, CommunityInfo, CommentSection } from '@/components'
+import { PageContainer, PostBox, CommentSection } from '@/components'
 
 function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
     if (isErrorFromServer) {
@@ -11,22 +12,24 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
     }
     const router = useRouter()
     const postId = router.query.id as string
-    const {options} = router.query
+    const { options } = router.query
     const { data } = usePostQuery({ variables: { postId: Number(postId) } })
 
     return (
         <PageContainer>
             <div className='h-[30px]' />
             {!data?.post && <p>Post does not exist</p>}
-            <PageContentLayout
-                left={data && data.post && <PostBox
-                    post={data.post}
-                    hideJoinBtn
-                    isSinglePost
-                    isEditing={options === 'edit'}
-                    comments={<CommentSection />} />}
-                right={<CommunityInfo />}
-            />
+
+            {data && data.post &&
+                <div className='my-[30px]'>
+                    <PostBox
+                        post={data.post}
+                        hideJoinBtn
+                        isSinglePost
+                        isEditing={options === 'edit'}
+                        comments={<CommentSection />} />
+                </div>
+            }
         </PageContainer>
 
     )
@@ -34,7 +37,7 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
 
 export default SinglePostPage
 
-export const getServerSideProps = async (context: any) => {
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
     const { params } = context
 
     if (!params) return {
@@ -56,7 +59,7 @@ export const getServerSideProps = async (context: any) => {
     }
 
     try {
-        const apolloClient = initializeApollo()
+        const apolloClient = initializeApollo({ headers: context.req.headers })
 
         await apolloClient.query({
             query: PostDocument,
