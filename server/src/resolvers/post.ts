@@ -105,6 +105,44 @@ export class PostResolver {
 
     }
 
+    @Query(() => PaginatedPosts)
+    async getCommunityPosts(
+        @Arg("after", () => String, { nullable: true }) after: string | null,
+        @Arg("first", () => Int) first: number,
+        @Arg("communityName", () => String) communityName: string
+    ): Promise<PaginatedPosts | { errors: String }> {
+
+        // Calculate offset and limit based on the "after" and "first" parameters
+        const offset = after ? parseInt(Buffer.from(after, 'base64').toString(), 10) : 0;
+        const limit = Math.min(20, first);
+        const community = await Community.findOne({ where: { name: communityName } })
+
+        if (!community) {
+            return { errors: "No community found with this name!" }
+        }
+        // Get posts with pagination
+        const [posts, totalCount] = await AppDataSource.getRepository(Post).findAndCount({
+            order: { createdAt: 'DESC' },
+            skip: offset,
+            take: limit,
+            where: { communityId: community.id }
+        })
+
+        // Calculate endCursor, and encode 
+        const hasNextPage = offset + limit < totalCount
+        const endCursor = hasNextPage ? Buffer.from((offset + limit).toString()).toString('base64') : null
+
+        // Calculate pageInfo
+        const pageInfo = {
+            endCursor,
+            hasNextPage,
+            hasPreviousPage: offset > 0,
+        };
+
+        return { paginatedPosts: posts, pageInfo: pageInfo }
+
+    }
+
     @Query(() => Post, { nullable: true })
     async post(@Arg("id") id: number): Promise<Post | null> {
         return await AppDataSource.getRepository(Post).findOneBy({ id })
@@ -124,6 +162,8 @@ export class PostResolver {
             //communityId
             // imageUrl
         }).save()
+
+        // update Vote Table 
     }
 
     @Mutation(() => Post, { nullable: true })

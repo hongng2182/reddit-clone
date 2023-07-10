@@ -14,3 +14,9 @@ export enum VoteType {
     UPVOTE = 1,
     DOWNVOTE = -1
 }
+
+export enum PrivacyType {
+    public = 'public',
+    restricted = 'restricted',
+    private = 'private'
+}

@@ -1,6 +1,7 @@
 import { Field, ObjectType } from "type-graphql";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from "typeorm";
 import { UserCommunity } from "./UserCommunity";
+import { PrivacyType } from "../types";
 
 
 @ObjectType()
@@ -10,13 +11,15 @@ export class Community extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
+    @Field()
+    hasJoined!: boolean;
 
     @Field()
     @Column({ unique: true })
     name!: string;
 
     @Field()
-    @Column()
+    @Column({ nullable: true, default: '' })
     description!: string;
 
     @Field()
@@ -28,11 +31,11 @@ export class Community extends BaseEntity {
     numMembers!: number;
 
     @Field()
-    @Column()
-    privacyType!: string;
+    @Column({ type: 'enum', enum: PrivacyType, default: PrivacyType.public })
+    privacyType!: PrivacyType;
 
     @Field()
-    @Column({ nullable: true, default: null })
+    @Column({ nullable: true, default: '' })
     communityIconUrl!: string;
 
     @OneToMany(() => UserCommunity, (userCommunity) => userCommunity.community)
