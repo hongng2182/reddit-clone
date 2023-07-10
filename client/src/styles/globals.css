@@ -95,6 +95,10 @@ input:focus {
     @apply flex flex-col gap-[10px] items-start
   }
 
+  .flex-col-center-10 {
+    @apply flex flex-col items-center gap-[10px]
+  }
+
   .flex-end {
     @apply flex justify-end items-center
   }
@@ -110,7 +114,7 @@ input:focus {
   .button-light {
     @apply bg-light rounded-full py-1 px-3 font-bold
   }
-  
+
   .button-hover {
     @apply bg-white rounded-3xl text-cate-blue font-bold py-1 hover:bg-medium px-3
   }
@@ -146,18 +150,24 @@ input:focus {
   .post-action {
     @apply flex-start gap-[5px] hover:bg-medium rounded-sm p-2 font-bold text-gray cursor-pointer
   }
-    .post-action-disable {
-      @apply flex-start gap-[5px] rounded-sm p-2 font-bold text-gray
-    }
 
-  .img-24 {
-@apply w-[24px] h-[24px] rounded-full object-cover object-[center,top]
+  .post-action-disable {
+    @apply flex-start gap-[5px] rounded-sm p-2 font-bold text-gray
   }
 
-.img-35 {
-  @apply w-[35px] h-[35px] rounded-full object-cover object-[center,top]}
+  .img-24 {
+    @apply w-[24px] h-[24px] rounded-full object-cover object-[center,top]
+  }
 
-  .username{
+  .img-35 {
+    @apply w-[35px] h-[35px] rounded-full object-cover object-[center,top]
+  }
+
+  .img-40 {
+    @apply w-[40px] h-[40px] rounded-full object-cover object-[center,top]
+  }
+
+  .username {
     @apply text-xs text-black-light font-bold
   }
 }

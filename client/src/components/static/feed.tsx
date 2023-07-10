@@ -48,7 +48,7 @@ const constants = [
         }],
     }]
 
-function Feed() {
+function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
     const [activeTab, setActiveTab] = useState<{
         icon: string,
         name: string
@@ -80,7 +80,7 @@ function Feed() {
                 </span>
                 <span><DropdownIcon width={20} fill='#000' /></span>
             </div>
-            {showTab && <div className="w-[270px] absolute top-[38px] h-[400px] flex-col-start-10 bg-white border border-medium border-t-0 z-10 overflow-y-scroll">
+            {showTab && <div className={`${isUserLogIn ? 'h-[360px]' : 'h-[150px]'} w-[270px] absolute top-[38px] flex-col-start-10 bg-white border border-medium border-t-0 z-10 overflow-y-scroll`}>
                 {/* FEEDS */}
                 <h4 className='feed-tab label-sm'>{feeds.title}</h4>
                 {feeds.sub_feed.map(item =>
@@ -105,8 +105,8 @@ function Feed() {
                     </button >
                 )}
                 {/* COMMUNITIES */}
-                {constants.map(menu =>
-                    <div key={menu.title}>
+                {isUserLogIn && constants.map(menu =>
+                    <div key={menu.title} className='w-full'>
                         <h4 className='feed-tab label-sm'>{menu.title}</h4>
                         {menu.sub_feed.map(item => <button
                             key={item.name}

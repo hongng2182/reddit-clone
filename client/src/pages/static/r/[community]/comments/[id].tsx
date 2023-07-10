@@ -11,8 +11,8 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
         return <div>An errorn has happen</div>
     }
     const router = useRouter()
-    const postId = router.query.id as string
-    const { options } = router.query
+    // const postId = router.query.id as string
+    const { options, id: postId } = router.query
     const { data } = usePostQuery({ variables: { postId: Number(postId) } })
 
     return (

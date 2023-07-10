@@ -1,0 +1,11 @@
+mutation UpdateCommunity(
+  $input: CommunityUpdateInput!
+  $updateCommunityId: Int!
+) {
+  updateCommunity(input: $input, id: $updateCommunityId) {
+    community {
+      ...CommunityInfo
+    }
+    errors
+  }
+}

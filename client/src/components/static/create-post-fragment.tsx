@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { PictureIcon, LinkIcon } from '../icons'
 
-function CreatePostFragment() {
+function CreatePostFragment({ pathname = '/static/submit' }: { pathname?: string }) {
     const router = useRouter()
 
     return (
@@ -18,18 +18,22 @@ function CreatePostFragment() {
             />
             <div className='h-[40px] w-[70%] bg-light  hover-border-blue rounded-sm'>
                 <input name="create-post" className='h-full my-auto font-light w-full pl-2' placeholder='Create Post' readOnly
-                    onFocus={() => router.push('/static/submit')} />
+                    onFocus={() => router.push(pathname)} />
             </div>
             <div className="p-2 hover:bg-medium cursor-pointer rounded-sm" onClick={() => router.push({
-                pathname: '/static/submit',
+                pathname,
                 query: { media: true },
             })}><PictureIcon /></div>
             <div className="p-2 hover:bg-medium cursor-pointer rounded-sm" onClick={() => router.push({
-                pathname: '/static/submit',
+                pathname,
                 query: { url: true },
             })}><LinkIcon /></div>
         </div >
     )
+}
+
+CreatePostFragment.defaultProps = {
+    pathname: '/static/submit'
 }
 
 export default CreatePostFragment

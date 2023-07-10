@@ -1,0 +1,11 @@
+fragment CommunityInfo on Community {
+  id
+  name
+  description
+  creatorId
+  numMembers
+  privacyType
+  communityIconUrl
+  createdAt
+  hasJoined
+}

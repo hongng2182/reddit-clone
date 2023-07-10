@@ -5,8 +5,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next"
 import { Navbar } from "@/components"
 import { addApolloState, initializeApollo } from "@/lib/apolloClient"
 import { PaginatedPosts, PostsDocument, VoteType, useDeletePostMutation, useMeQuery, usePostsQuery, useVoteMutation } from "@/generated/graphql"
-
-const FETCH_LIMIT = 10
+import { FETCH_LIMIT } from "@/types"
 
 enum VoteStatusValues {
   Upvote = 1,

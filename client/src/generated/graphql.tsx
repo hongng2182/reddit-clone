@@ -21,10 +21,29 @@ export type Community = {
   createdAt: Scalars['String'];
   creatorId: Scalars['Float'];
   description: Scalars['String'];
+  hasJoined: Scalars['Boolean'];
   id: Scalars['Float'];
   name: Scalars['String'];
   numMembers: Scalars['Float'];
   privacyType: Scalars['String'];
+};
+
+export type CommunityInput = {
+  name: Scalars['String'];
+  privacyType: Scalars['String'];
+};
+
+export type CommunityResponse = {
+  __typename?: 'CommunityResponse';
+  community?: Maybe<Community>;
+  errors?: Maybe<Scalars['String']>;
+};
+
+export type CommunityUpdateInput = {
+  communityIconUrl?: InputMaybe<Scalars['String']>;
+  description?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  privacyType?: InputMaybe<Scalars['String']>;
 };
 
 export type FieldError = {
@@ -36,12 +55,14 @@ export type FieldError = {
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
+  createCommunity: CommunityResponse;
   createPost: Post;
   deletePost: Scalars['Boolean'];
   forgotPassword: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
+  updateCommunity: CommunityResponse;
   updatePost?: Maybe<Post>;
   vote: Post;
 };
@@ -50,6 +71,11 @@ export type Mutation = {
 export type MutationChangePasswordArgs = {
   newPassword: Scalars['String'];
   token: Scalars['String'];
+};
+
+
+export type MutationCreateCommunityArgs = {
+  input: CommunityInput;
 };
 
 
@@ -76,6 +102,12 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   options: UserInfoInput;
+};
+
+
+export type MutationUpdateCommunityArgs = {
+  id: Scalars['Int'];
+  input: CommunityUpdateInput;
 };
 
 
@@ -129,9 +161,23 @@ export type PostInput = {
 
 export type Query = {
   __typename?: 'Query';
+  community?: Maybe<Community>;
+  getCommunityPosts: PaginatedPosts;
   me?: Maybe<User>;
   post?: Maybe<Post>;
   posts: PaginatedPosts;
+};
+
+
+export type QueryCommunityArgs = {
+  communityName: Scalars['String'];
+};
+
+
+export type QueryGetCommunityPostsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  communityName: Scalars['String'];
+  first: Scalars['Int'];
 };
 
 
@@ -173,6 +219,8 @@ export enum VoteType {
   Upvote = 'UPVOTE'
 }
 
+export type CommunityInfoFragment = { __typename?: 'Community', id: number, name: string, description: string, creatorId: number, numMembers: number, privacyType: string, communityIconUrl: string, createdAt: string, hasJoined: boolean };
+
 export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number };
 
 export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string, profileUrl: string };
@@ -184,6 +232,13 @@ export type ChangePasswordMutationVariables = Exact<{
 
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null } };
+
+export type CreateCommunityMutationVariables = Exact<{
+  input: CommunityInput;
+}>;
+
+
+export type CreateCommunityMutation = { __typename?: 'Mutation', createCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', id: number, name: string, description: string, creatorId: number, numMembers: number, privacyType: string, communityIconUrl: string, createdAt: string, hasJoined: boolean } | null } };
 
 export type CreatePostMutationVariables = Exact<{
   input: PostInput;
@@ -226,6 +281,14 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null } };
 
+export type UpdateCommunityMutationVariables = Exact<{
+  input: CommunityUpdateInput;
+  updateCommunityId: Scalars['Int'];
+}>;
+
+
+export type UpdateCommunityMutation = { __typename?: 'Mutation', updateCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', id: number, name: string, description: string, creatorId: number, numMembers: number, privacyType: string, communityIconUrl: string, createdAt: string, hasJoined: boolean } | null } };
+
 export type UpdatePostMutationVariables = Exact<{
   input: PostInput;
   updatePostId: Scalars['Int'];
@@ -241,6 +304,22 @@ export type VoteMutationVariables = Exact<{
 
 
 export type VoteMutation = { __typename?: 'Mutation', vote: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string } } };
+
+export type GetCommunityPostsQueryVariables = Exact<{
+  first: Scalars['Int'];
+  after?: InputMaybe<Scalars['String']>;
+  communityName: Scalars['String'];
+}>;
+
+
+export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } }> } };
+
+export type CommunityQueryVariables = Exact<{
+  communityName: Scalars['String'];
+}>;
+
+
+export type CommunityQuery = { __typename?: 'Query', community?: { __typename?: 'Community', id: number, name: string, description: string, creatorId: number, numMembers: number, privacyType: string, communityIconUrl: string, createdAt: string, hasJoined: boolean } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -262,6 +341,19 @@ export type PostsQueryVariables = Exact<{
 
 export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } }> } };
 
+export const CommunityInfoFragmentDoc = gql`
+    fragment CommunityInfo on Community {
+  id
+  name
+  description
+  creatorId
+  numMembers
+  privacyType
+  communityIconUrl
+  createdAt
+  hasJoined
+}
+    `;
 export const PostInfoFragmentDoc = gql`
     fragment PostInfo on Post {
   id
@@ -327,6 +419,42 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const CreateCommunityDocument = gql`
+    mutation CreateCommunity($input: CommunityInput!) {
+  createCommunity(input: $input) {
+    community {
+      ...CommunityInfo
+    }
+    errors
+  }
+}
+    ${CommunityInfoFragmentDoc}`;
+export type CreateCommunityMutationFn = Apollo.MutationFunction<CreateCommunityMutation, CreateCommunityMutationVariables>;
+
+/**
+ * __useCreateCommunityMutation__
+ *
+ * To run a mutation, you first call `useCreateCommunityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCommunityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCommunityMutation, { data, loading, error }] = useCreateCommunityMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCommunityMutation(baseOptions?: Apollo.MutationHookOptions<CreateCommunityMutation, CreateCommunityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCommunityMutation, CreateCommunityMutationVariables>(CreateCommunityDocument, options);
+      }
+export type CreateCommunityMutationHookResult = ReturnType<typeof useCreateCommunityMutation>;
+export type CreateCommunityMutationResult = Apollo.MutationResult<CreateCommunityMutation>;
+export type CreateCommunityMutationOptions = Apollo.BaseMutationOptions<CreateCommunityMutation, CreateCommunityMutationVariables>;
 export const CreatePostDocument = gql`
     mutation CreatePost($input: PostInput!) {
   createPost(input: $input) {
@@ -531,6 +659,43 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const UpdateCommunityDocument = gql`
+    mutation UpdateCommunity($input: CommunityUpdateInput!, $updateCommunityId: Int!) {
+  updateCommunity(input: $input, id: $updateCommunityId) {
+    community {
+      ...CommunityInfo
+    }
+    errors
+  }
+}
+    ${CommunityInfoFragmentDoc}`;
+export type UpdateCommunityMutationFn = Apollo.MutationFunction<UpdateCommunityMutation, UpdateCommunityMutationVariables>;
+
+/**
+ * __useUpdateCommunityMutation__
+ *
+ * To run a mutation, you first call `useUpdateCommunityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCommunityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCommunityMutation, { data, loading, error }] = useUpdateCommunityMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *      updateCommunityId: // value for 'updateCommunityId'
+ *   },
+ * });
+ */
+export function useUpdateCommunityMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCommunityMutation, UpdateCommunityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCommunityMutation, UpdateCommunityMutationVariables>(UpdateCommunityDocument, options);
+      }
+export type UpdateCommunityMutationHookResult = ReturnType<typeof useUpdateCommunityMutation>;
+export type UpdateCommunityMutationResult = Apollo.MutationResult<UpdateCommunityMutation>;
+export type UpdateCommunityMutationOptions = Apollo.BaseMutationOptions<UpdateCommunityMutation, UpdateCommunityMutationVariables>;
 export const UpdatePostDocument = gql`
     mutation UpdatePost($input: PostInput!, $updatePostId: Int!) {
   updatePost(input: $input, id: $updatePostId) {
@@ -605,6 +770,91 @@ export function useVoteMutation(baseOptions?: Apollo.MutationHookOptions<VoteMut
 export type VoteMutationHookResult = ReturnType<typeof useVoteMutation>;
 export type VoteMutationResult = Apollo.MutationResult<VoteMutation>;
 export type VoteMutationOptions = Apollo.BaseMutationOptions<VoteMutation, VoteMutationVariables>;
+export const GetCommunityPostsDocument = gql`
+    query GetCommunityPosts($first: Int!, $after: String, $communityName: String!) {
+  getCommunityPosts(first: $first, after: $after, communityName: $communityName) {
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    paginatedPosts {
+      ...PostInfo
+      user {
+        username
+      }
+      community {
+        name
+      }
+    }
+  }
+}
+    ${PostInfoFragmentDoc}`;
+
+/**
+ * __useGetCommunityPostsQuery__
+ *
+ * To run a query within a React component, call `useGetCommunityPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCommunityPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCommunityPostsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      communityName: // value for 'communityName'
+ *   },
+ * });
+ */
+export function useGetCommunityPostsQuery(baseOptions: Apollo.QueryHookOptions<GetCommunityPostsQuery, GetCommunityPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCommunityPostsQuery, GetCommunityPostsQueryVariables>(GetCommunityPostsDocument, options);
+      }
+export function useGetCommunityPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCommunityPostsQuery, GetCommunityPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCommunityPostsQuery, GetCommunityPostsQueryVariables>(GetCommunityPostsDocument, options);
+        }
+export type GetCommunityPostsQueryHookResult = ReturnType<typeof useGetCommunityPostsQuery>;
+export type GetCommunityPostsLazyQueryHookResult = ReturnType<typeof useGetCommunityPostsLazyQuery>;
+export type GetCommunityPostsQueryResult = Apollo.QueryResult<GetCommunityPostsQuery, GetCommunityPostsQueryVariables>;
+export const CommunityDocument = gql`
+    query Community($communityName: String!) {
+  community(communityName: $communityName) {
+    ...CommunityInfo
+  }
+}
+    ${CommunityInfoFragmentDoc}`;
+
+/**
+ * __useCommunityQuery__
+ *
+ * To run a query within a React component, call `useCommunityQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCommunityQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCommunityQuery({
+ *   variables: {
+ *      communityName: // value for 'communityName'
+ *   },
+ * });
+ */
+export function useCommunityQuery(baseOptions: Apollo.QueryHookOptions<CommunityQuery, CommunityQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CommunityQuery, CommunityQueryVariables>(CommunityDocument, options);
+      }
+export function useCommunityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CommunityQuery, CommunityQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CommunityQuery, CommunityQueryVariables>(CommunityDocument, options);
+        }
+export type CommunityQueryHookResult = ReturnType<typeof useCommunityQuery>;
+export type CommunityLazyQueryHookResult = ReturnType<typeof useCommunityLazyQuery>;
+export type CommunityQueryResult = Apollo.QueryResult<CommunityQuery, CommunityQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {

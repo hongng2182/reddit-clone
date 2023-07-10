@@ -1,8 +1,25 @@
 import React from 'react'
 import Image from 'next/image'
+import { CommunityInfo } from '@/types'
 
+type Props = {
+    communityInfo: CommunityInfo,
+    userId: number | undefined
+}
 
-function CommunityBanner() {
+function CommunityBanner({ communityInfo, userId }: Props) {
+    const { communityIconUrl, name, hasJoined, creatorId } = communityInfo
+    const capitalizeName = name[0].toUpperCase() + name.slice(1,)
+    const isMod = userId === creatorId
+
+    const handleJoinLeave = () => {
+        if (!userId) {// show popup login} 
+        }
+        // if user haJoined => leave
+
+        // hasnt join, join
+    }
+
     return (
         <div className='h-[250px]'>
             <div className='h-[150px] bg-primary' />
@@ -13,7 +30,7 @@ function CommunityBanner() {
                             <Image
                                 height='0'
                                 width='0'
-                                src='/demo.png'
+                                src={communityIconUrl}
                                 alt='logo'
                                 sizes='100%'
                                 className='w-full h-full rounded-full'
@@ -21,10 +38,12 @@ function CommunityBanner() {
                         </div>
                         <div className='mt-[20px] flex-col-start'>
                             <div className='flex-start gap-[20px]'>
-                                <h1>Twice</h1>
-                                <button type="button" className='button-main-outline'>Joined</button>
+                                <h1>{capitalizeName}</h1>
+                                <button type="button" disabled={isMod} className={`${hasJoined ? 'button-main-outline after:content-["Joined"] hover:after:content-["Leave"]' : 'button-main'}`}
+                                    onClick={handleJoinLeave}
+                                >{hasJoined ? "" : "Join"}</button>
                             </div>
-                            <span className='label-sm'>r/twice</span>
+                            <span className='label-sm'>r/{name}</span>
                         </div>
 
                     </div>

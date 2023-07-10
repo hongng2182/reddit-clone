@@ -1,27 +1,48 @@
 import React from 'react'
-import { CreatePostFragment, PageContentLayout, PageContainer, FilterBox, PostBox, CommunityBanner, CommunityInfo } from '@/components'
-import { usePostsQuery } from '@/generated/graphql'
-
-const FETCH_LIMIT = 10
+import { NetworkStatus } from "@apollo/client"
+import { useRouter } from 'next/router'
+import { CreatePostFragment, PageContentLayout, PageContainer, FilterBox, PostBox, CommunityBanner, AboutCommunity } from '@/components'
+import { useCommunityQuery, useGetCommunityPostsQuery, useMeQuery } from '@/generated/graphql'
+import { FETCH_LIMIT } from '@/types'
 
 function CommunityPage() {
-    const { data } = usePostsQuery({ variables: { first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
+    const router = useRouter()
+    const communityName = router.query.community as string
+    const { data: communityData } = useCommunityQuery({ variables: { communityName } })
 
+    const { data, fetchMore, networkStatus } = useGetCommunityPostsQuery({ variables: { communityName, first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
+    const isLoadingMorePosts = networkStatus === NetworkStatus.fetchMore
+
+    const { data: meData } = useMeQuery()
+
+    // userId(meQuery) === communityCreator => Mod Tools show
+    if (!communityData?.community) {
+        return "Sorry, there aren’t any communities on Reddit with that name."
+    }
     return (
         <>
-            <CommunityBanner />
-            <PageContainer>
+            <CommunityBanner userId={meData?.me?.id} communityInfo={communityData.community} />
+            {data?.getCommunityPosts && <PageContainer>
                 <PageContentLayout
                     left={<>
-                        <CreatePostFragment />
+                        <CreatePostFragment pathname={`${router.asPath}/submit`} />
                         <FilterBox />
                         <div className='flex-col-start-10 w-full'>
-                            {data?.posts.paginatedPosts.map(post => <PostBox post={post} hideCommunity hideJoinBtn />)}
+                            {data?.getCommunityPosts.paginatedPosts.map(post => <PostBox key={post.id} post={post} hideCommunity hideJoinBtn />)}
+                            {
+                                data?.getCommunityPosts.pageInfo.hasNextPage &&
+                                <button
+                                    type="button"
+                                    className='button-main'
+                                    onClick={() => fetchMore({ variables: { first: FETCH_LIMIT, after: data?.getCommunityPosts.pageInfo.endCursor } })}>
+                                    {isLoadingMorePosts ? 'Loading' : 'Load more'}
+                                </button>
+                            }
                         </div>
                     </>}
-                    right={<CommunityInfo />}
+                    right={<AboutCommunity communityInfo={communityData.community} />}
                 />
-            </PageContainer>
+            </PageContainer>}
         </>
     )
 }

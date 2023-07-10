@@ -74,7 +74,7 @@ function Header() {
                     />
                 </Link>
                 <div className="flex-center">
-                    <Feed />
+                    <Feed isUserLogIn={Boolean(data?.me)} />
                 </div>
                 <div className="flex-[2] flex-start">
                     <SearchBar />

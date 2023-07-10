@@ -3,6 +3,17 @@ import { LockIcon, ProfileIcon, RestrictedIcon } from '../icons'
 
 function CommunityCreatePopup({ closeModal }: { closeModal: () => void }) {
   // TODO: handle error typing community name, add func 
+  // const [createCommunity, { loading }] = useCreateCommunityMutation()
+  // const [updateCommunity, { data }] = useUpdateCommunityMutation()
+  // const form = {
+  //   name: 'feedback5',
+  //   privacyType: "restricted"
+  // }
+
+  // const formUpdate = {
+  //   privacyType: "restricted"
+  // }
+
   return (
     <><div className='flex-col-start-10 w-[300px] sm:w-[500px]'>
       <h3 className='w-full pb-2 border-b border-b-medium'>Create a community</h3>
@@ -34,7 +45,12 @@ function CommunityCreatePopup({ closeModal }: { closeModal: () => void }) {
     </div>
       <div className='h-[50px] mt-4 flex-end gap-[10px] w-full'>
         <button type="button" className='button-main-outline' onClick={closeModal}>Cancel</button>
-        <button type="button" className='button-main'>Create Community</button>
+        <button type="button" className='button-main'
+        // onClick={() => createCommunity({
+        //   variables: { input: form }
+        // })}
+        // {loading ? 'Loading' : 'Create Community'}
+        >Create Community</button>
       </div>
     </>
   )

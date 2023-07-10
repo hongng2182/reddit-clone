@@ -3,13 +3,13 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Reference } from '@apollo/client'
-import { VoteStatusValues } from '@/types'
+import { PostInfo, VoteStatusValues } from '@/types'
 import { PaginatedPosts, VoteType, useDeletePostMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
 import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon } from '../icons'
 import EditPost from './edit-post'
 
 type PostBoxProps = {
-    post: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } },
+    post: PostInfo,
     hideCommunity?: boolean,
     hideJoinBtn?: boolean,
     comments?: ReactNode,

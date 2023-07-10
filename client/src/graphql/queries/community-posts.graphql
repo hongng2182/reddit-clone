@@ -1,0 +1,22 @@
+query GetCommunityPosts($first: Int!, $after: String, $communityName: String!) {
+  getCommunityPosts(
+    first: $first
+    after: $after
+    communityName: $communityName
+  ) {
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    paginatedPosts {
+      ...PostInfo
+      user {
+        username
+      }
+      community {
+        name
+      }
+    }
+  }
+}

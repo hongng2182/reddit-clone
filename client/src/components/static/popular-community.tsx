@@ -8,7 +8,7 @@ function PopularCommunity() {
     const router = useRouter()
     const communities = ['lorem', 'ipsum', 'loremipsum']
     return (
-        <div className='h-[300px] w-full'>
+        <div className='h-[300px] w-full white-gray-rounded'>
             <ExpandCollapse
                 title='POLULAR COMMUNITIES'
                 children={<p className='flex gap-[10px] flex-wrap'>

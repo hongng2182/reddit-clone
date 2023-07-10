@@ -86,6 +86,21 @@ function createApolloClient(headers: IncomingHttpHeaders | null = null) {
 
                                 return { ...incoming, paginatedPosts }
                             }
+                        },
+                        getCommunityPosts: {
+                            keyArgs: ["communityName"],
+                            merge(existing, incoming) {
+                                let paginatedPosts: Post[] = []
+                                if (existing && existing.paginatedPosts) {
+                                    paginatedPosts = paginatedPosts.concat(existing.paginatedPosts)
+                                }
+
+                                if (incoming && incoming.paginatedPosts) {
+                                    paginatedPosts = paginatedPosts.concat(incoming.paginatedPosts)
+                                }
+
+                                return { ...incoming, paginatedPosts }
+                            }
                         }
                     },
                 },

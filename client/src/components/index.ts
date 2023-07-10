@@ -11,12 +11,14 @@ import PageContentLayout from './static/page-content-layout'
 import PageContainer from './static/page-container'
 import PostBox from './static/post-box'
 import CommunityBanner from './static/community-banner'
-import CommunityInfo from './static/community-info'
+import AboutCommunity from './static/about-community'
 import CommentSection from './static/comment-section'
 import Modal from './static/modal'
 import CommunitySelect from './static/community-select'
 import CreatePost from './static/create-post'
 import EditPost from './static/edit-post'
 import PopularCommunity from './static/popular-community'
+import CreatePostRules from './static/create-post-rules'
+import UserHomeSidebar from './static/user-home-sidebar'
 
-export { Navbar, Header, Feed, TrendingPosts, SearchBar, AuthenticatePopup, CommunityCreatePopup, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, CommunityInfo, CommentSection, Modal, CommunitySelect, CreatePost, PopularCommunity, EditPost }
+export { Navbar, Header, Feed, TrendingPosts, SearchBar, AuthenticatePopup, CommunityCreatePopup, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, AboutCommunity, CommentSection, Modal, CommunitySelect, CreatePost, PopularCommunity, EditPost, CreatePostRules, UserHomeSidebar }
