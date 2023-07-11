@@ -155,16 +155,20 @@ input:focus {
     @apply flex-start gap-[5px] rounded-sm p-2 font-bold text-gray
   }
 
+.img-14 {
+  @apply w-[14px] h-[14px] rounded-full object-cover object-[center,top] bg-medium
+}
+
   .img-24 {
     @apply w-[24px] h-[24px] rounded-full object-cover object-[center,top]
   }
 
   .img-35 {
-    @apply w-[35px] h-[35px] rounded-full object-cover object-[center,top]
+    @apply w-[35px] h-[35px] rounded-full object-cover object-[center,top] bg-medium
   }
 
   .img-40 {
-    @apply w-[40px] h-[40px] rounded-full object-cover object-[center,top]
+    @apply w-[40px] h-[40px] rounded-full object-cover object-[center,top] bg-medium
   }
 
   .username {

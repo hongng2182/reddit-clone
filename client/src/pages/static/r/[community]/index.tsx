@@ -9,7 +9,6 @@ function CommunityPage() {
     const router = useRouter()
     const communityName = router.query.community as string
     const { data: communityData } = useCommunityQuery({ variables: { communityName } })
-
     const { data, fetchMore, networkStatus } = useGetCommunityPostsQuery({ variables: { communityName, first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
     const isLoadingMorePosts = networkStatus === NetworkStatus.fetchMore
 
@@ -28,7 +27,7 @@ function CommunityPage() {
                         <CreatePostFragment pathname={`${router.asPath}/submit`} />
                         <FilterBox />
                         <div className='flex-col-start-10 w-full'>
-                            {data?.getCommunityPosts.paginatedPosts.map(post => <PostBox key={post.id} post={post} hideCommunity hideJoinBtn />)}
+                            {data?.getCommunityPosts.paginatedPosts.length > 0 ? data?.getCommunityPosts.paginatedPosts.map(post => <PostBox key={post.id} post={post} hideCommunity hideJoinBtn />) : 'No posts in this community'}
                             {
                                 data?.getCommunityPosts.pageInfo.hasNextPage &&
                                 <button
@@ -40,7 +39,9 @@ function CommunityPage() {
                             }
                         </div>
                     </>}
-                    right={<AboutCommunity communityInfo={communityData.community} />}
+                    right={<AboutCommunity
+                        isMod={meData && communityData.community.creatorId === meData.me?.id}
+                        communityInfo={communityData.community} />}
                 />
             </PageContainer>}
         </>

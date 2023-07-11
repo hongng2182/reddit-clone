@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { MeDocument, MeQuery, useRegisterMutation } from '../generated/graphql'
-import toErrorMap from '../utils'
+import { toErrorMap } from '../utils'
 
 function Register() {
   const router = useRouter()

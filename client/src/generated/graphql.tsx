@@ -24,7 +24,7 @@ export type Community = {
   hasJoined: Scalars['Boolean'];
   id: Scalars['Float'];
   name: Scalars['String'];
-  numMembers: Scalars['Float'];
+  numMembers: Scalars['Int'];
   privacyType: Scalars['String'];
 };
 
@@ -59,6 +59,8 @@ export type Mutation = {
   createPost: Post;
   deletePost: Scalars['Boolean'];
   forgotPassword: Scalars['Boolean'];
+  joinCommunity: CommunityResponse;
+  leaveCommunity: CommunityResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
@@ -91,6 +93,16 @@ export type MutationDeletePostArgs = {
 
 export type MutationForgotPasswordArgs = {
   email: Scalars['String'];
+};
+
+
+export type MutationJoinCommunityArgs = {
+  communityName: Scalars['String'];
+};
+
+
+export type MutationLeaveCommunityArgs = {
+  communityName: Scalars['String'];
 };
 
 
@@ -142,7 +154,7 @@ export type Post = {
   createdAt: Scalars['String'];
   id: Scalars['Float'];
   imageUrl: Scalars['String'];
-  numComments: Scalars['Float'];
+  numComments: Scalars['Int'];
   ownerId: Scalars['Float'];
   points: Scalars['Float'];
   text: Scalars['String'];
@@ -261,6 +273,20 @@ export type ForgotPasswordMutationVariables = Exact<{
 
 export type ForgotPasswordMutation = { __typename?: 'Mutation', forgotPassword: boolean };
 
+export type JoinCommunityMutationVariables = Exact<{
+  communityName: Scalars['String'];
+}>;
+
+
+export type JoinCommunityMutation = { __typename?: 'Mutation', joinCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', hasJoined: boolean, numMembers: number } | null } };
+
+export type LeaveCommunityMutationVariables = Exact<{
+  communityName: Scalars['String'];
+}>;
+
+
+export type LeaveCommunityMutation = { __typename?: 'Mutation', leaveCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', hasJoined: boolean, numMembers: number } | null } };
+
 export type LoginMutationVariables = Exact<{
   password: Scalars['String'];
   usernameOrEmail: Scalars['String'];
@@ -312,7 +338,7 @@ export type GetCommunityPostsQueryVariables = Exact<{
 }>;
 
 
-export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } }> } };
+export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl: string } }> } };
 
 export type CommunityQueryVariables = Exact<{
   communityName: Scalars['String'];
@@ -331,7 +357,7 @@ export type PostQueryVariables = Exact<{
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl: string } } | null };
 
 export type PostsQueryVariables = Exact<{
   first: Scalars['Int'];
@@ -339,7 +365,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl: string } }> } };
 
 export const CommunityInfoFragmentDoc = gql`
     fragment CommunityInfo on Community {
@@ -550,6 +576,80 @@ export function useForgotPasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ForgotPasswordMutationHookResult = ReturnType<typeof useForgotPasswordMutation>;
 export type ForgotPasswordMutationResult = Apollo.MutationResult<ForgotPasswordMutation>;
 export type ForgotPasswordMutationOptions = Apollo.BaseMutationOptions<ForgotPasswordMutation, ForgotPasswordMutationVariables>;
+export const JoinCommunityDocument = gql`
+    mutation JoinCommunity($communityName: String!) {
+  joinCommunity(communityName: $communityName) {
+    errors
+    community {
+      hasJoined
+      numMembers
+    }
+  }
+}
+    `;
+export type JoinCommunityMutationFn = Apollo.MutationFunction<JoinCommunityMutation, JoinCommunityMutationVariables>;
+
+/**
+ * __useJoinCommunityMutation__
+ *
+ * To run a mutation, you first call `useJoinCommunityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useJoinCommunityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [joinCommunityMutation, { data, loading, error }] = useJoinCommunityMutation({
+ *   variables: {
+ *      communityName: // value for 'communityName'
+ *   },
+ * });
+ */
+export function useJoinCommunityMutation(baseOptions?: Apollo.MutationHookOptions<JoinCommunityMutation, JoinCommunityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<JoinCommunityMutation, JoinCommunityMutationVariables>(JoinCommunityDocument, options);
+      }
+export type JoinCommunityMutationHookResult = ReturnType<typeof useJoinCommunityMutation>;
+export type JoinCommunityMutationResult = Apollo.MutationResult<JoinCommunityMutation>;
+export type JoinCommunityMutationOptions = Apollo.BaseMutationOptions<JoinCommunityMutation, JoinCommunityMutationVariables>;
+export const LeaveCommunityDocument = gql`
+    mutation LeaveCommunity($communityName: String!) {
+  leaveCommunity(communityName: $communityName) {
+    errors
+    community {
+      hasJoined
+      numMembers
+    }
+  }
+}
+    `;
+export type LeaveCommunityMutationFn = Apollo.MutationFunction<LeaveCommunityMutation, LeaveCommunityMutationVariables>;
+
+/**
+ * __useLeaveCommunityMutation__
+ *
+ * To run a mutation, you first call `useLeaveCommunityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLeaveCommunityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [leaveCommunityMutation, { data, loading, error }] = useLeaveCommunityMutation({
+ *   variables: {
+ *      communityName: // value for 'communityName'
+ *   },
+ * });
+ */
+export function useLeaveCommunityMutation(baseOptions?: Apollo.MutationHookOptions<LeaveCommunityMutation, LeaveCommunityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LeaveCommunityMutation, LeaveCommunityMutationVariables>(LeaveCommunityDocument, options);
+      }
+export type LeaveCommunityMutationHookResult = ReturnType<typeof useLeaveCommunityMutation>;
+export type LeaveCommunityMutationResult = Apollo.MutationResult<LeaveCommunityMutation>;
+export type LeaveCommunityMutationOptions = Apollo.BaseMutationOptions<LeaveCommunityMutation, LeaveCommunityMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($password: String!, $usernameOrEmail: String!) {
   login(usernameOrEmail: $usernameOrEmail, password: $password) {
@@ -785,6 +885,8 @@ export const GetCommunityPostsDocument = gql`
       }
       community {
         name
+        hasJoined
+        communityIconUrl
       }
     }
   }
@@ -898,6 +1000,8 @@ export const PostDocument = gql`
     }
     community {
       name
+      hasJoined
+      communityIconUrl
     }
   }
 }
@@ -945,6 +1049,8 @@ export const PostsDocument = gql`
       }
       community {
         name
+        hasJoined
+        communityIconUrl
       }
     }
   }

@@ -26,9 +26,6 @@ export class Community extends BaseEntity {
     @Column()
     creatorId!: number;
 
-    @Field()
-    @Column({ type: 'int', default: 1 })
-    numMembers!: number;
 
     @Field()
     @Column({ type: 'enum', enum: PrivacyType, default: PrivacyType.public })

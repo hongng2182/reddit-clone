@@ -1,0 +1,9 @@
+mutation LeaveCommunity($communityName: String!) {
+  leaveCommunity(communityName: $communityName) {
+    errors
+    community {
+      hasJoined
+      numMembers
+    }
+  }
+}

@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Reference, gql } from '@apollo/client'
+import { useRouter } from 'next/router'
 import { useModal } from '@/hooks'
-import { MeDocument, MeQuery, useLogoutMutation, useMeQuery } from '@/generated/graphql'
+import { useLogoutMutation, useMeQuery } from '@/generated/graphql'
 import Feed from './feed'
 import { DropdownIcon, ProfileIcon, LogOutIcon } from '../icons'
 import SearchBar from './search-bar'
@@ -11,45 +11,16 @@ import AuthenticatePopup from './authenticate-popup'
 import Modal from './modal'
 
 function Header() {
+    const router = useRouter()
     const { data } = useMeQuery()
     const [profileFocus, setProfileFocus] = useState(false)
     const { isOpen, openModal, closeModal } = useModal()
-    const [logout] = useLogoutMutation()
+    const [logout, { data: logoutData }] = useLogoutMutation()
 
     const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
-        logout({
-            update(cache, { data: logoutData }) {
-                if (logoutData?.logout) {
-                    cache.writeQuery<MeQuery>({
-                        query: MeDocument,
-                        data: { me: null }
-                    })
-
-                    cache.modify({
-                        fields: {
-                            posts(existing) {
-                                existing.paginatedPosts.forEach((post: Reference) => {
-                                    cache.writeFragment({
-                                        // eslint-disable-next-line no-underscore-dangle
-                                        id: post.__ref,
-                                        fragment: gql`
-                                                fragment voteStatus on Post {
-                                                    voteStatus
-                                                }
-                                                `,
-                                        data: {
-                                            voteStatus: 0
-                                        }
-                                    })
-                                })
-                                return existing
-                            }
-                        }
-                    })
-                }
-            }
-        })
+        logout()
+        if (logoutData?.logout) { router.reload() }
     }
 
     return (<>
@@ -95,7 +66,7 @@ function Header() {
                             width='35'
                             height='35'
                             sizes='100%'
-                            className='rounded-full w-[35px] h-[35px]' />
+                            className='img-35' />
                         <span className='label-md smM:hidden'>{data.me.username}</span>
                     </div>}
                     <DropdownIcon width={12} />

@@ -7,7 +7,7 @@ import { PostsDocument, useMeQuery, usePostsQuery } from '@/generated/graphql'
 import { FETCH_LIMIT } from '@/types'
 
 function HomePage() {
-    const {data: meData} = useMeQuery()
+    const { data: meData } = useMeQuery()
     const { data, fetchMore, networkStatus } = usePostsQuery({ variables: { first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
     const isLoadingMorePosts = networkStatus === NetworkStatus.fetchMore
 
@@ -15,7 +15,8 @@ function HomePage() {
         <PageContainer>
             <PageContentLayout
                 containerClassname='mt-[40px]'
-                left={<><CreatePostFragment />
+                left={<>
+                    {meData?.me && <CreatePostFragment />}
                     <FilterBox />
                     {/* POSTS */}
                     <div className='flex-col-start-10 w-full'>
@@ -30,7 +31,7 @@ function HomePage() {
                             </button>
                         }
                     </div></>}
-                right={meData?.me ? <UserHomeSidebar/> : <PopularCommunity/>} />
+                right={meData?.me ? <UserHomeSidebar /> : <PopularCommunity />} />
         </PageContainer>
     )
 }

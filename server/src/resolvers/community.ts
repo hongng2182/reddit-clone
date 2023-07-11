@@ -40,12 +40,11 @@ class CommunityResponse {
 export class CommunityResolver {
 
 
-    // @FieldResolver(() => User)
-    // async user(@Root() root: Post,
-    //     @Ctx() { dataLoaders: { userLoader } }: MyContext
-    // ) {
-    //     return await userLoader.load(root.ownerId)
-    // }
+    @FieldResolver(() => Int)
+    async numMembers(@Root() root: Community) {
+        const [_, totalCount] =  await UserCommunity.findAndCountBy({communityId: root.id})
+        return totalCount
+    }
 
     // @FieldResolver(() => Community)
     // async community(@Root() root: Post,
@@ -56,9 +55,9 @@ export class CommunityResolver {
 
     @FieldResolver(() => Boolean)
     async hasJoined(@Root() root: Community,
-        @Ctx() { req }: MyContext) {
+        @Ctx() { req, dataLoaders: { userCommunityLoader } }: MyContext) {
         if (!req.session.userId) { return false }
-        const record = await UserCommunity.findOne({ where: { communityId: root.id, userId: req.session.userId } })
+        const record = await userCommunityLoader.load({ communityId: root.id, userId: req.session.userId })
         return record ? true : false
     }
 
@@ -148,8 +147,53 @@ export class CommunityResolver {
     }
 
     // Join Community
-
+    @Mutation(() => CommunityResponse)
+    @UseMiddleware(isAuth)
+    async joinCommunity(
+        @Arg("communityName", () => String) communityName: string,
+        @Ctx() { req }: MyContext)
+        : Promise<CommunityResponse> {
+        // find Community
+        const community = await Community.findOne({ where: { name: communityName } })
+        if (!community) {
+            return { errors: 'No community found!' }
+        }
+        // update table user-community and increment community members
+        try {
+            const user_community = UserCommunity.create({
+                userId: req.session.userId,
+                communityId: community.id
+            })
+            await user_community.save()
+            return { community }
+        } catch (err) {
+            console.log(err)
+            return { errors: "Fail to join community!" }
+        }
+    }
 
     // Leave Community
-
+    @Mutation(() => CommunityResponse)
+    @UseMiddleware(isAuth)
+    async leaveCommunity(
+        @Arg("communityName", () => String) communityName: string,
+        @Ctx() { req }: MyContext)
+        : Promise<CommunityResponse> {
+        // find Community
+        const community = await Community.findOne({ where: { name: communityName } })
+        if (!community) {
+            return { errors: 'No community found!' }
+        }
+        // update table user-community and minus community members
+        try {
+            await UserCommunity.delete({
+                userId: req.session.userId,
+                communityId: community.id
+            })
+            return { community }
+        } catch (err) {
+            console.log(err)
+            return { errors: "Fail to leave community!" }
+        }
+    }
 }

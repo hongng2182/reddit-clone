@@ -6,6 +6,8 @@ query Post($postId: Float!) {
     }
     community {
       name
+      hasJoined
+      communityIconUrl
     }
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { MeDocument, MeQuery, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from '@/generated/graphql'
-import toErrorMap from '@/utils'
+import { toErrorMap } from '@/utils'
 import { initializeApollo } from '@/lib/apolloClient'
 
 function AuthenticatePopup({ closeModal }: { closeModal: () => void }) {

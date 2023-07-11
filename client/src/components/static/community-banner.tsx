@@ -1,6 +1,10 @@
 import React from 'react'
 import Image from 'next/image'
 import { CommunityInfo } from '@/types'
+import { useModal } from '@/hooks'
+import { CommunityDocument, useJoinCommunityMutation, useLeaveCommunityMutation } from '@/generated/graphql'
+import AuthenticatePopup from './authenticate-popup'
+import Modal from './modal'
 
 type Props = {
     communityInfo: CommunityInfo,
@@ -9,24 +13,67 @@ type Props = {
 
 function CommunityBanner({ communityInfo, userId }: Props) {
     const { communityIconUrl, name, hasJoined, creatorId } = communityInfo
+    const { isOpen, openModal, closeModal } = useModal()
+    const [joinCommunity] = useJoinCommunityMutation({
+        update(cache, { data }) {
+            const joinedData = data?.joinCommunity.community
+            if (joinedData) {
+                cache.updateQuery({
+                    query: CommunityDocument,
+                    variables: { communityName: name }
+                }, (cacheData) => ({
+                    community: {
+                        ...cacheData.community,
+                        hasJoined: joinedData.hasJoined,
+                        numMembers: joinedData.numMembers
+                    }
+                }))
+            }
+        }
+    })
+    const [leaveCommunity] = useLeaveCommunityMutation({
+        update(cache, { data }) {
+            const leaveData = data?.leaveCommunity.community
+            if (leaveData) {
+                cache.updateQuery({
+                    query: CommunityDocument,
+                    variables: { communityName: name }
+                }, (cacheData) => ({
+                    community: {
+                        ...cacheData.community,
+                        hasJoined: leaveData.hasJoined,
+                        numMembers: leaveData.numMembers
+                    }
+                }))
+            }
+        }
+    })
     const capitalizeName = name[0].toUpperCase() + name.slice(1,)
     const isMod = userId === creatorId
 
     const handleJoinLeave = () => {
         if (!userId) {// show popup login} 
+            openModal()
+            return
         }
-        // if user haJoined => leave
-
-        // hasnt join, join
+        if (hasJoined) {
+            leaveCommunity({
+                variables: { communityName: name }
+            })
+            // toast successfully join r/...
+        } else {
+            joinCommunity({ variables: { communityName: name } })
+            // toast successfully left r/...
+        }
     }
 
-    return (
+    return (<>
         <div className='h-[250px]'>
             <div className='h-[150px] bg-primary' />
             <div className='h-[90px] bg-white'>
                 <div className='main-container relative bg-slate-400'>
                     <div className="absolute  top-[-16px] left-0  flex-start-10" >
-                        <div className='w-[80px] h-[80px] rounded-full bg-slate-600 border-4 border-white'>
+                        <div className='w-[80px] h-[80px] rounded-full bg-medium border-4 border-white'>
                             <Image
                                 height='0'
                                 width='0'
@@ -50,6 +97,12 @@ function CommunityBanner({ communityInfo, userId }: Props) {
                 </div>
             </div>
         </div>
+        <Modal
+            isOpen={isOpen}
+            closeModal={closeModal}
+            modalContent={<AuthenticatePopup closeModal={closeModal} />}
+        />
+    </>
     )
 }
 

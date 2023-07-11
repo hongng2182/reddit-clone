@@ -12,6 +12,8 @@ query Posts($first: Int!, $after: String) {
       }
       community {
         name
+        hasJoined
+        communityIconUrl
       }
     }
   }

@@ -1,0 +1,9 @@
+mutation JoinCommunity($communityName: String!) {
+  joinCommunity(communityName: $communityName) {
+    errors
+    community {
+      hasJoined
+      numMembers
+    }
+  }
+}

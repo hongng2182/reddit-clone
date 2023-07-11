@@ -1,9 +1,14 @@
 import DataLoader from 'dataloader'
-import { Vote, User, Community } from '../entities'
+import { Vote, User, Community, UserCommunity } from '../entities'
 import { In } from 'typeorm'
 
 interface VoteTypeCondition {
     postId: number
+    userId: number
+}
+
+interface UserCommunityCondition {
+    communityId: number
     userId: number
 }
 
@@ -29,6 +34,18 @@ const batchGetVoteTypes = async (voteTypeConditions: VoteTypeCondition[]) => {
     )
 }
 
+const batchGetUserCommunities = async (userCommunityConditions: UserCommunityCondition[]) => {
+    const userCommunities = await UserCommunity.findByIds(userCommunityConditions)
+    return userCommunityConditions.map(userCommunityCondition =>
+        userCommunities.find(
+            record =>
+                record.communityId === userCommunityCondition.communityId &&
+                record.userId === userCommunityCondition.userId
+        )
+    )
+}
+
+
 export const buildDataLoaders = () => ({
     userLoader: new DataLoader<number, User | undefined>(userIds =>
         batchGetUsers(userIds as number[])
@@ -39,5 +56,9 @@ export const buildDataLoaders = () => ({
     ),
     communityLoader: new DataLoader<number, Community | undefined>(communityIds =>
         batchGetCommunities(communityIds as number[])
+    ),
+    userCommunityLoader: new DataLoader<UserCommunityCondition, UserCommunity | undefined>(
+        userCommunityConditions =>
+            batchGetUserCommunities(userCommunityConditions as UserCommunityCondition[])
     ),
 })

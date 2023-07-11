@@ -7,9 +7,10 @@ import { CalendarIcon } from '../icons'
 type Props = {
     communityInfo: CommunityInfo,
     isSubmitPost?: boolean
+    isMod: boolean | undefined
 }
 
-function AboutCommunity({ communityInfo, isSubmitPost }: Props) {
+function AboutCommunity({ communityInfo, isSubmitPost, isMod }: Props) {
     const router = useRouter()
     const { numMembers, createdAt, description, communityIconUrl, name } = communityInfo
     const dateCreated = new Date(Number(createdAt)).toLocaleDateString('en-US', {
@@ -34,6 +35,7 @@ function AboutCommunity({ communityInfo, isSubmitPost }: Props) {
             </div>}
             <div className='pt-3 flex-col-start-10 mx-auto w-[90%]'>
                 <div className="">{description}</div>
+                {isMod && <button type="button">Edit</button>}
                 <div className='flex-start-10 text-gray'>
                     <CalendarIcon />
                     Created {dateCreated}

@@ -41,10 +41,6 @@ export class Post extends BaseEntity {
     imageUrl!: string;
 
     @Field()
-    @Column({ type: 'int', default: 0 })
-    numComments!: number;
-
-    @Field()
     voteStatus!: number;
 
     @ManyToOne(() => User, (user) => user.posts)

@@ -72,6 +72,10 @@ export class PostResolver {
 
         return voteStatus ? voteStatus.value : 0
     }
+    @FieldResolver(() => Int)
+    numComments() {
+        return 0
+    }
 
     @Query(() => PaginatedPosts)
     async posts(

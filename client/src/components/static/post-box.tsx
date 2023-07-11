@@ -4,7 +4,8 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Reference } from '@apollo/client'
 import { PostInfo, VoteStatusValues } from '@/types'
-import { PaginatedPosts, VoteType, useDeletePostMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
+import { getTimeAgo } from '@/utils'
+import { PaginatedPosts, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
 import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon } from '../icons'
 import EditPost from './edit-post'
 
@@ -29,17 +30,23 @@ const getPointsColorClassname = (voteStatus: number) => {
     }
 }
 function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, isSinglePost, isEditing }: PostBoxProps) {
+    // Object destructure from post
+    // TODO: add field urlLink Post
+    const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt, community: { name: communityName, hasJoined, communityIconUrl }, numComments, imageUrl } = post
+    const pointsClassname = getPointsColorClassname(voteStatus)
+    const timeAgo = getTimeAgo(Number(createdAt))
+    // Declare state
     const router = useRouter()
     const { options } = router.query
+    const [showEdit, setShowEdit] = useState(false)
+    const [isLoading, setLoading] = useState(true);
+    // Hooks
     const [vote] = useVoteMutation()
     const { data: meData } = useMeQuery()
     const [delelePost, { loading: isDeleteLoading }] = useDeletePostMutation()
-    const [showEdit, setShowEdit] = useState(false)
-    const [isLoading, setLoading] = useState(true);
-    // TODO: add field urlLink Post
-    const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt, community: { name: communityName }, numComments, imageUrl } = post
-    const pointsClassname = getPointsColorClassname(voteStatus)
+    const [joinCommunity, { data: joinData }] = useJoinCommunityMutation()
 
+    // Utils
     const handlePostClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation()
         if (!comments) router.push(`/static/r/${communityName}/comments/${id}`)
@@ -78,9 +85,19 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
             }
         })
     }
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const upVote = async (voteStatus: number, postId: number) => {
-        if (voteStatus !== VoteStatusValues.Upvote) {
+
+    const handleJoinCommunity = () => {
+        if (!meData?.me) {
+            // openLogInPopup
+            console.log('Show logIn popup')
+            return
+        }
+        joinCommunity({ variables: { communityName } })
+    }
+
+    const upVote = async (voteValue: number, postId: number) => {
+        if (!meData?.me) { console.log('Show logIn popup'); return }
+        if (voteValue !== VoteStatusValues.Upvote) {
             await vote({
                 variables: {
                     postId,
@@ -90,9 +107,9 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const downVote = async (voteStatus: number, postId: number) => {
-        if (voteStatus !== VoteStatusValues.Downvote) {
+    const downVote = async (voteValue: number, postId: number) => {
+        if (!meData?.me) { console.log('Show logIn popup'); return }
+        if (voteValue !== VoteStatusValues.Downvote) {
             await vote({
                 variables: {
                     postId,
@@ -101,9 +118,11 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
             })
         }
     }
+
     useEffect(() => {
         if (isEditing) setShowEdit(true)
     }, [isEditing])
+
     return (
         <div onClick={(e) => handlePostClick(e)}
             className={`${comments ? 'border-transparent' : 'hover:border-gray cursor-pointer'}
@@ -143,8 +162,9 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                                 width='0'
                                 height='0'
                                 alt='avatar'
-                                src='/logo-cat.png'
-                                className='w-[14px] h-[14px] rounded-full'
+                                sizes='50%'
+                                src={communityIconUrl !== '' ? communityIconUrl : '/logo-cat.png'}
+                                className='img-14'
                             />
                             <span className='font-bold hover:underline'>r/{communityName}</span>
                             <span className='text-gray'>•</span>
@@ -153,10 +173,19 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                             <span className='text-gray'>&nbsp;Posted by <Link
                                 href={`/static/user/${username}`}
                                 onClick={(e) => e.stopPropagation()} className='hover:underline'>
-                                u/{username}</Link> {createdAt} ago - id: {id}</span>
+                                u/{username}</Link>
+                                <span className='text-gray'> - </span>
+                                {timeAgo}</span>
                         </div>
                     </div>
-                    {!hideJoinBtn && <button type="button" className='text-sm button-light hover:bg-medium'>Join</button>}
+                    {!hasJoined && !hideJoinBtn && <button
+                        type="button" className='text-sm button-light hover:bg-medium disabled:cursor-none disabled:bg-medium'
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleJoinCommunity()
+                        }}
+                        disabled={joinData?.joinCommunity.community?.hasJoined}
+                    >{joinData?.joinCommunity.community?.hasJoined ? 'Joined' : 'Join'}</button>}
                 </div>
                 {isTrendingPost ?
                     <h2 className='pr-3 label-md'>{title}</h2>
