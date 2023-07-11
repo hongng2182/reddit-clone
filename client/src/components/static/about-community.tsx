@@ -7,10 +7,11 @@ import { CalendarIcon } from '../icons'
 type Props = {
     communityInfo: CommunityInfo,
     isSubmitPost?: boolean
-    isMod: boolean | undefined
+    isMod: boolean | undefined,
+    isUserLogin: boolean
 }
 
-function AboutCommunity({ communityInfo, isSubmitPost, isMod }: Props) {
+function AboutCommunity({ communityInfo, isSubmitPost, isMod, isUserLogin }: Props) {
     const router = useRouter()
     const { numMembers, createdAt, description, communityIconUrl, name } = communityInfo
     const dateCreated = new Date(Number(createdAt)).toLocaleDateString('en-US', {
@@ -46,7 +47,7 @@ function AboutCommunity({ communityInfo, isSubmitPost, isMod }: Props) {
                     <p>Members</p>
                 </div>
                 <div className='h-[1px] w-full bg-medium' />
-                {!isSubmitPost && <button type="button"
+                {!isSubmitPost && isUserLogin && <button type="button"
                     className='button-main w-full mt-2 mb-4'
                     onClick={() => router.push(`${router.asPath}/submit`)}
                 >Create Post</button>}

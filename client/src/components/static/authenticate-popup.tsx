@@ -3,11 +3,13 @@ import { useRouter } from 'next/router'
 import { MeDocument, MeQuery, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from '@/generated/graphql'
 import { toErrorMap } from '@/utils'
 import { initializeApollo } from '@/lib/apolloClient'
+import { useGlobalState } from '@/hooks'
+import { setShowSignInModal } from '@/action'
 
-function AuthenticatePopup({ closeModal }: { closeModal: () => void }) {
+function AuthenticatePopup() {
     const [active, setActive] = useState<'login' | 'signup' | 'forgot'>('login')
-
-    // TODO: handle login function and error, limit username character
+    const { dispatch } = useGlobalState()
+    // TODO: handle login error, limit username character
     const router = useRouter()
     const formRef = useRef({ username: '', password: '', email: '', usernameOrEmail: '' })
     const [register, { loading: registerLoading }] = useRegisterMutation()
@@ -81,7 +83,7 @@ function AuthenticatePopup({ closeModal }: { closeModal: () => void }) {
         } else if (response.data?.login.user) {
             const apolloClient = initializeApollo()
             await apolloClient.resetStore()
-            closeModal()
+            dispatch(setShowSignInModal(false))
         }
     }
     const handleForgotPassword = async (e: React.MouseEvent<HTMLButtonElement>) => {

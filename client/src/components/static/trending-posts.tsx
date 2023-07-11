@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
@@ -15,9 +13,9 @@ function TrendingPosts() {
                 {trending_posts.map(item => <div
                     key={item.id}
                     style={{
-                    background: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${item.imgUrl})`,
-                    backgroundPosition: 'center'
-                }}
+                        background: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${item.imgUrl})`,
+                        backgroundPosition: 'center'
+                    }}
                     className="px-2 rounded-md bg-medium text-white h-[186px] pt-[80px]"
                     onClick={() => router.push(`/static/search?q=${item.topic}`)}>
                     <h3>{item.topic}</h3>

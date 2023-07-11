@@ -6,6 +6,8 @@ import { Reference } from '@apollo/client'
 import { PostInfo, VoteStatusValues } from '@/types'
 import { getTimeAgo } from '@/utils'
 import { PaginatedPosts, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
+import { useGlobalState } from '@/hooks'
+import { setShowSignInModal } from '@/action'
 import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon } from '../icons'
 import EditPost from './edit-post'
 
@@ -41,6 +43,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
     const [showEdit, setShowEdit] = useState(false)
     const [isLoading, setLoading] = useState(true);
     // Hooks
+    const { dispatch } = useGlobalState()
     const [vote] = useVoteMutation()
     const { data: meData } = useMeQuery()
     const [delelePost, { loading: isDeleteLoading }] = useDeletePostMutation()
@@ -88,15 +91,17 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
 
     const handleJoinCommunity = () => {
         if (!meData?.me) {
-            // openLogInPopup
-            console.log('Show logIn popup')
+            dispatch(setShowSignInModal(true))
             return
         }
         joinCommunity({ variables: { communityName } })
     }
 
     const upVote = async (voteValue: number, postId: number) => {
-        if (!meData?.me) { console.log('Show logIn popup'); return }
+        if (!meData?.me) {
+            dispatch(setShowSignInModal(true))
+            return
+        }
         if (voteValue !== VoteStatusValues.Upvote) {
             await vote({
                 variables: {
@@ -108,7 +113,10 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
     }
 
     const downVote = async (voteValue: number, postId: number) => {
-        if (!meData?.me) { console.log('Show logIn popup'); return }
+        if (!meData?.me) {
+            dispatch(setShowSignInModal(true))
+            return
+        }
         if (voteValue !== VoteStatusValues.Downvote) {
             await vote({
                 variables: {

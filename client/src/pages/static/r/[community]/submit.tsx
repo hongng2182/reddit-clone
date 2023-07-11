@@ -16,7 +16,8 @@ function CreatePostInCommunityPage() {
                 containerClassname='mt-[30px]'
                 left={<CreatePost />}
                 right={<>
-                    <AboutCommunity isMod={false} communityInfo={communityData.community} isSubmitPost />
+                    <AboutCommunity isUserLogin={false} isMod={false}
+                        communityInfo={communityData.community} isSubmitPost />
                     <CreatePostRules />
                 </>}
             />

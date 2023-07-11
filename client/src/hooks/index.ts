@@ -1,2 +1,2 @@
-// eslint-disable-next-line import/prefer-default-export
 export { default as useModal } from './use-modal'
+export { default as useGlobalState } from './use-global-state'

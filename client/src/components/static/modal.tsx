@@ -3,10 +3,10 @@ import React, { useEffect } from 'react';
 interface ModalProps {
     isOpen: boolean;
     closeModal: () => void;
-    modalContent: React.ReactNode;
+    children: React.ReactNode;
 }
 
-function Modal({ isOpen, closeModal, modalContent }: ModalProps) {
+function Modal({ isOpen, closeModal, children }: ModalProps) {
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
@@ -40,7 +40,7 @@ function Modal({ isOpen, closeModal, modalContent }: ModalProps) {
                         <div className='absolute right-3 top-0 text-gray'>
                             <span className="cursor-pointer text-[25px]" onClick={closeModal}>&times;</span>
                         </div>
-                        <div className="mt-3">{modalContent}</div>
+                        <div className="mt-3">{children}</div>
                     </div>
                 </div>
             )}

@@ -1,10 +1,9 @@
 import React from 'react'
 import Image from 'next/image'
 import { CommunityInfo } from '@/types'
-import { useModal } from '@/hooks'
+import { useGlobalState } from '@/hooks'
 import { CommunityDocument, useJoinCommunityMutation, useLeaveCommunityMutation } from '@/generated/graphql'
-import AuthenticatePopup from './authenticate-popup'
-import Modal from './modal'
+import { setShowSignInModal } from '@/action'
 
 type Props = {
     communityInfo: CommunityInfo,
@@ -13,7 +12,7 @@ type Props = {
 
 function CommunityBanner({ communityInfo, userId }: Props) {
     const { communityIconUrl, name, hasJoined, creatorId } = communityInfo
-    const { isOpen, openModal, closeModal } = useModal()
+    const { dispatch } = useGlobalState()
     const [joinCommunity] = useJoinCommunityMutation({
         update(cache, { data }) {
             const joinedData = data?.joinCommunity.community
@@ -52,8 +51,8 @@ function CommunityBanner({ communityInfo, userId }: Props) {
     const isMod = userId === creatorId
 
     const handleJoinLeave = () => {
-        if (!userId) {// show popup login} 
-            openModal()
+        if (!userId) {
+            dispatch(setShowSignInModal(true))
             return
         }
         if (hasJoined) {
@@ -67,7 +66,7 @@ function CommunityBanner({ communityInfo, userId }: Props) {
         }
     }
 
-    return (<>
+    return (
         <div className='h-[250px]'>
             <div className='h-[150px] bg-primary' />
             <div className='h-[90px] bg-white'>
@@ -97,12 +96,6 @@ function CommunityBanner({ communityInfo, userId }: Props) {
                 </div>
             </div>
         </div>
-        <Modal
-            isOpen={isOpen}
-            closeModal={closeModal}
-            modalContent={<AuthenticatePopup closeModal={closeModal} />}
-        />
-    </>
     )
 }
 

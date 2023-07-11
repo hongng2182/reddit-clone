@@ -5,6 +5,7 @@ import type { AppProps } from 'next/app'
 import { ApolloProvider } from '@apollo/client'
 import { useApollo } from '@/lib/apolloClient'
 import { Header } from '@/components'
+import { GlobalProvider } from '@/context'
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -12,8 +13,10 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ApolloProvider client={apolloClient}>
-      <Header />
-      <Component {...pageProps} />
+      <GlobalProvider>
+        <Header />
+        <Component {...pageProps} />
+      </GlobalProvider>
     </ApolloProvider>
   )
 }

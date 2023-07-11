@@ -1,11 +1,12 @@
 import React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useMeQuery } from '@/generated/graphql'
+import { MeQuery } from '@/generated/graphql'
 import { PictureIcon, LinkIcon } from '../icons'
 
-function CreatePostFragment({ pathname = '/static/submit' }: { pathname?: string }) {
-    const { data: meData } = useMeQuery()
+type Props = { pathname?: string, meData: MeQuery }
+
+function CreatePostFragment({ pathname = '/static/submit', meData }: Props) {
     const router = useRouter()
 
     return (

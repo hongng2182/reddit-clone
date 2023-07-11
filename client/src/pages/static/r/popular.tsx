@@ -1,11 +1,10 @@
 import React from 'react'
-import { TrendingPosts, PageContainer, PageContentLayout, PopularCommunity, FilterBox, PostBox } from '@/components'
-import { usePostsQuery } from '@/generated/graphql'
-
-// TODO: Not login - Popular communities, login- create-post/community
+import { TrendingPosts, PageContainer, PageContentLayout, PopularCommunity, FilterBox, PostBox, UserHomeSidebar } from '@/components'
+import { useMeQuery, usePostsQuery } from '@/generated/graphql'
 
 function PopularPage() {
   const { data } = usePostsQuery({ variables: { first: 10, after: null }, notifyOnNetworkStatusChange: true })
+  const { data: meData } = useMeQuery()
 
   return (
     <PageContainer>
@@ -19,7 +18,7 @@ function PopularPage() {
           <div className='flex-col-start-10 w-full'>
             {data?.posts.paginatedPosts.map(post => <PostBox post={post} />)}
           </div></>}
-        right={<PopularCommunity />} />
+        right={meData?.me ? <UserHomeSidebar /> : <PopularCommunity />} />
     </PageContainer>
   )
 }

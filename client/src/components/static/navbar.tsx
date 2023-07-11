@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useModal } from '@/hooks'
+import { useGlobalState } from '@/hooks'
 import { useLogoutMutation, useMeQuery } from '@/generated/graphql'
+import { setShowSignInModal } from '@/action'
 import Feed from './feed'
 import { DropdownIcon, ProfileIcon, LogOutIcon } from '../icons'
 import SearchBar from './search-bar'
@@ -14,7 +15,7 @@ function Header() {
     const router = useRouter()
     const { data } = useMeQuery()
     const [profileFocus, setProfileFocus] = useState(false)
-    const { isOpen, openModal, closeModal } = useModal()
+    const { dispatch, state: { showSignInModal } } = useGlobalState()
     const [logout, { data: logoutData }] = useLogoutMutation()
 
     const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -53,7 +54,7 @@ function Header() {
             </div>
             <div className="grow-0 flex-end gap-[1.5rem]">
                 {!data?.me && <button type="button" className='button-main smM:hidden'
-                    onClick={openModal}>Login</button>}
+                    onClick={() => dispatch(setShowSignInModal(true))}>Login</button>}
                 <div className="relative flex-start gap-[5px] border border-transparent hover:border-medium p-1 rounded-md cursor-pointer min-h-[40px]"
                     onMouseEnter={() => setProfileFocus(true)}
                     onMouseLeave={() => setProfileFocus(false)}
@@ -94,7 +95,7 @@ function Header() {
                         {!data?.me && <button
                             type='button'
                             className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
-                            onClick={openModal}
+                            onClick={() => dispatch(setShowSignInModal(true))}
                         >
                             <div className='w-[24px] h-[24px]'>
                                 <LogOutIcon />
@@ -106,10 +107,10 @@ function Header() {
             </div >
         </nav >
         <Modal
-            isOpen={isOpen}
-            closeModal={closeModal}
-            modalContent={<AuthenticatePopup closeModal={closeModal} />}
-        />
+            isOpen={showSignInModal}
+            closeModal={() => dispatch(setShowSignInModal(false))}>
+            <AuthenticatePopup />
+        </Modal>
     </>
     )
 }

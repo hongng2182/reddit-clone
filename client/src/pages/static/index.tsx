@@ -16,7 +16,7 @@ function HomePage() {
             <PageContentLayout
                 containerClassname='mt-[40px]'
                 left={<>
-                    {meData?.me && <CreatePostFragment />}
+                    {meData?.me && <CreatePostFragment meData={meData} />}
                     <FilterBox />
                     {/* POSTS */}
                     <div className='flex-col-start-10 w-full'>

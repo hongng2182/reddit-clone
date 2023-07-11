@@ -32,8 +32,9 @@ function UserHomeSidebar() {
         </div>
         <Modal isOpen={isOpen}
             closeModal={closeModal}
-            modalContent={<CommunityCreatePopup closeModal={closeModal} />}
-        />
+        >
+            <CommunityCreatePopup closeModal={closeModal} />
+        </Modal>
     </>
     )
 }

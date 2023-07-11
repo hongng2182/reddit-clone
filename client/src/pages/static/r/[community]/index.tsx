@@ -24,7 +24,7 @@ function CommunityPage() {
             {data?.getCommunityPosts && <PageContainer>
                 <PageContentLayout
                     left={<>
-                        <CreatePostFragment pathname={`${router.asPath}/submit`} />
+                        {meData?.me && <CreatePostFragment meData={meData} pathname={`${router.asPath}/submit`} />}
                         <FilterBox />
                         <div className='flex-col-start-10 w-full'>
                             {data?.getCommunityPosts.paginatedPosts.length > 0 ? data?.getCommunityPosts.paginatedPosts.map(post => <PostBox key={post.id} post={post} hideCommunity hideJoinBtn />) : 'No posts in this community'}
@@ -40,6 +40,7 @@ function CommunityPage() {
                         </div>
                     </>}
                     right={<AboutCommunity
+                        isUserLogin={Boolean(meData?.me)}
                         isMod={meData && communityData.community.creatorId === meData.me?.id}
                         communityInfo={communityData.community} />}
                 />
