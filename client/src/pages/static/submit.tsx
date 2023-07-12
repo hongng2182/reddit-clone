@@ -1,20 +1,21 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect } from 'react'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
-import { useRouter } from 'next/router'
 import { CreatePost, CreatePostRules, PageContainer, PageContentLayout } from '@/components'
 import { MeDocument, useMeQuery } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
+import { useGlobalState } from '@/hooks'
+import { setShowSignInModal } from '@/action'
 
 
 function CreatePostPage() {
   // TODO: textarea expand and word count
-  const router = useRouter()
   const { data: meData } = useMeQuery()
+  const { dispatch } = useGlobalState()
 
   useEffect(() => {
     if (!meData?.me) {
-      router.push('/login')
+      dispatch(setShowSignInModal(true))
     }
   }, [])
 

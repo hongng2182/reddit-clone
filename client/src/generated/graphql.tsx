@@ -52,13 +52,19 @@ export type FieldError = {
   message: Scalars['String'];
 };
 
+export type ForgotPasswordResponse = {
+  __typename?: 'ForgotPasswordResponse';
+  errors?: Maybe<Array<FieldError>>;
+  message?: Maybe<Scalars['String']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
   createCommunity: CommunityResponse;
   createPost: Post;
   deletePost: Scalars['Boolean'];
-  forgotPassword: Scalars['Boolean'];
+  forgotPassword: ForgotPasswordResponse;
   joinCommunity: CommunityResponse;
   leaveCommunity: CommunityResponse;
   login: UserResponse;
@@ -209,7 +215,7 @@ export type User = {
   email: Scalars['String'];
   id: Scalars['Float'];
   password: Scalars['String'];
-  profileUrl: Scalars['String'];
+  profileUrl?: Maybe<Scalars['String']>;
   updatedAt: Scalars['String'];
   username: Scalars['String'];
 };
@@ -235,7 +241,7 @@ export type CommunityInfoFragment = { __typename?: 'Community', id: number, name
 
 export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number };
 
-export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string, profileUrl: string };
+export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null };
 
 export type ChangePasswordMutationVariables = Exact<{
   newPassword: Scalars['String'];
@@ -243,7 +249,7 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null } };
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null } | null } };
 
 export type CreateCommunityMutationVariables = Exact<{
   input: CommunityInput;
@@ -271,7 +277,7 @@ export type ForgotPasswordMutationVariables = Exact<{
 }>;
 
 
-export type ForgotPasswordMutation = { __typename?: 'Mutation', forgotPassword: boolean };
+export type ForgotPasswordMutation = { __typename?: 'Mutation', forgotPassword: { __typename?: 'ForgotPasswordResponse', message?: string | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
 export type JoinCommunityMutationVariables = Exact<{
   communityName: Scalars['String'];
@@ -293,7 +299,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -305,7 +311,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null } | null } };
 
 export type UpdateCommunityMutationVariables = Exact<{
   input: CommunityUpdateInput;
@@ -350,7 +356,7 @@ export type CommunityQuery = { __typename?: 'Query', community?: { __typename?: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string, email: string, profileUrl: string } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null } | null };
 
 export type PostQueryVariables = Exact<{
   postId: Scalars['Float'];
@@ -547,7 +553,13 @@ export type DeletePostMutationResult = Apollo.MutationResult<DeletePostMutation>
 export type DeletePostMutationOptions = Apollo.BaseMutationOptions<DeletePostMutation, DeletePostMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
-  forgotPassword(email: $email)
+  forgotPassword(email: $email) {
+    errors {
+      field
+      message
+    }
+    message
+  }
 }
     `;
 export type ForgotPasswordMutationFn = Apollo.MutationFunction<ForgotPasswordMutation, ForgotPasswordMutationVariables>;

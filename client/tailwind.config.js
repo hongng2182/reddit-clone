@@ -20,6 +20,7 @@ module.exports = {
         light: 'var(--color-background-light)',
         hover: 'var(--color-hover)',
         error: 'var(--color-error)',
+        success: 'var(--color-success)',
         'cate': {
           green: 'var(--color-category-green)',
           blue: 'var(--color-category-blue)',

@@ -5,6 +5,8 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { AboutCommunity, CreatePost, CreatePostRules, PageContainer, PageContentLayout } from '@/components'
 import { MeDocument, useCommunityQuery, useMeQuery } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
+import { useGlobalState } from '@/hooks'
+import { setShowSignInModal } from '@/action'
 
 function CreatePostInCommunityPage() {
     // TODO: textarea expand and word count
@@ -12,11 +14,11 @@ function CreatePostInCommunityPage() {
     const communityName = router.query.community as string
     const { data: communityData } = useCommunityQuery({ variables: { communityName } })
     const { data: meData } = useMeQuery()
+    const { dispatch } = useGlobalState()
 
     useEffect(() => {
-        console.log('medata', meData)
         if (!meData?.me) {
-            router.push('/login')
+            dispatch(setShowSignInModal(true))
         }
     }, [])
 

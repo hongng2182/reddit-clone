@@ -3,7 +3,7 @@ import { MyContext } from "../types";
 import { Arg, Ctx, Resolver, Mutation, InputType, Field, ObjectType, Query } from "type-graphql";
 import argon2 from 'argon2'
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
-import { sendEmail } from "../utils/sendEmail";
+import { getEmailTemplate, sendEmail } from "../utils/sendEmail";
 import { v4 as uuidv4 } from 'uuid';
 
 @InputType()
@@ -30,6 +30,14 @@ class UserResponse {
     errors?: FieldError[]
     @Field(() => User, { nullable: true })
     user?: User
+}
+
+@ObjectType()
+class ForgotPasswordResponse {
+    @Field(() => [FieldError], { nullable: true })
+    errors?: FieldError[]
+    @Field(() => String, { nullable: true })
+    message?: string
 }
 
 @Resolver()
@@ -129,23 +137,28 @@ export class UserResolver {
         })
     }
 
-    @Mutation(() => Boolean)
+    @Mutation(() => ForgotPasswordResponse)
     async forgotPassword(
         @Arg('email', () => String) email: string,
-        @Ctx() { redisClient }: MyContext): Promise<boolean> {
+        @Ctx() { redisClient }: MyContext): Promise<ForgotPasswordResponse> {
         const user = await User.findOne({ where: { email } })
         if (!user) {
-            return true
+            return { errors: [{ field: "email", message: "Sorry, No account associated with this address!" }] }
         }
-        const token = uuidv4()
+        try {
+            const token = uuidv4()
+            await redisClient.set(FORGOT_PASSWORD_PREFIX + token, user.id, {
+                EX: 10 * 60 * 1000,
+            }) // 10 mins
+            const emailContent = getEmailTemplate(token)
 
-        await redisClient.set(FORGOT_PASSWORD_PREFIX + token, user.id, {
-            EX: 1000 * 20,
-        }) // 1 day
-        const emailContent = `<a href="http://localhost:3000/change-password/${token}">Reset your password</a>`
-
-        await sendEmail(email, emailContent)
-        return true
+            await sendEmail(email, emailContent)
+            return {
+                message: "Thanks! If your Reddit username and email address match, you'll get an email with a link to reset your password shortly"
+            }
+        } catch (error) {
+            return { errors: [{ field: "email", message: "Error sending forgot password intructions to your email!" }] }
+        }
     }
 
     @Mutation(() => UserResponse)

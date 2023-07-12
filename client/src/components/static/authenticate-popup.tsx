@@ -13,7 +13,7 @@ function AuthenticatePopup() {
     const formRef = useRef({ username: '', password: '', email: '', usernameOrEmail: '' })
     const [register, { loading: registerLoading }] = useRegisterMutation()
     const [login, { loading: logInloading }] = useLoginMutation()
-    const [forgotPassword] = useForgotPasswordMutation()
+    const [forgotPassword, { data: forgotPasswordData }] = useForgotPasswordMutation()
 
     const [errorState, setError] = useState<{ [key: string]: string }>({})
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,6 +26,7 @@ function AuthenticatePopup() {
 
     const handleRegister = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
+        setError({})
         const { username, email, password } = formRef.current
         const response = await register({
             variables: { options: { username, email, password } }, update(cache, { data }) {
@@ -73,9 +74,15 @@ function AuthenticatePopup() {
     }
     const handleForgotPassword = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
-        await forgotPassword({
+        setError({})
+        const response = await forgotPassword({
             variables: { email: formRef.current.email }
         })
+        if (response.data?.forgotPassword.errors) {
+            const fieldName = response.data.forgotPassword.errors
+            const errorMap = toErrorMap(fieldName)
+            setError(errorMap)
+        }
     }
 
     return (
@@ -167,6 +174,10 @@ function AuthenticatePopup() {
                             onClick={handleForgotPassword}>
                             Reset Password
                         </button>
+
+                        {/* Forgot Password Message */}
+                        {forgotPasswordData?.forgotPassword.message && <p className='text-success text-sm pl-3'>{forgotPasswordData?.forgotPassword.message}</p>}
+
                         <p className='text-sm'>Don&apos;t have an email or need assistance logging in? <span className='link underline'>Get Help</span>
                         </p>
                     </>
