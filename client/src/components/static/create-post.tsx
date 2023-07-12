@@ -68,7 +68,7 @@ function CreatePost() {
                 {/* Tabs */}
                 <div className='bg-white w-full mt-2'>
                     <div className='w-full flex-around font-bold'>
-                        {tabs.map(tab => <button type="button"
+                        {tabs.map(tab => <button key={tab.name} type="button"
                             className={`flex-center gap-[8px] w-full py-3 border-b border-r border-medium hover:bg-primary-light ${tab.name === active ? 'text-cate-blue border-b-cate-blue' : 'text-gray'}`}
                             onClick={() => { setActive(tab.name) }}>
                             <Image

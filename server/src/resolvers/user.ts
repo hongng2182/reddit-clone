@@ -93,19 +93,17 @@ export class UserResolver {
         @Arg('password', () => String) password: string,
         @Ctx() { req }: MyContext): Promise<UserResponse> {
         const user = await User.findOne({ where: usernameOrEmail.includes('@') ? { email: usernameOrEmail } : { username: usernameOrEmail } })
+        const errors = [{
+            field: "usernameOrEmail",
+            message: "Incorect username or password!"
+        },
+        { field: "password", message: " " }]
         if (!user) {
-            return {
-                errors: [{
-                    field: "usernameOrEmail",
-                    message: "Username doesn't exists"
-                }]
-            }
+            return { errors }
         }
         const validUser = await argon2.verify(user.password, password)
         if (!validUser) {
-            return {
-                errors: [{ field: "password", message: "Incorect password!" }]
-            }
+            return { errors }
         }
 
         req.session.userId = user.id

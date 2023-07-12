@@ -1,26 +1,36 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { AboutCommunity, CreatePost, CreatePostRules, PageContainer, PageContentLayout } from '@/components'
-import { useCommunityQuery } from '@/generated/graphql'
+import { MeDocument, useCommunityQuery, useMeQuery } from '@/generated/graphql'
+import { addApolloState, initializeApollo } from '@/lib/apolloClient'
 
 function CreatePostInCommunityPage() {
     // TODO: textarea expand and word count
     const router = useRouter()
     const communityName = router.query.community as string
     const { data: communityData } = useCommunityQuery({ variables: { communityName } })
+    const { data: meData } = useMeQuery()
+
+    useEffect(() => {
+        console.log('medata', meData)
+        if (!meData?.me) {
+            router.push('/login')
+        }
+    }, [])
 
     return (
-        communityData?.community && <PageContainer>
-            <PageContentLayout
+        <PageContainer>
+            {meData?.me && <PageContentLayout
                 containerClassname='mt-[30px]'
                 left={<CreatePost />}
-                right={<>
+                right={communityData?.community && <>
                     <AboutCommunity isUserLogin={false} isMod={false}
                         communityInfo={communityData.community} isSubmitPost />
                     <CreatePostRules />
                 </>}
-            />
+            />}
         </PageContainer>
     )
 }
@@ -28,3 +38,16 @@ function CreatePostInCommunityPage() {
 export default CreatePostInCommunityPage
 
 
+
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+
+    const apolloClient = initializeApollo({ headers: context.req.headers })
+
+    await apolloClient.query({
+        query: MeDocument,
+    })
+
+    return addApolloState(apolloClient, {
+        props: {}
+    })
+}

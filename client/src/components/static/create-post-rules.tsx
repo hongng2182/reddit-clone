@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React from 'react'
 import { postingRules } from '@/mockup'
 import { RulesIcon } from '../icons'
@@ -8,7 +9,7 @@ function CreatePostRules() {
             <RulesIcon />
             <h3>Posing to MiniReddit</h3>
         </div>
-        {postingRules.map(rule => <p className='label-md border-b border-medium py-2 px-3'>{rule}</p>)}
+        {postingRules.map((rule, index) => <p key={index} className='label-md border-b border-medium py-2 px-3'>{rule}</p>)}
     </div>
 }
 

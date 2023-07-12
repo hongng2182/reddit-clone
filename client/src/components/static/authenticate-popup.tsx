@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { MeDocument, MeQuery, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from '@/generated/graphql'
 import { toErrorMap } from '@/utils'
@@ -9,15 +9,13 @@ import { setShowSignInModal } from '@/action'
 function AuthenticatePopup() {
     const [active, setActive] = useState<'login' | 'signup' | 'forgot'>('login')
     const { dispatch } = useGlobalState()
-    // TODO: handle login error, limit username character
     const router = useRouter()
     const formRef = useRef({ username: '', password: '', email: '', usernameOrEmail: '' })
     const [register, { loading: registerLoading }] = useRegisterMutation()
     const [login, { loading: logInloading }] = useLoginMutation()
     const [forgotPassword] = useForgotPasswordMutation()
 
-
-    const [errorState, setError] = useState({ field: '', message: '' })
+    const [errorState, setError] = useState<{ [key: string]: string }>({})
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         formRef.current = {
@@ -25,13 +23,6 @@ function AuthenticatePopup() {
             [name]: value
         }
     }
-
-    useEffect(() => {
-        const errorElement = document.getElementById(errorState.field)
-        if (errorElement) {
-            errorElement.style.border = "1px solid red"
-        }
-    }, [errorState])
 
     const handleRegister = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
@@ -49,18 +40,16 @@ function AuthenticatePopup() {
         if (response.data?.register.errors) {
             const fieldName = response.data.register.errors
             const errorMap = toErrorMap(fieldName)
-            setError(prev => ({
-                ...prev,
-                field: Object.keys(errorMap)[0],
-                message: errorMap[Object.keys(errorMap)[0]]
-            }))
+            setError(errorMap)
         } else if (response.data?.register.user) {
-            router.push('/')
+            dispatch(setShowSignInModal(false))
+            router.push('/static')
         }
     }
 
     const handleLogIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
+        setError({})
         const { usernameOrEmail, password } = formRef.current
         const response = await login({
             variables: { usernameOrEmail, password }, update(cache, { data }) {
@@ -75,11 +64,7 @@ function AuthenticatePopup() {
         if (response.data?.login.errors) {
             const fieldName = response.data.login.errors
             const errorMap = toErrorMap(fieldName)
-            setError(prev => ({
-                ...prev,
-                field: Object.keys(errorMap)[0],
-                message: errorMap[Object.keys(errorMap)[0]]
-            }))
+            setError(errorMap)
         } else if (response.data?.login.user) {
             const apolloClient = initializeApollo()
             await apolloClient.resetStore()
@@ -110,42 +95,56 @@ function AuthenticatePopup() {
                         <>Tell us your email address associated with your Reddit account, and we&apos;ll send you an email with a link to reset your password.</>
                     }</p>
                 {/* Email input */}
-                {active !== 'login' && <div
-                    className='w-full border bg-light border-transparent hover:border-medium rounded-3xl py-1 px-3'
-                >
-                    <input name="email" id='email' type="email" placeholder='Email'
-                        onChange={(e) => handleChange(e)}
-                        className='border-none w-full p-1'
-                    />
-                    {errorState.field === "email" && <p className='text-red-500'>{errorState.message}</p>}
-                </div>}
+                {active !== 'login' &&
+                    <div className='w-full'>
+                        <div
+                            id='email'
+                            className={`${errorState.email ? 'border-error' : 'border-transparent'} border bg-light  hover:border-medium rounded-3xl py-1 px-3`}
+                        >
+                            <input name="email" type="email" placeholder='Email'
+                                onChange={(e) => handleChange(e)}
+                                className='border-none w-full p-1'
+                            />
+                        </div>
+                        {errorState.email && <p className='text-error text-sm pl-3'>{errorState.email}</p>}
+                    </div>}
                 {/* Username or Email input */}
                 {active !== 'forgot' && <>
-                    <div
-                        className='w-full border bg-light border-transparent hover:border-medium rounded-3xl py-1 px-3'
-                    >
-                        <input name={`${active === 'login' ? 'usernameOrEmail' : 'username'}`}
-                            id='username' type="text"
-                            placeholder={`${active === 'login' ? 'Username Or Email' : 'Username'}`}
-                            onChange={(e) => handleChange(e)} className='border-none w-full p-1'
-                        />
-                        {errorState.field === "username" && <p className='text-red-500'>{errorState.message}</p>}
+                    <div className="w-full">
+                        <div
+                            id={`${active === 'login' ? 'usernameOrEmail' : 'username'}`}
+                            className={`${errorState.usernameOrEmail || errorState.username ? 'border-error' : 'border-transparent'} w-full border bg-light hover:border-medium rounded-3xl py-1 px-3`}
+                        >
+                            <input name={`${active === 'login' ? 'usernameOrEmail' : 'username'}`}
+                                type="text"
+                                placeholder={`${active === 'login' ? 'Username Or Email' : 'Username'}`}
+                                onChange={(e) => handleChange(e)} className='border-none w-full p-1'
+                            />
+                        </div>
+                        {errorState.username && <p className='text-error p-3 text-sm'>{errorState.username}</p>}
+                        {errorState.usernameOrEmail && <p className='text-error p-3 text-sm'>{errorState.usernameOrEmail}</p>}
                     </div>
                     {/* Password input */}
-                    <div
-                        className='w-full border bg-light border-transparent hover:border-medium rounded-3xl py-1 px-3'
-                    >
-                        <input name="password" id='password' type="password" placeholder='Password' className='border-none w-full p-1'
-                            onChange={(e) => handleChange(e)}
-                        />
-                        {errorState.field === "password" && <p className='text-red-500'>{errorState.message}</p>}
+                    <div className="w-full">
+                        <div
+                            id='password'
+                            className={`${errorState.password ? 'border-error' : 'border-transparent'} w-full border bg-light hover:border-medium rounded-3xl py-1 px-3`}
+                        >
+                            <input name="password" type="password" placeholder='Password' className='border-none w-full p-1'
+                                onChange={(e) => handleChange(e)}
+                            />
+                        </div>
+                        {errorState.password && <p className='text-error text-sm pl-3'>{errorState.password}</p>}
                     </div>
-                </>
-                }
+                </>}
+                {/* Errors */}
                 {/* Button Login */}
                 {active === 'login' && <>
                     <button type='button' className='text-sm link underline'
-                        onClick={() => setActive('forgot')}
+                        onClick={() => {
+                            setActive('forgot')
+                            setError({})
+                        }}
                     >Forgot your password?</button>
                     <button onClick={handleLogIn}
                         disabled={logInloading}
@@ -174,11 +173,24 @@ function AuthenticatePopup() {
                 }
 
                 {/* Footer */}
-                {active === 'login' && <p className='text-sm'>New to Reddit? <button type='button' className='link underline' onClick={() => setActive('signup')}>Sign up</button></p>}
-                {active === 'signup' && <p className='text-sm'>Already a redditor? <button type='button' className='link underline' onClick={() => setActive('login')}>Log In</button></p>}
+                {active === 'login' && <p className='text-sm'>New to Reddit? <button type='button' className='link underline'
+                    onClick={() => {
+                        setActive('signup')
+                        setError({})
+                    }}>Sign up</button></p>}
+                {active === 'signup' && <p className='text-sm'>Already a redditor? <button type='button' className='link underline' onClick={() => {
+                    setActive('login')
+                    setError({})
+                }}>Log In</button></p>}
                 {active === 'forgot' && <div className='flex gap-[10px] text-primary text-sm'>
-                    <button type='button' className='link underline' onClick={() => setActive('signup')}>Sign up</button> •
-                    <button type='button' className='link underline' onClick={() => setActive('login')}>Log In</button>
+                    <button type='button' className='link underline' onClick={() => {
+                        setActive('signup')
+                        setError({})
+                    }}>Sign up</button> •
+                    <button type='button' className='link underline' onClick={() => {
+                        setActive('login')
+                        setError({})
+                    }}>Log In</button>
                 </div>}
             </div>
         </div >
