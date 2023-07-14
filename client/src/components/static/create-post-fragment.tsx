@@ -2,6 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { MeQuery } from '@/generated/graphql'
+import { defaultProfileIcon } from '@/lib/constants'
 import { PictureIcon, LinkIcon } from '../icons'
 
 type Props = { pathname?: string, meData: MeQuery }
@@ -13,7 +14,7 @@ function CreatePostFragment({ pathname = '/static/submit', meData }: Props) {
         <div className='w-full h-[61px] flex-around px-4 py-3 font-bold white-gray-rounded'>
             <Image
                 alt='avatar'
-                src={meData?.me?.profileUrl ? meData.me.profileUrl : '/default-profile.jpg'}
+                src={meData?.me?.profileUrl ? meData.me.profileUrl : defaultProfileIcon}
                 height='0'
                 width='0'
                 sizes='100%'

@@ -7,15 +7,21 @@ import { useGlobalState } from '@/hooks'
 import { setShowSignInModal } from '@/action'
 
 function AuthenticatePopup() {
+    // React hooks
     const [active, setActive] = useState<'login' | 'signup' | 'forgot'>('login')
-    const { dispatch } = useGlobalState()
     const router = useRouter()
     const formRef = useRef({ username: '', password: '', email: '', usernameOrEmail: '' })
+    const [errorState, setError] = useState<{ [key: string]: string }>({})
+
+    // Created hooks
+    const { dispatch } = useGlobalState()
+
+    // GraphQL hooks
     const [register, { loading: registerLoading }] = useRegisterMutation()
     const [login, { loading: logInloading }] = useLoginMutation()
     const [forgotPassword, { data: forgotPasswordData }] = useForgotPasswordMutation()
 
-    const [errorState, setError] = useState<{ [key: string]: string }>({})
+    // Utils
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         formRef.current = {
@@ -24,6 +30,7 @@ function AuthenticatePopup() {
         }
     }
 
+    // handleRegister
     const handleRegister = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setError({})
@@ -48,6 +55,7 @@ function AuthenticatePopup() {
         }
     }
 
+    // handleLogIn
     const handleLogIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setError({})
@@ -72,6 +80,8 @@ function AuthenticatePopup() {
             dispatch(setShowSignInModal(false))
         }
     }
+
+    // handleForgotPassword
     const handleForgotPassword = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setError({})

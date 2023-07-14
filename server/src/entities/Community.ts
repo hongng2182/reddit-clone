@@ -19,7 +19,11 @@ export class Community extends BaseEntity {
     name!: string;
 
     @Field()
-    @Column({ nullable: true, default: '' })
+    @Column()
+    displayName!: string;
+
+    @Field({ nullable: true })
+    @Column({ nullable: true, default: null })
     description!: string;
 
     @Field()
@@ -31,8 +35,8 @@ export class Community extends BaseEntity {
     @Column({ type: 'enum', enum: PrivacyType, default: PrivacyType.public })
     privacyType!: PrivacyType;
 
-    @Field()
-    @Column({ nullable: true, default: '' })
+    @Field({ nullable: true })
+    @Column({ nullable: true, default: null })
     communityIconUrl!: string;
 
     @OneToMany(() => UserCommunity, (userCommunity) => userCommunity.community)

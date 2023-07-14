@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { useGlobalState } from '@/hooks'
 import { useLogoutMutation, useMeQuery } from '@/generated/graphql'
 import { setShowSignInModal } from '@/action'
+import { defaultProfileIcon } from '@/lib/constants'
 import Feed from './feed'
 import { DropdownIcon, ProfileIcon, LogOutIcon } from '../icons'
 import SearchBar from './search-bar'
@@ -12,12 +13,16 @@ import AuthenticatePopup from './authenticate-popup'
 import Modal from './modal'
 
 function Header() {
+    // React hooks
     const router = useRouter()
-    const { data } = useMeQuery()
     const [profileFocus, setProfileFocus] = useState(false)
+    
+    // Graphql Hooks
+    const { data } = useMeQuery()
     const { dispatch, state: { showSignInModal } } = useGlobalState()
     const [logout, { data: logoutData }] = useLogoutMutation()
 
+    // Utils
     const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         logout()
@@ -62,7 +67,7 @@ function Header() {
                     {!data?.me && <ProfileIcon type='outline' />}
                     {data && data.me && <div className='flex-start gap-[5px] min-w-[30px]'>
                         <Image
-                            src={data.me.profileUrl ? data.me.profileUrl : '/default-profile.jpg'}
+                            src={data.me.profileUrl ? data.me.profileUrl : defaultProfileIcon}
                             alt='avatar'
                             width='35'
                             height='35'

@@ -52,7 +52,7 @@ input:focus {
   }
 
   h2 {
-    @apply text-xl font-bold
+    @apply text-2xl font-bold
   }
 
   h3 {
@@ -122,7 +122,7 @@ input:focus {
   }
 
   .hover-border-blue {
-    @apply border border-medium hover:border hover:border-blue-600 hover:bg-white
+    @apply border border-medium hover:border-blue-600 hover:bg-white
   }
 
   .feed-tab {
@@ -135,6 +135,10 @@ input:focus {
 
   .label-md {
     @apply text-sm text-black-light font-bold
+  }
+
+  .label-md-gray {
+    @apply text-sm text-gray font-semibold
   }
 
   .link {

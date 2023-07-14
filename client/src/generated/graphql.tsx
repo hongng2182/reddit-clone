@@ -17,10 +17,11 @@ export type Scalars = {
 
 export type Community = {
   __typename?: 'Community';
-  communityIconUrl: Scalars['String'];
+  communityIconUrl?: Maybe<Scalars['String']>;
   createdAt: Scalars['String'];
   creatorId: Scalars['Float'];
-  description: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  displayName: Scalars['String'];
   hasJoined: Scalars['Boolean'];
   id: Scalars['Float'];
   name: Scalars['String'];
@@ -42,7 +43,7 @@ export type CommunityResponse = {
 export type CommunityUpdateInput = {
   communityIconUrl?: InputMaybe<Scalars['String']>;
   description?: InputMaybe<Scalars['String']>;
-  name?: InputMaybe<Scalars['String']>;
+  displayName?: InputMaybe<Scalars['String']>;
   privacyType?: InputMaybe<Scalars['String']>;
 };
 
@@ -237,7 +238,7 @@ export enum VoteType {
   Upvote = 'UPVOTE'
 }
 
-export type CommunityInfoFragment = { __typename?: 'Community', id: number, name: string, description: string, creatorId: number, numMembers: number, privacyType: string, communityIconUrl: string, createdAt: string, hasJoined: boolean };
+export type CommunityInfoFragment = { __typename?: 'Community', id: number, name: string, displayName: string, description?: string | null, creatorId: number, numMembers: number, privacyType: string, communityIconUrl?: string | null, createdAt: string, hasJoined: boolean };
 
 export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number };
 
@@ -256,7 +257,7 @@ export type CreateCommunityMutationVariables = Exact<{
 }>;
 
 
-export type CreateCommunityMutation = { __typename?: 'Mutation', createCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', id: number, name: string, description: string, creatorId: number, numMembers: number, privacyType: string, communityIconUrl: string, createdAt: string, hasJoined: boolean } | null } };
+export type CreateCommunityMutation = { __typename?: 'Mutation', createCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', id: number, name: string, displayName: string, description?: string | null, creatorId: number, numMembers: number, privacyType: string, communityIconUrl?: string | null, createdAt: string, hasJoined: boolean } | null } };
 
 export type CreatePostMutationVariables = Exact<{
   input: PostInput;
@@ -319,7 +320,7 @@ export type UpdateCommunityMutationVariables = Exact<{
 }>;
 
 
-export type UpdateCommunityMutation = { __typename?: 'Mutation', updateCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', id: number, name: string, description: string, creatorId: number, numMembers: number, privacyType: string, communityIconUrl: string, createdAt: string, hasJoined: boolean } | null } };
+export type UpdateCommunityMutation = { __typename?: 'Mutation', updateCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', id: number, name: string, displayName: string, description?: string | null, creatorId: number, numMembers: number, privacyType: string, communityIconUrl?: string | null, createdAt: string, hasJoined: boolean } | null } };
 
 export type UpdatePostMutationVariables = Exact<{
   input: PostInput;
@@ -344,14 +345,14 @@ export type GetCommunityPostsQueryVariables = Exact<{
 }>;
 
 
-export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl: string } }> } };
+export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null } }> } };
 
 export type CommunityQueryVariables = Exact<{
   communityName: Scalars['String'];
 }>;
 
 
-export type CommunityQuery = { __typename?: 'Query', community?: { __typename?: 'Community', id: number, name: string, description: string, creatorId: number, numMembers: number, privacyType: string, communityIconUrl: string, createdAt: string, hasJoined: boolean } | null };
+export type CommunityQuery = { __typename?: 'Query', community?: { __typename?: 'Community', id: number, name: string, displayName: string, description?: string | null, creatorId: number, numMembers: number, privacyType: string, communityIconUrl?: string | null, createdAt: string, hasJoined: boolean } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -363,7 +364,7 @@ export type PostQueryVariables = Exact<{
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl: string } } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null } } | null };
 
 export type PostsQueryVariables = Exact<{
   first: Scalars['Int'];
@@ -371,12 +372,13 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl: string } }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, textSnippet: string, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink: string, imageUrl: string, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null } }> } };
 
 export const CommunityInfoFragmentDoc = gql`
     fragment CommunityInfo on Community {
   id
   name
+  displayName
   description
   creatorId
   numMembers

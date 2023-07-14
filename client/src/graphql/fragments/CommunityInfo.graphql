@@ -1,6 +1,7 @@
 fragment CommunityInfo on Community {
   id
   name
+  displayName
   description
   creatorId
   numMembers

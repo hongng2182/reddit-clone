@@ -11,9 +11,10 @@ import AboutCommunity from './static/about-community'
 import CommentSection from './static/comment-section'
 import Modal from './static/modal'
 import CreatePost from './static/create-post'
-import EditPost from './static/edit-post' 
+import EditPost from './static/edit-post'
 import PopularCommunity from './static/popular-community'
 import CreatePostRules from './static/create-post-rules'
 import UserHomeSidebar from './static/user-home-sidebar'
+import Error from './static/error'
 
-export { Navbar, Header, TrendingPosts, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, AboutCommunity, CommentSection, Modal, CreatePost, PopularCommunity, EditPost, CreatePostRules, UserHomeSidebar }
+export { Navbar, Header, TrendingPosts, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, AboutCommunity, CommentSection, Modal, CreatePost, PopularCommunity, EditPost, CreatePostRules, UserHomeSidebar, Error }

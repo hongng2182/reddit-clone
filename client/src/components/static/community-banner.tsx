@@ -1,9 +1,11 @@
 import React from 'react'
 import Image from 'next/image'
+import toast from 'react-hot-toast'
 import { CommunityInfo } from '@/types'
 import { useGlobalState } from '@/hooks'
 import { CommunityDocument, useJoinCommunityMutation, useLeaveCommunityMutation } from '@/generated/graphql'
 import { setShowSignInModal } from '@/action'
+import { defaultCommunityIcon } from '@/lib/constants'
 
 type Props = {
     communityInfo: CommunityInfo,
@@ -11,7 +13,7 @@ type Props = {
 }
 
 function CommunityBanner({ communityInfo, userId }: Props) {
-    const { communityIconUrl, name, hasJoined, creatorId } = communityInfo
+    const { communityIconUrl, name, hasJoined, creatorId, displayName } = communityInfo
     const { dispatch } = useGlobalState()
     const [joinCommunity] = useJoinCommunityMutation({
         update(cache, { data }) {
@@ -47,22 +49,25 @@ function CommunityBanner({ communityInfo, userId }: Props) {
             }
         }
     })
-    const capitalizeName = name[0].toUpperCase() + name.slice(1,)
     const isMod = userId === creatorId
 
-    const handleJoinLeave = () => {
+    const handleJoinLeave = async () => {
         if (!userId) {
             dispatch(setShowSignInModal(true))
             return
         }
         if (hasJoined) {
-            leaveCommunity({
+            const response = await leaveCommunity({
                 variables: { communityName: name }
             })
-            // toast successfully join r/...
+            if (response.data?.leaveCommunity.community) {
+                toast.success(`Successfully leave r/${name}`, { position: 'bottom-center' })
+            }
         } else {
-            joinCommunity({ variables: { communityName: name } })
-            // toast successfully left r/...
+            const response = await joinCommunity({ variables: { communityName: name } })
+            if (response.data?.joinCommunity.community) {
+                toast.success(`Successfully join r/${name}`, { position: 'bottom-center' })
+            }
         }
     }
 
@@ -76,7 +81,7 @@ function CommunityBanner({ communityInfo, userId }: Props) {
                             <Image
                                 height='0'
                                 width='0'
-                                src={communityIconUrl}
+                                src={communityIconUrl || defaultCommunityIcon}
                                 alt='logo'
                                 sizes='100%'
                                 className='w-full h-full rounded-full'
@@ -84,8 +89,8 @@ function CommunityBanner({ communityInfo, userId }: Props) {
                         </div>
                         <div className='mt-[20px] flex-col-start'>
                             <div className='flex-start gap-[20px]'>
-                                <h1>{capitalizeName}</h1>
-                                <button type="button" disabled={isMod} className={`${hasJoined ? 'button-main-outline after:content-["Joined"] hover:after:content-["Leave"]' : 'button-main'}`}
+                                <h1>{displayName}</h1>
+                                <button type="button" disabled={isMod} className={`${hasJoined ? 'button-main-outline after:content-["Joined"] hover:after:content-["Leave"]' : 'button-main'} cursor-pointer`}
                                     onClick={handleJoinLeave}
                                 >{hasJoined ? "" : "Join"}</button>
                             </div>

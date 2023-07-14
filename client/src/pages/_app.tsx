@@ -2,6 +2,7 @@
 import React from 'react'
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
+import { Toaster } from 'react-hot-toast'
 import { ApolloProvider } from '@apollo/client'
 import { useApollo } from '@/lib/apolloClient'
 import { Header } from '@/components'
@@ -17,6 +18,13 @@ export default function App({ Component, pageProps }: AppProps) {
         <Header />
         <Component {...pageProps} />
       </GlobalProvider>
+      <Toaster
+        toastOptions={{
+          style: {
+            zIndex: 99999,
+          }
+        }}
+      />
     </ApolloProvider>
   )
 }

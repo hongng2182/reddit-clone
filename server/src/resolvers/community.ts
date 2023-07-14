@@ -19,7 +19,7 @@ class CommunityInput {
 @InputType()
 class CommunityUpdateInput {
     @Field({ nullable: true })
-    name?: string
+    displayName?: string
     @Field({ nullable: true })
     privacyType?: PrivacyType
     @Field({ nullable: true })
@@ -42,7 +42,7 @@ export class CommunityResolver {
 
     @FieldResolver(() => Int)
     async numMembers(@Root() root: Community) {
-        const [_, totalCount] =  await UserCommunity.findAndCountBy({communityId: root.id})
+        const [_, totalCount] = await UserCommunity.findAndCountBy({ communityId: root.id })
         return totalCount
     }
 
@@ -135,7 +135,7 @@ export class CommunityResolver {
         // update field respectively
         try {
             if (input.communityIconUrl) { community.communityIconUrl = input.communityIconUrl }
-            if (input.name) { community.name = input.name }
+            if (input.displayName) { community.displayName = input.displayName }
             if (input.description) { community.description = input.description }
             if (input.privacyType) { community.privacyType = input.privacyType }
             await community.save()

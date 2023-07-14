@@ -4,7 +4,7 @@ import { NetworkStatus } from "@apollo/client"
 import { addApolloState, initializeApollo } from "@/lib/apolloClient"
 import { PageContainer, PageContentLayout, CreatePostFragment, FilterBox, PostBox, UserHomeSidebar, PopularCommunity } from '@/components'
 import { PostsDocument, useMeQuery, usePostsQuery } from '@/generated/graphql'
-import { FETCH_LIMIT } from '@/types'
+import { FETCH_LIMIT } from "@/lib/constants"
 
 function HomePage() {
     const { data: meData } = useMeQuery()

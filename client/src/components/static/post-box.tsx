@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Reference } from '@apollo/client'
 import { PostInfo, VoteStatusValues } from '@/types'
 import { getTimeAgo } from '@/utils'
+import { defaultCommunityIcon } from '@/lib/constants'
 import { PaginatedPosts, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
 import { useGlobalState } from '@/hooks'
 import { setShowSignInModal } from '@/action'
@@ -171,7 +172,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                                 height='0'
                                 alt='avatar'
                                 sizes='50%'
-                                src={communityIconUrl !== '' ? communityIconUrl : '/logo-cat.png'}
+                                src={communityIconUrl || defaultCommunityIcon}
                                 className='img-14'
                             />
                             <span className='font-bold hover:underline'>r/{communityName}</span>
