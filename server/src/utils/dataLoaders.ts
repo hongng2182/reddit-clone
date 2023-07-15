@@ -60,5 +60,5 @@ export const buildDataLoaders = () => ({
     userCommunityLoader: new DataLoader<UserCommunityCondition, UserCommunity | undefined>(
         userCommunityConditions =>
             batchGetUserCommunities(userCommunityConditions as UserCommunityCondition[])
-    ),
+    )
 })

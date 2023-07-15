@@ -201,5 +201,4 @@ export class UserResolver {
 
     }
 
-
 }

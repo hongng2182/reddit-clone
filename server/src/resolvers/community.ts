@@ -35,6 +35,14 @@ class CommunityResponse {
     @Field(() => Community, { nullable: true })
     community?: Community
 }
+@ObjectType()
+class UserCommunities {
+    @Field(() => Boolean)
+    isModerator?: boolean
+    @Field(() => Community)
+    community?: Community
+}
+
 
 @Resolver(_of => Community)
 export class CommunityResolver {
@@ -46,19 +54,30 @@ export class CommunityResolver {
         return totalCount
     }
 
-    // @FieldResolver(() => Community)
-    // async community(@Root() root: Post,
-    //     @Ctx() { dataLoaders: { communityLoader } }: MyContext
-    // ) {
-    //     return await communityLoader.load(root.communityId)
-    // }
-
     @FieldResolver(() => Boolean)
     async hasJoined(@Root() root: Community,
         @Ctx() { req, dataLoaders: { userCommunityLoader } }: MyContext) {
         if (!req.session.userId) { return false }
         const record = await userCommunityLoader.load({ communityId: root.id, userId: req.session.userId })
         return record ? true : false
+    }
+
+    @Query(() => [UserCommunities], { nullable: true })
+    async userCommunities(
+        // @Arg("userId", () => Int) userId: number,
+        @Ctx() { req }: MyContext
+    ): Promise<UserCommunities[]> {
+        const record = await UserCommunity.find({
+            relations: {
+                community: true,
+            }, where: { userId: req.session.userId }
+        })
+        const commuity = record.map(item => ({
+            community: item.community,
+            isModerator: item.isModerator
+        }))
+
+        return commuity
     }
 
     @Query(() => Community, { nullable: true })
@@ -71,12 +90,6 @@ export class CommunityResolver {
         }
         return community
     }
-
-    // @Query(() => Post, { nullable: true })
-    // async post(@Arg("id") id: number): Promise<Post | null> {
-    //     return await AppDataSource.getRepository(Post).findOneBy({ id })
-    //     // Post.findOne({ where: { id } })
-    // }
 
     @Mutation(() => CommunityResponse)
     @UseMiddleware(isAuth)
@@ -98,6 +111,7 @@ export class CommunityResolver {
             // Create community
             const community = Community.create({
                 ...input,
+                displayName: input.name,
                 creatorId: req.session.userId
             })
             try {

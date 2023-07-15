@@ -14,8 +14,13 @@ class PostInput {
     @Field()
     title: string
     @Field()
-    text: string
-    //communityId, urlLink, imageUrl
+    communityId: number
+    @Field({ nullable: true })
+    text?: string
+    @Field({ nullable: true })
+    urlLink?: string
+    @Field({ nullable: true })
+    imageUrl?: string
 }
 
 @ObjectType()
@@ -40,12 +45,20 @@ class PaginatedPosts {
     pageInfo: PageInfo
 }
 
+@ObjectType()
+class PostResponse {
+    @Field(() => String, { nullable: true })
+    errors?: string
+    @Field(() => Post, { nullable: true })
+    post?: Post
+}
+
 @Resolver(_of => Post)
 export class PostResolver {
 
-    @FieldResolver(() => String)
+    @FieldResolver(() => String, { nullable: true })
     textSnippet(@Root() root: Post) {
-        return root.text.slice(0, 50)
+        return root.text ? root.text.slice(0, 50) : null
     }
 
     @FieldResolver(() => User)
@@ -153,21 +166,51 @@ export class PostResolver {
         // Post.findOne({ where: { id } })
     }
 
-    @Mutation(() => Post)
+    @Mutation(() => PostResponse)
     @UseMiddleware(isAuth)
     async createPost(
         @Arg("input") input: PostInput,
         @Ctx() { req }: MyContext
-    ): Promise<Post> {
-        return Post.create({
-            ...input,
-            ownerId: req.session.userId,
-            //urlLink
-            //communityId
-            // imageUrl
-        }).save()
+    ): Promise<PostResponse> {
+        const { title, communityId } = input
+        const community = await Community.findOne({ where: { id: communityId } })
+        // Check validity of communityId and Post title
+        if (!community) {
+            return { errors: "Sorry, you can't post in this community!" }
+        }
+        if (title === '') {
+            return { errors: "Title cant't be empty" }
+        }
+        // Append field if has to create new post
+        let form: PostInput = { title, communityId }
 
-        // update Vote Table 
+        if (input.text) {
+            if (input.text === '') { return { errors: "Post content cant't be empty" } }
+            form = { ...form, text: input.text }
+        }
+        if (input.imageUrl) {
+            if (input.imageUrl === '') { return { errors: "Sorry, something wrong happend this your post image!" } }
+            form = { ...form, imageUrl: input.imageUrl }
+        }
+        if (input.urlLink) {
+            if (input.urlLink === '') { return { errors: "Sorry, your post's link cant't be empty" } }
+            form = { ...form, urlLink: input.urlLink }
+        }
+        // Create new record in db
+        try {
+            const post = Post.create({
+                ownerId: req.session.userId,
+                ...form
+            })
+            await post.save()
+            // update Vote Table 
+            const upvote = await Vote.create({ userId: req.session.userId, postId: post.id, value: 1 })
+            await upvote.save()
+            return { post }
+        } catch (err) {
+            console.log("Error in createPost", err)
+            return { errors: 'Fail to create post!' }
+        }
     }
 
     @Mutation(() => Post, { nullable: true })
@@ -185,7 +228,7 @@ export class PostResolver {
         }
 
         post.title = input.title
-        post.text = input.text
+        // post.text = input.text
 
         await post.save()
         return post

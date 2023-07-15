@@ -16,7 +16,7 @@ export class Post extends BaseEntity {
     title!: string;
 
 
-    @Field()
+    @Field({ nullable: true })
     @Column({ nullable: true })
     text!: string;
 
@@ -28,7 +28,7 @@ export class Post extends BaseEntity {
     @Column()
     ownerId!: number;
 
-    @Field()
+    @Field({ nullable: true })
     @Column({ nullable: true })
     urlLink!: string;
 
@@ -36,7 +36,7 @@ export class Post extends BaseEntity {
     @Column()
     communityId!: number;
 
-    @Field()
+    @Field({ nullable: true })
     @Column({ nullable: true })
     imageUrl!: string;
 
