@@ -1,8 +1,5 @@
-mutation UpdatePost($input: PostInput!, $updatePostId: Int!) {
-  updatePost(input: $input, id: $updatePostId) {
-    ...PostInfo
-    user {
-      username
-    }
+mutation UpdatePost($text: String!, $updatePostId: Int!) {
+  updatePost(text: $text, id: $updatePostId) {
+   text
   }
 }

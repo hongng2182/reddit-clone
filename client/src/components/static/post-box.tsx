@@ -143,7 +143,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
     }
 
     useEffect(() => {
-        if (isEditing) setShowEdit(true)
+        if (isEditing && text) setShowEdit(true)
     }, [isEditing])
 
     return (<>
@@ -221,7 +221,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                     </div>
                 }
                 {!isTrendingPost && <>
-                    {!isEditing && <p>{isSinglePost ? text : textSnippet}</p>}
+                    {!showEdit && <p>{isSinglePost ? text : textSnippet}</p>}
                     {imageUrl &&
                         <div className="relative h-auto w-full bg-gray-200 object-contain">
                             <Image
@@ -238,6 +238,8 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                             />
                         </div>
                     }
+                    {/* EDIT POSTS */}
+                    {showEdit && text && <EditPost postId={id} postText={text} hideEdit={() => setShowEdit(false)} />}
                     <div className='text-xs flex-start-10'>
                         <div className={`${comments ? 'post-action-disable' : 'post-action'}`}>
                             <CommentIcon />
@@ -253,7 +255,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                         </div>
 
                         {meData?.me?.id === post.ownerId && <>
-                            <button className='post-action'
+                            {text && <button className='post-action'
                                 type='button'
                                 disabled={isDeleteLoading}
                                 onClick={(e) => {
@@ -269,7 +271,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                                 }}>
                                 <EditIcon />
                                 Edit
-                            </button>
+                            </button>}
                             <button className='post-action'
                                 type='button'
                                 onClick={(e) => {
@@ -292,10 +294,6 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                         </p>
                     </div>
                 }
-                {/* EDIT POSTS */}
-
-                {showEdit && <EditPost hideEdit={() => setShowEdit(false)} />}
-
                 {/* COMMENTS */}
                 {comments &&
                     <div className='w-full'>

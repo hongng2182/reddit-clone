@@ -217,18 +217,17 @@ export class PostResolver {
     @UseMiddleware(isAuth)
     async updatePost(
         @Arg("id", () => Int) id: number,
-        @Arg("input", () => PostInput) input: PostInput): Promise<Post | null> {
+        @Arg("text", () => String) text: string): Promise<Post | null> {
         const post = await Post.findOne({ where: { id } })
         if (!post) {
             return null
         }
 
-        if (input.text === '' || input.title === '') {
+        if (text === '') {
             return null
         }
 
-        post.title = input.title
-        // post.text = input.text
+        post.text = text
 
         await post.save()
         return post
