@@ -4,14 +4,14 @@ import { useRouter } from 'next/router'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { PostDocument, usePostQuery } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
-import { PageContainer, PostBox, CommentSection } from '@/components'
+import { PageContainer, PostBox, CommentSection, Error } from '@/components'
 
 function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
     if (isErrorFromServer) {
-        return <div>An errorn has happen</div>
+        return <Error />
     }
+    
     const router = useRouter()
-    // const postId = router.query.id as string
     const { options, id: postId } = router.query
     const { data } = usePostQuery({ variables: { postId: Number(postId) } })
 

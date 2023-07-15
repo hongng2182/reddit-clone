@@ -3,14 +3,16 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Reference } from '@apollo/client'
+import toast from 'react-hot-toast'
 import { PostInfo, VoteStatusValues } from '@/types'
 import { getTimeAgo } from '@/utils'
 import { defaultCommunityIcon } from '@/lib/constants'
 import { PaginatedPosts, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
-import { useGlobalState } from '@/hooks'
+import { useGlobalState, useModal } from '@/hooks'
 import { setShowSignInModal } from '@/action'
 import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon } from '../icons'
 import EditPost from './edit-post'
+import Modal from './modal'
 
 type PostBoxProps = {
     post: PostInfo,
@@ -34,17 +36,18 @@ const getPointsColorClassname = (voteStatus: number) => {
 }
 function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, isSinglePost, isEditing }: PostBoxProps) {
     // Object destructure from post
-    // TODO: add field urlLink Post
-    const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt, community: { name: communityName, hasJoined, communityIconUrl }, numComments, imageUrl } = post
+    const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt, community: { name: communityName, hasJoined, communityIconUrl }, numComments, imageUrl, urlLink } = post
     const pointsClassname = getPointsColorClassname(voteStatus)
     const timeAgo = getTimeAgo(Number(createdAt))
-    // Declare state
+    // React hooks
     const router = useRouter()
     const { options } = router.query
     const [showEdit, setShowEdit] = useState(false)
     const [isLoading, setLoading] = useState(true);
-    // Hooks
     const { dispatch } = useGlobalState()
+    const { isOpen, openModal, closeModal } = useModal()
+
+    // GraphQL hooks
     const [vote] = useVoteMutation()
     const { data: meData } = useMeQuery()
     const [delelePost, { loading: isDeleteLoading }] = useDeletePostMutation()
@@ -60,6 +63,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
         await delelePost({
             variables: { deletePostId: postId }, update(cache, { data: deleteData }) {
                 if (deleteData?.deletePost) {
+                    toast.success('Successfully delete post!')
                     cache.modify({
                         fields: {
                             posts(existing: Pick<PaginatedPosts,
@@ -85,17 +89,27 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                             }
                         }
                     })
+                    closeModal()
+                    if (router.pathname === '/static/r/[community]/comments/[id]') { router.push('/static') }
                 }
             }
         })
     }
 
-    const handleJoinCommunity = () => {
+    const handleJoinCommunity = async () => {
         if (!meData?.me) {
             dispatch(setShowSignInModal(true))
             return
         }
-        joinCommunity({ variables: { communityName } })
+        try {
+            const response = await joinCommunity({ variables: { communityName } })
+            if (response.data?.joinCommunity.community?.hasJoined) {
+                toast.success(`Successfully joined r/${communityName}!`)
+            }
+        }
+        catch (err) {
+            toast.error(`Error when joining r/${communityName} `)
+        }
     }
 
     const upVote = async (voteValue: number, postId: number) => {
@@ -132,7 +146,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
         if (isEditing) setShowEdit(true)
     }, [isEditing])
 
-    return (
+    return (<>
         <div onClick={(e) => handlePostClick(e)}
             className={`${comments ? 'border-transparent' : 'hover:border-gray cursor-pointer'}
             ${isTrendingPost && 'p-2'} white-gray-rounded flex shadow-md w-full`}>
@@ -188,7 +202,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                         </div>
                     </div>
                     {!hasJoined && !hideJoinBtn && <button
-                        type="button" className='text-sm button-light hover:bg-medium disabled:cursor-none disabled:bg-medium'
+                        type="button" className='text-sm button-main disabled:cursor-none disabled:bg-medium'
                         onClick={(e) => {
                             e.stopPropagation()
                             handleJoinCommunity()
@@ -197,12 +211,19 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                     >{joinData?.joinCommunity.community?.hasJoined ? 'Joined' : 'Join'}</button>}
                 </div>
                 {isTrendingPost ?
-                    <h2 className='pr-3 label-md'>{title}</h2>
-                    : <h2 className='pr-3'>{title}</h2>}
+                    <div>
+                        <h2 className='pr-3 label-md'>{title}</h2>
+                        {urlLink && <Link className='text-xs text-cate-blue' href={urlLink}>{urlLink.slice(0, 30)}...</Link>}
+                    </div>
+                    : <div>
+                        <h2 className='pr-3'>{title}</h2>
+                        {urlLink && <Link className='text-sm text-cate-blue' href={urlLink}>{urlLink.slice(0, 30)}...</Link>}
+                    </div>
+                }
                 {!isTrendingPost && <>
                     {!isEditing && <p>{isSinglePost ? text : textSnippet}</p>}
                     {imageUrl &&
-                        <div className="relative max-h-[500px] h-auto w-full bg-gray-200">
+                        <div className="relative h-auto w-full bg-gray-200 object-contain">
                             <Image
                                 alt="post-image"
                                 src={imageUrl}
@@ -210,7 +231,9 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                                 width="500"
                                 height="500"
                                 sizes='100%'
-                                className={`w-auto h-auto mx-auto duration-700 max-h-[500px] ease-in-out group-hover:opacity-75 ${isLoading ? "blur-2xl grayscale" : "blur-0 grayscale-0"})`}
+                                className={`w-auto h-auto mx-auto duration-700  ease-in-out group-hover:opacity-75 max-h-[500px]
+                                ${isLoading ? "blur-2xl grayscale" : "blur-0 grayscale-0"}
+                                `}
                                 onLoadingComplete={() => setLoading(false)}
                             />
                         </div>
@@ -249,10 +272,9 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                             </button>
                             <button className='post-action'
                                 type='button'
-                                disabled={isDeleteLoading}
                                 onClick={(e) => {
                                     e.stopPropagation()
-                                    handleDeletePost(post.id)
+                                    openModal()
                                 }}>
                                 <DeleteIcon />
                                 Delete
@@ -289,6 +311,24 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                 {comments && comments}
             </div>
         </div >
+        <Modal isOpen={isOpen}
+            closeModal={closeModal}
+        >
+            <div className="flex-col-center-10 p-2">
+                <div>Are you sure you want to delete this post?</div>
+                <div className="flex-center gap-2 w-full mt-2">
+                    <button type='button' className='button-main-outline' onClick={closeModal}>Cancel</button>
+                    <button type='button' className='button-main'
+                        disabled={isDeleteLoading}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeletePost(post.id)
+                        }}>{isDeleteLoading ? 'Loading' : 'Delete'}</button>
+                </div>
+            </div>
+
+        </Modal>
+    </>
     )
 }
 

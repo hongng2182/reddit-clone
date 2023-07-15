@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState } from 'react'
 import { useRouter } from 'next/router'
-import { PostDocument, useMeQuery, usePostQuery, useUpdatePostMutation } from '@/generated/graphql'
+import { PostDocument, useMeQuery, usePostQuery } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
 
 export default function PostEdit({ isError: isErrorFromServer }: { isError: boolean }) {
@@ -13,7 +13,7 @@ export default function PostEdit({ isError: isErrorFromServer }: { isError: bool
 
     const { data: meData, error: meError } = useMeQuery()
     const { data: postData, error: postError } = usePostQuery({ variables: { postId: Number(postId) } })
-    const [updatePost] = useUpdatePostMutation()
+    // const [updatePost] = useUpdatePostMutation()
 
     const [form, setForm] = useState({ title: postData?.post?.title ?? '', text: postData?.post?.text ?? '' })
 
@@ -46,15 +46,15 @@ export default function PostEdit({ isError: isErrorFromServer }: { isError: bool
                     onSubmit={async (e) => {
                         e.preventDefault()
                         try {
-                            const response = await updatePost({
-                                variables: {
-                                    updatePostId: Number(postId),
-                                    input: form
-                                }
-                            })
-                            if (response.data?.updatePost) {
-                                router.push('/')
-                            }
+                            // const response = await updatePost({
+                            //     variables: {
+                            //         updatePostId: Number(postId),
+                            //         input: form
+                            //     }
+                            // })
+                            // if (response.data?.updatePost) {
+                            //     router.push('/')
+                            // }
                         } catch (err) {
                             console.log(err)
                         }

@@ -1,0 +1,11 @@
+query UserCommunities {
+  userCommunities {
+    isModerator
+    community {
+      id
+      name
+      communityIconUrl
+      numMembers
+    }
+  }
+}

@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import toast from 'react-hot-toast'
 import { CommunityInfo, PrivacyType } from '@/types'
 import { defaultCommunityIcon } from '@/lib/constants'
 import { useUpdateCommunityMutation } from '@/generated/graphql'
@@ -36,18 +37,26 @@ function AboutCommunity({ communityInfo, isSubmitPost, isMod, isUserLogin }: Pro
     })
 
     const handleEditDescription = async () => {
-        const response = await updateCommunity({
-            variables: {
-                updateCommunityId: id,
-                input: { description: descriptionInput }
+        if (descriptionInput !== '' && descriptionInput !== description) {
+            const response = await updateCommunity({
+                variables: {
+                    updateCommunityId: id,
+                    input: { description: descriptionInput }
+                }
+            })
+            const communityData = response.data?.updateCommunity.community
+            if (communityData) {
+                toast.success("Community settings updated successfully")
+                setShowEdit(false)
+                if (communityData.description) {
+                    setDescriptionInput(communityData.description)
+                }
             }
-        })
-        const communityData = response.data?.updateCommunity.community
-        if (communityData) {
-            setShowEdit(false)
-            if (communityData.description) {
-                setDescriptionInput(communityData.description)
-            }
+        } else {
+            toast("Please make sure you have entered updated info!", {
+                icon: '🤔',
+                style: { color: '#363938', backgroundColor: '#f5fafc' }
+            })
         }
     }
 

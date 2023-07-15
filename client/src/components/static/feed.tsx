@@ -22,7 +22,7 @@ const feeds: Feeds = {
     {
         icon: 'arrow',
         name: 'Popular',
-        link: 'static/r/popular'
+        link: '/static/r/popular'
     }],
 }
 
@@ -63,8 +63,7 @@ function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
 
     return (
         <div className="bg-white relative _995:w-[270px]"
-            onMouseEnter={() => setShowTab(true)}
-            onMouseLeave={() => setShowTab(false)}
+            onClick={() => setShowTab(!showTab)}
         >
             <div className={`w-full font-bold h-[40px] border hover:border-medium rounded-[4px] p-[5px] flex-between-10 cursor-pointer ${showTab ? 'border-medium' : 'border-transparent'}`}
             >
@@ -89,32 +88,36 @@ function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
                         type='button'
                         className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
                         onClick={() => {
+                            setShowTab(false)
                             setActiveTab(item)
                             router.push(item.link)
-                            setShowTab(false)
                         }}
                     >
                         <Image
                             alt='img'
                             width='24'
                             height='24'
-                            src={`/icons/${item.icon}-outline.svg`}
+                            src={activeTab.name === item.name ? `/icons/${item.icon}-fill.svg` : `/icons/${item.icon}-outline.svg`}
                             className='img-24'
                         />
-                        <span>{item.name}</span>
+                        <span className={activeTab.name === item.name ? 'font-bold' : ''}>{item.name}</span>
                     </button >
                 )}
                 {/* COMMUNITIES */}
                 {isUserLogIn && constants.map(menu =>
                     <div key={menu.title} className='w-full'>
                         <h4 className='feed-tab label-sm'>{menu.title}</h4>
+                        {/* Sub Feed */}
                         {menu.sub_feed.map(item => <button
                             key={item.name}
                             type='button'
                             className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
                             onClick={() => {
                                 setActiveTab(item)
-                                if (item.name === 'Create Community') { openModal() }
+                                if (item.name === 'Create Community') {
+                                    openModal()
+                                    setShowTab(false)
+                                }
                                 else if (item.link) { router.push(item.link) }
                             }}
                         >
@@ -125,8 +128,9 @@ function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
                                 src={`/icons/${item.icon}-outline.svg`}
                                 className='img-24'
                             />
-                            <span>{item.name}</span>
+                            <span className={activeTab.name === item.name ? 'font-bold' : ''}>{item.name}</span>
                         </button >)}
+                        {/* Communities map */}
                         {menu.communities &&
                             menu.communities.map(community => <button
                                 key={community.name}
@@ -137,6 +141,7 @@ function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
                                         icon: community.imgSrc,
                                         name: `r/${community.name}`
                                     })
+                                    setShowTab(false)
                                     router.push(`/static/r/${community.name}`)
                                 }}
                             >
@@ -148,7 +153,7 @@ function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
                                     sizes='100%'
                                     className='img-24'
                                 />
-                                <span>r/{community.name}</span>
+                                <span className={activeTab.name === `r/${community.name}` ? 'font-bold' : ''}>r/{community.name}</span>
                             </button>)
                         }
                     </div>

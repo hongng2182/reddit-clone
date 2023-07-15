@@ -5,3 +5,17 @@ export enum PrivacyType {
     restricted = 'restricted',
     private = 'private'
 }
+
+export type CommunityFragment = {
+    __typename?: "Community" | undefined;
+    id: number;
+    name: string;
+    communityIconUrl?: string | null | undefined;
+    numMembers: number;
+}
+
+export type UserCommunities = {
+    __typename?: "UserCommunities" | undefined;
+    isModerator: boolean;
+    community: CommunityFragment
+}[]

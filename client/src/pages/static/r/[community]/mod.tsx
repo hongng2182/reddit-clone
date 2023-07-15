@@ -1,24 +1,18 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import Image from 'next/image'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import Link from 'next/link'
-import {
-    ref,
-    uploadBytesResumable,
-    getDownloadURL,
-    deleteObject,
-} from 'firebase/storage'
 import toast from 'react-hot-toast'
-import { Error, PageContainer } from '@/components'
+import { Error, ImageUpload, PageContainer } from '@/components'
 import { CommunityDocument, CommunityUpdateInput, MeDocument, useCommunityQuery, useMeQuery, useUpdateCommunityMutation } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
 import { defaultCommunityIcon } from '@/lib/constants'
 import { PrivacyType } from '@/types'
-import { LockIcon, ProfileIcon, RestrictedIcon, UploadIcon, DeleteIcon } from '@/components/icons'
-import { storage } from '@/lib/firebase'
+import { LockIcon, ProfileIcon, RestrictedIcon } from '@/components/icons'
+import { useUploadImage } from '@/hooks'
 
 
 const MAX_DISPLAYNAME_CHARACTERS = 100
@@ -35,10 +29,7 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
     const { data: communityData } = useCommunityQuery({ variables: { communityName } })
     const [updateCommunity] = useUpdateCommunityMutation()
 
-    // React hooks 
-    const inputFileRef = useRef<HTMLInputElement>(null)
-    const [isUploading, setIsUploading] = useState(false)
-    const [photoFile, setPhotoFile] = useState<File | null>(null)
+    // Form state
     const [displayName, setDisplayName] = useState<string>('')
     const [description, setDescription] = useState<string>('')
     const [privacyType, setPrivacyType] = useState<string>('')
@@ -53,21 +44,33 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
         }
     }, [communityData?.community])
 
-    // Memorize image to prevent re-render when description change
-    const memoizedImage = useMemo(() => (
-        photoFile && <Image
-            className='relative rounded-[0.75rem] md:w-[298px] h-[198px] object-cover object-[center,top] bg-medium'
-            src={URL.createObjectURL(photoFile)}
-            alt="avatar"
-            width={298}
-            height={198}
-        />
-    ), [photoFile]);
+    // Image Upload hooks
+    const onUploadComplete = (downloadURL: string) => {
+        setcommunityIconUrl(downloadURL)
+    }
+    const { isUploading, photoFile, deleteImage, handleFileInput, deleteFirebaseImage, setPhotoFile } = useUploadImage({
+        onUploadComplete,
+        firebaseFolderName: 'community-icon'
+    })
+
+    const memoizedImage = useMemo(() => {
+        const onDeleteImage = () => {
+            deleteImage()
+            setcommunityIconUrl('')
+        }
+        return (
+            <ImageUpload
+                photoFile={photoFile}
+                handleFileInput={handleFileInput}
+                isUploading={isUploading}
+                onDeleteImage={onDeleteImage}
+            />
+        )
+    }, [photoFile, handleFileInput, isUploading]);
 
     // Utils
     const remainNameCharacters = MAX_DISPLAYNAME_CHARACTERS - displayName.length
     const remainDescCharacters = MAX_DESCRIPTION_CHARACTERS - description.length
-
 
     if (isErrorFromServer) {
         return <Error />
@@ -75,58 +78,6 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
 
     if (!meData?.me || meData.me.id !== communityData?.community?.creatorId) {
         return <UserNotAllowed communityName={communityData?.community?.name} />
-    }
-
-    const handleOpenFile = () => {
-        if (inputFileRef.current) {
-            inputFileRef.current.click()
-        }
-    }
-
-    const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
-        const uploadFile = e.target.files
-        if (uploadFile) {
-            const fileType = uploadFile[0]?.type
-            const fileSize = uploadFile[0]?.size
-            if (
-                (fileType === 'image/png' ||
-                    fileType === 'image/jpg' ||
-                    fileType === 'image/jpeg') &&
-                fileSize > 0 &&
-                fileSize < 2048 * 1000
-            ) {
-                setPhotoFile(uploadFile[0])
-                // Create file name and prepare to upload image to Firebase storage
-                const fileName = new Date().getTime() + uploadFile[0].name
-                const storageRef = ref(storage, `community-icon/${fileName}`)
-                const uploadTask = uploadBytesResumable(storageRef, uploadFile[0])
-                setIsUploading(true)
-                uploadTask.on('state_changed', {
-                    next: snapshot => {
-                        const progress =
-                            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                        console.log(`Upload file ${progress} %`)
-                    },
-                    error: errorUpload => {
-                        toast.error('Error while uploading your image! Please try again!', {
-                            position: 'top-center',
-                        })
-                        console.log(errorUpload)
-                        setIsUploading(false)
-                    },
-                    complete: async () => {
-                        // Upload success then get photo url and save to data
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref)
-                        setcommunityIconUrl(downloadURL)
-                        setIsUploading(false)
-                    },
-                })
-            } else {
-                toast.error('Please choose the correct image file type and size!', {
-                    position: 'top-center',
-                })
-            }
-        }
     }
 
     const handleSaveChanges = async () => {
@@ -155,19 +106,11 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
                 if (response.data?.updateCommunity.community)
                     // If success, find and delete old image record in Firebase(if has)
                     toast.success('Successfuly save your community settings!')
+                setPhotoFile(null)
                 try {
                     const { communityIconUrl: oldCommunityIconUrl } = initialForm
                     if (oldCommunityIconUrl && form.communityIconUrl) {
-                        // Find old pic
-                        const oldPhoto = ref(storage, oldCommunityIconUrl)
-                        if (oldPhoto.name) {
-                            // Start deleting
-                            const desertRef = ref(storage, `community-icon/${oldPhoto.name}`)
-                            // Delete the file
-                            deleteObject(desertRef).catch(deleteError => {
-                                console.log(deleteError)
-                            })
-                        }
+                        deleteFirebaseImage(oldCommunityIconUrl)
                     }
                 } catch (deletePhotoError) {
                     console.log(deletePhotoError)
@@ -281,35 +224,7 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
                     <h4 className='label-md-gray'>COMMUNITY ICON</h4>
                     <div className="h-[1px] w-full bg-medium mt-1" />
                     <div className='m-[15px]'>
-                        <form className='flex-center flex-col' encType="multipart/form-data">
-                            <div className='md:flex-center md:gap-[1.5rem]'>
-                                {!photoFile && <div className=' flex-col-center-10 justify-center rounded-[0.75rem] border border-medium md:w-[300px] h-[200px] cursor-grabbing'
-                                    onClick={() => handleOpenFile()}
-                                >
-                                    <UploadIcon width={50} height={50} className='mx-auto' />
-                                    <p className="label-md-gray"> Drag & drop or upload image file here </p>
-                                    <input
-                                        className='hidden'
-                                        type="file"
-                                        accept=".jpg, .png, .jpeg"
-                                        ref={inputFileRef}
-                                        onChange={handleFileInput}
-                                    />
-                                </div>}
-                                {photoFile && <div className='border relative border-medium rounded-[0.75rem] md:w-[300px] h-[200px]'>
-                                    {memoizedImage}
-                                    <div className='flex-end h-[15%] pr-2'>
-                                        <button type="button" onClick={() => {
-                                            setPhotoFile(null)
-                                            setcommunityIconUrl('')
-                                        }}>
-                                            <DeleteIcon fill='#dd2c00' />
-                                        </button>
-                                    </div>
-                                    {isUploading && <div className='absolute inset-0 w-full h-full flex-center bg-light'>Loading</div>}
-                                </div>}
-                            </div>
-                        </form>
+                        {memoizedImage}
                     </div>
                 </div>
             </div>

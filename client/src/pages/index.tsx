@@ -128,7 +128,6 @@ export default function Home() {
 
 export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 
-  // console.log('context', context)
   const apolloClient = initializeApollo({ headers: context.req.headers })
 
   await apolloClient.query({
