@@ -12,7 +12,7 @@ function getTimeAgo(time: number): string {
     const timeDifference = Math.floor(Date.now() / 1000) - time / 1000;
 
     if (timeDifference < 1) {
-        return 'less than 1 second ago';
+        return 'just now';
     }
 
     const condition = [

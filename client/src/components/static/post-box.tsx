@@ -8,11 +8,12 @@ import { PostInfo, VoteStatusValues } from '@/types'
 import { getTimeAgo } from '@/utils'
 import { defaultCommunityIcon } from '@/lib/constants'
 import { PaginatedPosts, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
-import { useGlobalState, useModal } from '@/hooks'
+import { useGlobalState, useModal, useCreateRootCommentHook } from '@/hooks'
 import { setShowSignInModal } from '@/action'
-import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon } from '../icons'
+import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon, AddIcon } from '../icons'
 import EditPost from './edit-post'
 import Modal from './modal'
+import CommentForm from './comment-form'
 
 type PostBoxProps = {
     post: PostInfo,
@@ -52,6 +53,8 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
     const { data: meData } = useMeQuery()
     const [delelePost, { loading: isDeleteLoading }] = useDeletePostMutation()
     const [joinCommunity, { data: joinData }] = useJoinCommunityMutation()
+    // Other Hooks
+    const { onCommentSubmit } = useCreateRootCommentHook({ postId: id })
 
     // Utils
     const handlePostClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -249,10 +252,10 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                             <ShareIcon />
                             Share
                         </div>
-                        <div className='post-action'>
+                        {meData?.me && <div className='post-action'>
                             <SaveIcon />
                             Save
-                        </div>
+                        </div>}
 
                         {meData?.me?.id === post.ownerId && <>
                             {text && <button className='post-action'
@@ -295,17 +298,19 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                     </div>
                 }
                 {/* COMMENTS */}
-                {comments &&
-                    <div className='w-full'>
-                        <span className='label-md'>Comment as {meData?.me?.username}</span>
-                        <div className='rounded-sm border border-medium mt-2'>
-                            <textarea name="create-post" className=' w-full font-light px-2 py-3 h-[70px] focus:outline-none' placeholder='What are your thoughts?'
-                            />
-                            <div className='flex-end p-2 bg-light'>
-                                <button type="button" className='button-main'>Comment</button>
-                            </div>
-                        </div>
-                    </div>}
+                {isSinglePost && meData?.me &&
+                    <><span className='label-md'>Comment as {meData?.me.username}</span>
+                        <CommentForm
+                            initialValue=''
+                            onSubmit={onCommentSubmit} />
+                    </>}
+                {isSinglePost && !meData?.me &&
+                    <div className='border py-2 px-5 rounded-full border-medium hover:border-gray flex-start-10 cursor-pointer'
+                        onClick={() => dispatch(setShowSignInModal(true))}
+                    >
+                        <AddIcon />
+                        Add a comment</div>
+                }
                 {comments && comments}
             </div>
         </div >
@@ -324,7 +329,6 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                         }}>{isDeleteLoading ? 'Loading' : 'Delete'}</button>
                 </div>
             </div>
-
         </Modal>
     </>
     )

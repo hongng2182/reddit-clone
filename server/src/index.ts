@@ -5,7 +5,7 @@ import { typeOrmConfigDev, typeOrmConfigProd } from './type-orm.config'
 import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
-import { CommunityResolver, PostResolver, UserResolver } from './resolvers'
+import { CommunityResolver, PostResolver, UserResolver, CommentResolver } from './resolvers'
 import RedisStore from "connect-redis"
 import session from "express-session"
 import { createClient } from "redis"
@@ -22,8 +22,8 @@ const main = async () => {
     // if (__prod__) {
     // console.log('migration run')
     // await AppDataSource.runMigrations()
- 
-    
+
+
     const app = express()
 
     // Initialize client.
@@ -65,7 +65,7 @@ const main = async () => {
 
     const apolloServer = new ApolloServer<MyContext>({
         schema: await buildSchema({
-            resolvers: [PostResolver, UserResolver, CommunityResolver],
+            resolvers: [PostResolver, UserResolver, CommunityResolver, CommentResolver],
             validate: false
         }),
         context: ({ req, res }) => ({ req, res, redisClient, dataLoaders: buildDataLoaders() })

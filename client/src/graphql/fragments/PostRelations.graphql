@@ -1,0 +1,13 @@
+fragment PostRelations on Post {
+  user {
+    username
+  }
+  community {
+    name
+    hasJoined
+    communityIconUrl
+  }
+  comments {
+    ...CommentInfo
+  }
+}

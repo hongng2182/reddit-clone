@@ -16,13 +16,17 @@ export class Comment extends BaseEntity {
 
     @Field()
     @Column()
-    authorId: number;
+    userId: number;
 
     @Field()
     @Column()
     postId: number;
 
     @Field()
+    @Column({ default: false })
+    isDeleted: boolean;
+
+    @Field({ nullable: true })
     @Column({ nullable: true })
     parentId: number;
 
@@ -38,7 +42,7 @@ export class Comment extends BaseEntity {
     @ManyToOne(() => Comment, comment => comment.children, { onDelete: 'CASCADE' })
     parent: Comment;
 
-    @Field(() => [Comment])
+    @Field(() => [Comment], { nullable: true })
     @OneToMany(() => Comment, comment => comment.parent)
     children: Comment[];
 

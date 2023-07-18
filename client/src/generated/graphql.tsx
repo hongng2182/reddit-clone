@@ -15,6 +15,28 @@ export type Scalars = {
   Float: number;
 };
 
+export type Comment = {
+  __typename?: 'Comment';
+  children?: Maybe<Array<Comment>>;
+  createdAt: Scalars['String'];
+  id: Scalars['Float'];
+  isDeleted: Scalars['Boolean'];
+  message: Scalars['String'];
+  parent?: Maybe<Comment>;
+  parentId?: Maybe<Scalars['Float']>;
+  post: Post;
+  postId: Scalars['Float'];
+  updatedAt: Scalars['String'];
+  user: User;
+  userId: Scalars['Float'];
+};
+
+export type CommentResponse = {
+  __typename?: 'CommentResponse';
+  comment?: Maybe<Comment>;
+  errors?: Maybe<Scalars['String']>;
+};
+
 export type Community = {
   __typename?: 'Community';
   communityIconUrl?: Maybe<Scalars['String']>;
@@ -47,6 +69,12 @@ export type CommunityUpdateInput = {
   privacyType?: InputMaybe<Scalars['String']>;
 };
 
+export type CreateCommentInput = {
+  message: Scalars['String'];
+  parentId?: InputMaybe<Scalars['Float']>;
+  postId: Scalars['Float'];
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
@@ -62,8 +90,10 @@ export type ForgotPasswordResponse = {
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
+  createComment: CommentResponse;
   createCommunity: CommunityResponse;
   createPost: PostResponse;
+  deleteComment: Scalars['Boolean'];
   deletePost: Scalars['Boolean'];
   forgotPassword: ForgotPasswordResponse;
   joinCommunity: CommunityResponse;
@@ -71,6 +101,7 @@ export type Mutation = {
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
+  updateComment?: Maybe<CommentResponse>;
   updateCommunity: CommunityResponse;
   updatePost?: Maybe<Post>;
   vote: Post;
@@ -83,6 +114,11 @@ export type MutationChangePasswordArgs = {
 };
 
 
+export type MutationCreateCommentArgs = {
+  input: CreateCommentInput;
+};
+
+
 export type MutationCreateCommunityArgs = {
   input: CommunityInput;
 };
@@ -90,6 +126,11 @@ export type MutationCreateCommunityArgs = {
 
 export type MutationCreatePostArgs = {
   input: PostInput;
+};
+
+
+export type MutationDeleteCommentArgs = {
+  id: Scalars['Int'];
 };
 
 
@@ -121,6 +162,12 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   options: UserInfoInput;
+};
+
+
+export type MutationUpdateCommentArgs = {
+  id: Scalars['Int'];
+  message: Scalars['String'];
 };
 
 
@@ -156,6 +203,7 @@ export type PaginatedPosts = {
 
 export type Post = {
   __typename?: 'Post';
+  comments: Array<Comment>;
   community: Community;
   communityId: Scalars['Float'];
   createdAt: Scalars['String'];
@@ -254,9 +302,13 @@ export enum VoteType {
   Upvote = 'UPVOTE'
 }
 
+export type CommentInfoFragment = { __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } };
+
 export type CommunityInfoFragment = { __typename?: 'Community', id: number, name: string, displayName: string, description?: string | null, creatorId: number, numMembers: number, privacyType: string, communityIconUrl?: string | null, createdAt: string, hasJoined: boolean };
 
 export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number };
+
+export type PostRelationsFragment = { __typename?: 'Post', user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> };
 
 export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null };
 
@@ -267,6 +319,13 @@ export type ChangePasswordMutationVariables = Exact<{
 
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null } | null } };
+
+export type CreateCommentMutationVariables = Exact<{
+  input: CreateCommentInput;
+}>;
+
+
+export type CreateCommentMutation = { __typename?: 'Mutation', createComment: { __typename?: 'CommentResponse', errors?: string | null, comment?: { __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } } | null } };
 
 export type CreateCommunityMutationVariables = Exact<{
   input: CommunityInput;
@@ -281,6 +340,13 @@ export type CreatePostMutationVariables = Exact<{
 
 
 export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', errors?: string | null, post?: { __typename?: 'Post', id: number, community: { __typename?: 'Community', name: string } } | null } };
+
+export type DeleteCommentMutationVariables = Exact<{
+  deleteCommentId: Scalars['Int'];
+}>;
+
+
+export type DeleteCommentMutation = { __typename?: 'Mutation', deleteComment: boolean };
 
 export type DeletePostMutationVariables = Exact<{
   deletePostId: Scalars['Int'];
@@ -330,6 +396,14 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null } | null } };
 
+export type UpdateCommentMutationVariables = Exact<{
+  message: Scalars['String'];
+  updateCommentId: Scalars['Int'];
+}>;
+
+
+export type UpdateCommentMutation = { __typename?: 'Mutation', updateComment?: { __typename?: 'CommentResponse', errors?: string | null, comment?: { __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } } | null } | null };
+
 export type UpdateCommunityMutationVariables = Exact<{
   input: CommunityUpdateInput;
   updateCommunityId: Scalars['Int'];
@@ -361,7 +435,7 @@ export type GetCommunityPostsQueryVariables = Exact<{
 }>;
 
 
-export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null } }> } };
+export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> }> } };
 
 export type CommunityQueryVariables = Exact<{
   communityName: Scalars['String'];
@@ -380,7 +454,7 @@ export type PostQueryVariables = Exact<{
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null } } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> } | null };
 
 export type PostsQueryVariables = Exact<{
   first: Scalars['Int'];
@@ -388,7 +462,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null } }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> }> } };
 
 export type UserCommunitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -426,6 +500,37 @@ export const PostInfoFragmentDoc = gql`
   communityId
 }
     `;
+export const CommentInfoFragmentDoc = gql`
+    fragment CommentInfo on Comment {
+  id
+  message
+  postId
+  user {
+    profileUrl
+    username
+    id
+  }
+  parentId
+  isDeleted
+  createdAt
+  updatedAt
+}
+    `;
+export const PostRelationsFragmentDoc = gql`
+    fragment PostRelations on Post {
+  user {
+    username
+  }
+  community {
+    name
+    hasJoined
+    communityIconUrl
+  }
+  comments {
+    ...CommentInfo
+  }
+}
+    ${CommentInfoFragmentDoc}`;
 export const UserInfoFragmentDoc = gql`
     fragment UserInfo on User {
   id
@@ -474,6 +579,42 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const CreateCommentDocument = gql`
+    mutation CreateComment($input: CreateCommentInput!) {
+  createComment(input: $input) {
+    errors
+    comment {
+      ...CommentInfo
+    }
+  }
+}
+    ${CommentInfoFragmentDoc}`;
+export type CreateCommentMutationFn = Apollo.MutationFunction<CreateCommentMutation, CreateCommentMutationVariables>;
+
+/**
+ * __useCreateCommentMutation__
+ *
+ * To run a mutation, you first call `useCreateCommentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCommentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCommentMutation, { data, loading, error }] = useCreateCommentMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCommentMutation(baseOptions?: Apollo.MutationHookOptions<CreateCommentMutation, CreateCommentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCommentMutation, CreateCommentMutationVariables>(CreateCommentDocument, options);
+      }
+export type CreateCommentMutationHookResult = ReturnType<typeof useCreateCommentMutation>;
+export type CreateCommentMutationResult = Apollo.MutationResult<CreateCommentMutation>;
+export type CreateCommentMutationOptions = Apollo.BaseMutationOptions<CreateCommentMutation, CreateCommentMutationVariables>;
 export const CreateCommunityDocument = gql`
     mutation CreateCommunity($input: CommunityInput!) {
   createCommunity(input: $input) {
@@ -549,6 +690,37 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const DeleteCommentDocument = gql`
+    mutation DeleteComment($deleteCommentId: Int!) {
+  deleteComment(id: $deleteCommentId)
+}
+    `;
+export type DeleteCommentMutationFn = Apollo.MutationFunction<DeleteCommentMutation, DeleteCommentMutationVariables>;
+
+/**
+ * __useDeleteCommentMutation__
+ *
+ * To run a mutation, you first call `useDeleteCommentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCommentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCommentMutation, { data, loading, error }] = useDeleteCommentMutation({
+ *   variables: {
+ *      deleteCommentId: // value for 'deleteCommentId'
+ *   },
+ * });
+ */
+export function useDeleteCommentMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCommentMutation, DeleteCommentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCommentMutation, DeleteCommentMutationVariables>(DeleteCommentDocument, options);
+      }
+export type DeleteCommentMutationHookResult = ReturnType<typeof useDeleteCommentMutation>;
+export type DeleteCommentMutationResult = Apollo.MutationResult<DeleteCommentMutation>;
+export type DeleteCommentMutationOptions = Apollo.BaseMutationOptions<DeleteCommentMutation, DeleteCommentMutationVariables>;
 export const DeletePostDocument = gql`
     mutation DeletePost($deletePostId: Int!) {
   deletePost(id: $deletePostId)
@@ -800,6 +972,43 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const UpdateCommentDocument = gql`
+    mutation UpdateComment($message: String!, $updateCommentId: Int!) {
+  updateComment(message: $message, id: $updateCommentId) {
+    errors
+    comment {
+      ...CommentInfo
+    }
+  }
+}
+    ${CommentInfoFragmentDoc}`;
+export type UpdateCommentMutationFn = Apollo.MutationFunction<UpdateCommentMutation, UpdateCommentMutationVariables>;
+
+/**
+ * __useUpdateCommentMutation__
+ *
+ * To run a mutation, you first call `useUpdateCommentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCommentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCommentMutation, { data, loading, error }] = useUpdateCommentMutation({
+ *   variables: {
+ *      message: // value for 'message'
+ *      updateCommentId: // value for 'updateCommentId'
+ *   },
+ * });
+ */
+export function useUpdateCommentMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCommentMutation, UpdateCommentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCommentMutation, UpdateCommentMutationVariables>(UpdateCommentDocument, options);
+      }
+export type UpdateCommentMutationHookResult = ReturnType<typeof useUpdateCommentMutation>;
+export type UpdateCommentMutationResult = Apollo.MutationResult<UpdateCommentMutation>;
+export type UpdateCommentMutationOptions = Apollo.BaseMutationOptions<UpdateCommentMutation, UpdateCommentMutationVariables>;
 export const UpdateCommunityDocument = gql`
     mutation UpdateCommunity($input: CommunityUpdateInput!, $updateCommunityId: Int!) {
   updateCommunity(input: $input, id: $updateCommunityId) {
@@ -918,18 +1127,12 @@ export const GetCommunityPostsDocument = gql`
     }
     paginatedPosts {
       ...PostInfo
-      user {
-        username
-      }
-      community {
-        name
-        hasJoined
-        communityIconUrl
-      }
+      ...PostRelations
     }
   }
 }
-    ${PostInfoFragmentDoc}`;
+    ${PostInfoFragmentDoc}
+${PostRelationsFragmentDoc}`;
 
 /**
  * __useGetCommunityPostsQuery__
@@ -1033,17 +1236,11 @@ export const PostDocument = gql`
     query Post($postId: Float!) {
   post(id: $postId) {
     ...PostInfo
-    user {
-      username
-    }
-    community {
-      name
-      hasJoined
-      communityIconUrl
-    }
+    ...PostRelations
   }
 }
-    ${PostInfoFragmentDoc}`;
+    ${PostInfoFragmentDoc}
+${PostRelationsFragmentDoc}`;
 
 /**
  * __usePostQuery__
@@ -1082,18 +1279,12 @@ export const PostsDocument = gql`
     }
     paginatedPosts {
       ...PostInfo
-      user {
-        username
-      }
-      community {
-        name
-        hasJoined
-        communityIconUrl
-      }
+      ...PostRelations
     }
   }
 }
-    ${PostInfoFragmentDoc}`;
+    ${PostInfoFragmentDoc}
+${PostRelationsFragmentDoc}`;
 
 /**
  * __usePostsQuery__

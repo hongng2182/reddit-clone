@@ -11,14 +11,7 @@ query GetCommunityPosts($first: Int!, $after: String, $communityName: String!) {
     }
     paginatedPosts {
       ...PostInfo
-      user {
-        username
-      }
-      community {
-        name
-        hasJoined
-        communityIconUrl
-      }
+      ...PostRelations
     }
   }
 }

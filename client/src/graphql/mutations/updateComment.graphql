@@ -1,0 +1,8 @@
+mutation UpdateComment($message: String!, $updateCommentId: Int!) {
+  updateComment(message: $message, id: $updateCommentId) {
+    errors
+    comment {
+      ...CommentInfo
+    }
+  }
+}

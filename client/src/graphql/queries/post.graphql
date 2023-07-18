@@ -1,13 +1,6 @@
 query Post($postId: Float!) {
   post(id: $postId) {
     ...PostInfo
-    user {
-      username
-    }
-    community {
-      name
-      hasJoined
-      communityIconUrl
-    }
+    ...PostRelations
   }
 }

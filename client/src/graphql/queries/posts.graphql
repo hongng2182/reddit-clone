@@ -7,14 +7,7 @@ query Posts($first: Int!, $after: String) {
     }
     paginatedPosts {
       ...PostInfo
-      user {
-        username
-      }
-      community {
-        name
-        hasJoined
-        communityIconUrl
-      }
+      ...PostRelations
     }
   }
 }

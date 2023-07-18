@@ -10,7 +10,7 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
     if (isErrorFromServer) {
         return <Error />
     }
-    
+
     const router = useRouter()
     const { options, id: postId } = router.query
     const { data } = usePostQuery({ variables: { postId: Number(postId) } })
@@ -27,7 +27,7 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
                         hideJoinBtn
                         isSinglePost
                         isEditing={options === 'edit'}
-                        comments={<CommentSection />} />
+                        comments={<CommentSection commentsData={data.post.comments} />} />
                 </div>
             }
         </PageContainer>

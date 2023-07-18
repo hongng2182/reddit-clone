@@ -1,0 +1,14 @@
+fragment CommentInfo on Comment {
+  id
+  message
+  postId
+  user {
+    profileUrl
+    username
+    id
+  }
+  parentId
+  isDeleted
+  createdAt
+  updatedAt
+}

@@ -1,5 +1,5 @@
 import { MyContext, VoteType } from "../types/index";
-import { Community, Post, User, Vote } from "../entities";
+import { Community, Post, User, Vote, Comment } from "../entities";
 import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware, FieldResolver, Root, ObjectType, registerEnumType } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../index";
@@ -75,6 +75,17 @@ export class PostResolver {
         return await communityLoader.load(root.communityId)
     }
 
+    @FieldResolver(() => [Comment])
+    async comments(@Root() root: Post,
+    ) {
+        const comments = await Comment.find({
+            where: { postId: root.id },
+            order: { createdAt: 'DESC' },
+            relations: { user: true }
+        })
+        return comments
+    }
+
     @FieldResolver(() => Int)
     async voteStatus(@Root() root: Post,
         @Ctx() { req, dataLoaders: { voteTypeLoader } }: MyContext) {
@@ -86,8 +97,9 @@ export class PostResolver {
         return voteStatus ? voteStatus.value : 0
     }
     @FieldResolver(() => Int)
-    numComments() {
-        return 0
+    async numComments(@Root() root: Comment) {
+        const [_, totalCount] = await Comment.findAndCountBy({ postId: root.id })
+        return totalCount
     }
 
     @Query(() => PaginatedPosts)
@@ -244,6 +256,7 @@ export class PostResolver {
             await Post.delete({ id, ownerId: req.session.userId })
             return true
         } catch (e) {
+            console.log('Error delete post', e)
             return false
         }
     }
