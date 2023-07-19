@@ -75,15 +75,11 @@ export class PostResolver {
         return await communityLoader.load(root.communityId)
     }
 
-    @FieldResolver(() => [Comment])
+    @FieldResolver(() => [Comment], { nullable: true })
     async comments(@Root() root: Post,
+        @Ctx() { dataLoaders: { commentLoader } }: MyContext
     ) {
-        const comments = await Comment.find({
-            where: { postId: root.id },
-            order: { createdAt: 'DESC' },
-            relations: { user: true }
-        })
-        return comments
+        return await commentLoader.load(root.id)
     }
 
     @FieldResolver(() => Int)
@@ -97,9 +93,11 @@ export class PostResolver {
         return voteStatus ? voteStatus.value : 0
     }
     @FieldResolver(() => Int)
-    async numComments(@Root() root: Comment) {
-        const [_, totalCount] = await Comment.findAndCountBy({ postId: root.id })
-        return totalCount
+    async numComments(@Root() root: Comment,
+        @Ctx() { dataLoaders: { numCommentsLoader } }: MyContext) {
+        // const [_, totalCount] = await AppDataSource.getRepository(Comment).findAndCountBy({ postId: root.id })
+        // return totalCount
+        return await numCommentsLoader.load(root.id)
     }
 
     @Query(() => PaginatedPosts)

@@ -49,9 +49,11 @@ export class CommunityResolver {
 
 
     @FieldResolver(() => Int)
-    async numMembers(@Root() root: Community) {
-        const [_, totalCount] = await UserCommunity.findAndCountBy({ communityId: root.id })
-        return totalCount
+    async numMembers(@Root() root: Community,
+     @Ctx() { dataLoaders: { numMembersLoader } }: MyContext) {
+        // const [_, totalCount] = await UserCommunity.findAndCountBy({ communityId: root.id })
+        // return totalCount
+        return await numMembersLoader.load(root.id)
     }
 
     @FieldResolver(() => Boolean)
