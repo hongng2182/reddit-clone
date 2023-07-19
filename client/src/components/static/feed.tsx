@@ -1,171 +1,152 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useModal } from '@/hooks'
+import { useGlobalState, useModal } from '@/hooks'
+import { useUserCommunitiesQuery } from '@/generated/graphql'
+import { defaultCommunityIcon, feeds, tabs } from '@/lib/constants'
+import { setActiveFeedTab } from '@/action'
+import { FeedTab } from '@/types'
 import Modal from './modal'
 import { DropdownIcon } from '../icons'
 import CommunityCreatePopup from './community-create-popup'
 
-type Feeds = {
-    title: string,
-    sub_feed:
-    { icon: string, name: string, link: string }[],
+type TabProps = {
+    handleClick: () => void,
+    imgSrc: string,
+    name: string,
+    isActive: boolean
 }
-
-const feeds: Feeds = {
-    title: 'FEEDS',
-    sub_feed: [{
-        icon: 'home',
-        name: 'Home',
-        link: '/static'
-    },
-    {
-        icon: 'arrow',
-        name: 'Popular',
-        link: '/static/r/popular'
-    }],
-}
-
-const constants = [
-    {
-        title: 'YOUR COMMUNITIES',
-        sub_feed: [{
-            icon: 'add',
-            name: 'Create Community',
-            link: null
-        }],
-        communities: [{
-            imgSrc: 'https://i.pinimg.com/originals/0f/a8/cb/0fa8cb6ebfa7c2ca5e3e229129ba85f3.png',
-            name: 'community'
-        }]
-    },
-    {
-        title: 'OTHER',
-        sub_feed: [{
-            icon: 'add',
-            name: 'Create Post',
-            link: '/static/submit'
-        }],
-    }]
 
 function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
-    const [activeTab, setActiveTab] = useState<{
-        icon: string,
-        name: string
-    }>({
-        icon: 'arrow',
-        name: 'Popular'
-    })
+    const { state: { activeFeedTab }, dispatch } = useGlobalState()
 
+    const setActiveTab = (value: FeedTab) => {
+        dispatch(setActiveFeedTab(value))
+    }
+
+    // React hooks
     const [showTab, setShowTab] = useState(false)
     const { isOpen, openModal, closeModal } = useModal()
     const router = useRouter()
 
-    return (
+    // GraphQL hooks
+    const { data } = useUserCommunitiesQuery()
+
+    return (<>
         <div className="bg-white relative _995:w-[270px]"
             onClick={() => setShowTab(!showTab)}
+            onMouseLeave={() => setShowTab(false)}
         >
             <div className={`w-full font-bold h-[40px] border hover:border-medium rounded-[4px] p-[5px] flex-between-10 cursor-pointer ${showTab ? 'border-medium' : 'border-transparent'}`}
             >
-                <span className='flex-start-10'>
+                <span className='flex-start-10 ml-2'>
                     <Image
                         alt='img'
                         width='20'
                         height='20'
-                        src={activeTab.icon.includes('https://') ? activeTab.icon : `/icons/${activeTab.icon}-fill.svg`}
+                        src={activeFeedTab.iconFill || activeFeedTab.icon}
                         className='img-24'
                     />
-                    <span className='_995M:hidden'>{activeTab.name}</span>
+                    <span className='_995M:hidden'>{activeFeedTab.name}</span>
                 </span>
                 <span><DropdownIcon width={20} fill='#000' /></span>
             </div>
             {showTab && <div className={`${isUserLogIn ? 'h-[360px]' : 'h-[150px]'} w-[270px] absolute top-[38px] flex-col-start-10 bg-white border border-medium border-t-0 z-10 overflow-y-scroll`}>
-                {/* FEEDS */}
-                <h4 className='feed-tab label-sm'>{feeds.title}</h4>
-                {feeds.sub_feed.map(item =>
-                    <button
-                        key={item.name}
-                        type='button'
-                        className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
-                        onClick={() => {
+                {/* MODERATING */}
+                <h4 className='feed-tab label-sm'>MODERATING</h4>
+                {data?.userCommunities && data?.userCommunities.filter(community => community.isModerator).map(item =>
+                    <Tab key={item.community.name}
+                        handleClick={() => {
+                            setActiveTab({
+                                icon: item.community.communityIconUrl || defaultCommunityIcon,
+                                iconFill: null,
+                                name: `r/${item.community.name}`
+                            })
                             setShowTab(false)
-                            setActiveTab(item)
-                            router.push(item.link)
+                            router.push(`/static/r/${item.community.name}`)
                         }}
-                    >
-                        <Image
-                            alt='img'
-                            width='24'
-                            height='24'
-                            src={activeTab.name === item.name ? `/icons/${item.icon}-fill.svg` : `/icons/${item.icon}-outline.svg`}
-                            className='img-24'
-                        />
-                        <span className={activeTab.name === item.name ? 'font-bold' : ''}>{item.name}</span>
-                    </button >
-                )}
+                        imgSrc={item.community.communityIconUrl || defaultCommunityIcon}
+                        name={`r/${item.community.name}`}
+                        isActive={false} />)}
                 {/* COMMUNITIES */}
-                {isUserLogIn && constants.map(menu =>
-                    <div key={menu.title} className='w-full'>
-                        <h4 className='feed-tab label-sm'>{menu.title}</h4>
-                        {/* Sub Feed */}
-                        {menu.sub_feed.map(item => <button
-                            key={item.name}
-                            type='button'
-                            className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
-                            onClick={() => {
-                                setActiveTab(item)
-                                if (item.name === 'Create Community') {
-                                    openModal()
-                                    setShowTab(false)
-                                }
-                                else if (item.link) { router.push(item.link) }
+                {isUserLogIn && <>
+                    <h4 className='feed-tab label-sm'>YOUR COMMUNITIES</h4>
+                    <Tab
+                        handleClick={() => {
+                            setActiveTab(tabs.createCommunity)
+                            openModal()
+                            setShowTab(false)
+                        }}
+                        imgSrc={tabs.createCommunity.icon}
+                        name={tabs.createCommunity.name}
+                        isActive={activeFeedTab.name === tabs.createCommunity.name} />
+                    {data?.userCommunities &&
+                        data?.userCommunities.map(item => <Tab key={item.community.name}
+                            handleClick={() => {
+                                setActiveTab({
+                                    icon: item.community.communityIconUrl || defaultCommunityIcon,
+                                    iconFill: null,
+                                    name: `r/${item.community.name}`
+                                })
+                                setShowTab(false)
+                                router.push(`/static/r/${item.community.name}`)
                             }}
-                        >
-                            <Image
-                                alt='img'
-                                width='24'
-                                height='24'
-                                src={`/icons/${item.icon}-outline.svg`}
-                                className='img-24'
-                            />
-                            <span className={activeTab.name === item.name ? 'font-bold' : ''}>{item.name}</span>
-                        </button >)}
-                        {/* Communities map */}
-                        {menu.communities &&
-                            menu.communities.map(community => <button
-                                key={community.name}
-                                type='button'
-                                className="feed-tab w-full flex-start-10 cursor-pointer hover:bg-light"
-                                onClick={() => {
-                                    setActiveTab({
-                                        icon: community.imgSrc,
-                                        name: `r/${community.name}`
-                                    })
-                                    setShowTab(false)
-                                    router.push(`/static/r/${community.name}`)
-                                }}
-                            >
-                                <Image
-                                    alt='community'
-                                    width='0'
-                                    height='0'
-                                    src={community.imgSrc}
-                                    sizes='100%'
-                                    className='img-24'
-                                />
-                                <span className={activeTab.name === `r/${community.name}` ? 'font-bold' : ''}>r/{community.name}</span>
-                            </button>)
-                        }
-                    </div>
-                )}
+                            imgSrc={item.community.communityIconUrl || defaultCommunityIcon}
+                            name={`r/${item.community.name}`}
+                            isActive={false} />)
+                    }
+                    {/* FEEDS */}
+                    <h4 className='feed-tab label-sm'>{feeds.title}</h4>
+                    {feeds.sub_feed.map(item =>
+                        <Tab key={item.name}
+                            handleClick={() => {
+                                setShowTab(false)
+                                setActiveTab(item)
+                                router.push(item.link)
+                            }}
+                            imgSrc={activeFeedTab.name === item.name ? item.iconFill : item.icon}
+                            name={item.name}
+                            isActive={activeFeedTab.name === item.name} />)}
+                    {/* OTHER */}
+                    {isUserLogIn && <>
+                        <h4 className='feed-tab label-sm'>OTHER</h4>
+                        <Tab
+                            handleClick={() => {
+                                setActiveTab(tabs.createPost)
+                                router.push('/static/submit')
+                            }}
+                            imgSrc={tabs.createPost.icon}
+                            name={tabs.createPost.name}
+                            isActive={activeFeedTab.name === tabs.createPost.name} />
+                    </>}
+                </>}
             </div>}
-            <Modal isOpen={isOpen}
-                closeModal={closeModal}
-            >
-                <CommunityCreatePopup closeModal={closeModal} />
-            </Modal>
         </div >
+        <Modal isOpen={isOpen}
+            closeModal={closeModal}
+        >
+            <CommunityCreatePopup closeModal={closeModal} />
+        </Modal>
+    </>
     )
 }
-
 export default Feed
+
+
+function Tab({ handleClick, imgSrc, name, isActive }: TabProps) {
+    return <button
+        type='button'
+        className="w-full feed-tab flex-start-10 hover:bg-light cursor-pointer"
+        onClick={handleClick}
+    >
+        <Image
+            alt='img'
+            width='24'
+            height='24'
+            src={imgSrc}
+            className='img-24'
+        />
+        <span className={isActive ? 'font-bold' : ''}>{name}</span>
+    </button >
+}

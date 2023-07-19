@@ -10,7 +10,7 @@ import { useCreateRootCommentHook, useModal } from '@/hooks'
 import { defaultDeleteIcon, defaultProfileIcon } from '@/lib/constants'
 import CommentForm from './comment-form'
 import Modal from './modal'
-import { CommentIcon, DeleteIcon, EditIcon, ExpandIcon } from '../icons'
+import { CommentIcon, DeleteIcon, EditIcon, ExpandIcon, LoadingIcon } from '../icons'
 
 
 function getReplies(parentId: string | number, commentsByParentId: {
@@ -186,7 +186,7 @@ function CommentDetail({ comment, commentsByParentId }: {
                     <button type='button' className='button-main-outline' onClick={closeModal}>Cancel</button>
                     <button type='button' className='button-main'
                         disabled={isDeleteLoading}
-                        onClick={onDeleteComment}>{isDeleteLoading ? 'Loading' : 'Delete'}</button>
+                        onClick={onDeleteComment}>{isDeleteLoading ? <LoadingIcon /> : 'Delete'}</button>
                 </div>
             </div>
         </Modal>

@@ -12,7 +12,7 @@ import { addApolloState, initializeApollo } from '@/lib/apolloClient'
 import { defaultCommunityIcon } from '@/lib/constants'
 import { PrivacyType } from '@/types'
 import { LockIcon, ProfileIcon, RestrictedIcon } from '@/components/icons'
-import { useUploadImage } from '@/hooks'
+import { useSetActiveFeed, useUploadImage } from '@/hooks'
 
 
 const MAX_DISPLAYNAME_CHARACTERS = 100
@@ -28,6 +28,7 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
     const { data: meData } = useMeQuery()
     const { data: communityData } = useCommunityQuery({ variables: { communityName } })
     const [updateCommunity] = useUpdateCommunityMutation()
+    useSetActiveFeed({ communityData })
 
     // Form state
     const [displayName, setDisplayName] = useState<string>('')

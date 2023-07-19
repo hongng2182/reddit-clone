@@ -5,7 +5,8 @@ import { CreatePost, CreatePostRules, PageContainer, PageContentLayout } from '@
 import { MeDocument, useMeQuery } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
 import { useGlobalState } from '@/hooks'
-import { setShowSignInModal } from '@/action'
+import { setActiveFeedTab, setShowSignInModal } from '@/action'
+import { tabs } from '@/lib/constants'
 
 
 function CreatePostPage() {
@@ -17,6 +18,7 @@ function CreatePostPage() {
     if (!meData?.me) {
       dispatch(setShowSignInModal(true))
     }
+    dispatch(setActiveFeedTab(tabs.createPost))
   }, [])
 
   return (

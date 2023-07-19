@@ -6,6 +6,7 @@ import { Navbar } from "@/components"
 import { addApolloState, initializeApollo } from "@/lib/apolloClient"
 import { PaginatedPosts, PostsDocument, VoteType, useDeletePostMutation, useMeQuery, usePostsQuery, useVoteMutation } from "@/generated/graphql"
 import { FETCH_LIMIT } from "@/lib/constants"
+import { LoadingIcon } from "@/components/icons"
 
 enum VoteStatusValues {
   Upvote = 1,
@@ -117,7 +118,7 @@ export default function Home() {
           <button type="button"
             className='bg-blue-500  w-[10rem] rounded-xl p-1 text-white'
             onClick={() => fetchMore({ variables: { first: FETCH_LIMIT, after: data?.posts.pageInfo.endCursor } })}>
-            {isLoadingMorePosts ? 'Loading' : 'Load more'}
+            {isLoadingMorePosts ? <LoadingIcon /> : 'Load more'}
           </button>
         }
       </section >

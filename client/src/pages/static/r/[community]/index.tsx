@@ -4,6 +4,8 @@ import { useRouter } from 'next/router'
 import { CreatePostFragment, PageContentLayout, PageContainer, FilterBox, PostBox, CommunityBanner, AboutCommunity } from '@/components'
 import { useCommunityQuery, useGetCommunityPostsQuery, useMeQuery } from '@/generated/graphql'
 import { FETCH_LIMIT } from "@/lib/constants"
+import { LoadingIcon } from '@/components/icons'
+import { useSetActiveFeed } from '@/hooks'
 
 function CommunityPage() {
     // React hooks
@@ -16,11 +18,14 @@ function CommunityPage() {
     const { data, fetchMore, networkStatus } = useGetCommunityPostsQuery({ variables: { communityName, first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
 
     const isLoadingMorePosts = networkStatus === NetworkStatus.fetchMore
+    useSetActiveFeed({ communityData })
+    // Hooks
 
     // Return no community match
     if (!communityData?.community) {
         return "Sorry, there aren’t any communities on Reddit with that name."
     }
+
 
     return (
         <>
@@ -38,7 +43,7 @@ function CommunityPage() {
                                     type="button"
                                     className='button-main'
                                     onClick={() => fetchMore({ variables: { first: FETCH_LIMIT, after: data?.getCommunityPosts.pageInfo.endCursor } })}>
-                                    {isLoadingMorePosts ? 'Loading' : 'Load more'}
+                                    {isLoadingMorePosts ? <LoadingIcon /> : 'Load more'}
                                 </button>
                             }
                         </div>

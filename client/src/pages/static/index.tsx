@@ -1,15 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { GetServerSideProps, GetServerSidePropsContext } from "next"
 import { NetworkStatus } from "@apollo/client"
 import { addApolloState, initializeApollo } from "@/lib/apolloClient"
 import { PageContainer, PageContentLayout, CreatePostFragment, FilterBox, PostBox, UserHomeSidebar, PopularCommunity } from '@/components'
 import { PostsDocument, useMeQuery, usePostsQuery } from '@/generated/graphql'
-import { FETCH_LIMIT } from "@/lib/constants"
+import { FETCH_LIMIT, tabs } from "@/lib/constants"
+import { LoadingIcon } from '@/components/icons'
+import { setActiveFeedTab } from '@/action'
+import { useGlobalState } from '@/hooks'
 
 function HomePage() {
+    const { dispatch } = useGlobalState()
     const { data: meData } = useMeQuery()
     const { data, fetchMore, networkStatus } = usePostsQuery({ variables: { first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
     const isLoadingMorePosts = networkStatus === NetworkStatus.fetchMore
+
+    useEffect(() => {
+        dispatch(setActiveFeedTab(tabs.home))
+    }, [])
 
     return (
         <PageContainer>
@@ -27,7 +35,7 @@ function HomePage() {
                                 type="button"
                                 className='button-main'
                                 onClick={() => fetchMore({ variables: { first: FETCH_LIMIT, after: data?.posts.pageInfo.endCursor } })}>
-                                {isLoadingMorePosts ? 'Loading' : 'Load more'}
+                                {isLoadingMorePosts ? <LoadingIcon /> : 'Load more'}
                             </button>
                         }
                     </div></>}

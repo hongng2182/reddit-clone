@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Mulish:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-family: 'Mulish', sans-serif;
+  --font-family: 'Lato', sans-serif;
   --color-black: #1C1C1C;
   --color-black-light: #363938;
   --color-light-gray: #CCC;
@@ -170,16 +170,20 @@ button:disabled{
   @apply w-[14px] h-[14px] rounded-full object-cover object-[center,top] bg-medium
 }
 
+.img-20 {
+  @apply w-[20px] h-[20px] rounded-full object-cover object-[center,top]
+}
+
   .img-24 {
-    @apply w-[24px] h-[24px] rounded-full object-cover object-[center,top] bg-medium
+    @apply w-[24px] h-[24px] rounded-full object-cover object-[center,top]
   }
 
   .img-35 {
-    @apply w-[35px] h-[35px] rounded-full object-cover object-[center,top] bg-medium
+    @apply w-[35px] h-[35px] rounded-full object-cover object-[center,top]
   }
 
   .img-40 {
-    @apply w-[40px] h-[40px] rounded-full object-cover object-[center,top] bg-medium
+    @apply w-[40px] h-[40px] rounded-full object-cover object-[center,top]
   }
 
   .username {

@@ -16,17 +16,19 @@ function Header() {
     // React hooks
     const router = useRouter()
     const [profileFocus, setProfileFocus] = useState(false)
-    
+    const { dispatch, state: { showSignInModal } } = useGlobalState()
+
     // Graphql Hooks
     const { data } = useMeQuery()
-    const { dispatch, state: { showSignInModal } } = useGlobalState()
-    const [logout, { data: logoutData }] = useLogoutMutation()
+    const [logout] = useLogoutMutation()
 
     // Utils
-    const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
-        logout()
-        if (logoutData?.logout) { router.reload() }
+        const response = await logout()
+        if (response.data?.logout) {
+            router.reload()
+        }
     }
 
     return (<>
@@ -76,7 +78,7 @@ function Header() {
                         <span className='label-md smM:hidden'>{data.me.username}</span>
                     </div>}
                     <DropdownIcon width={12} />
-                    {profileFocus && <div className="absolute h-auto bg-white top-[40px] right-0 py-[10px]">
+                    {profileFocus && <div className="absolute h-auto bg-white border border-medium top-[40px] right-0 py-[10px]">
                         {data && data.me && <><Link
                             href={`/static/user/${data.me.username}`}
                             className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"

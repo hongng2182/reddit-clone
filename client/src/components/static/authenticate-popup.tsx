@@ -5,6 +5,7 @@ import { toErrorMap } from '@/utils'
 import { initializeApollo } from '@/lib/apolloClient'
 import { useGlobalState } from '@/hooks'
 import { setShowSignInModal } from '@/action'
+import { LoadingIcon } from '../icons'
 
 function AuthenticatePopup() {
     // React hooks
@@ -166,7 +167,7 @@ function AuthenticatePopup() {
                     <button onClick={handleLogIn}
                         disabled={logInloading}
                         className='button-main w-full py-2' type='button'>
-                        {logInloading ? 'Login Loading' : 'Log In'}
+                        {logInloading ? <LoadingIcon /> : 'Log In'}
                     </button>
                 </>}
                 {/* Button Sign Up */}
@@ -174,7 +175,7 @@ function AuthenticatePopup() {
                     <button className='button-main w-full py-2' type='button'
                         disabled={registerLoading}
                         onClick={handleRegister}>
-                        {registerLoading ? 'Register Loading' : 'Sign Up'}
+                        {registerLoading ? <LoadingIcon /> : 'Sign Up'}
                     </button>
                 }
                 {/* Button Reset Password */}

@@ -3,10 +3,12 @@ import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { PostInput, useCreatePostMutation, useUserCommunitiesQuery } from '@/generated/graphql'
+import { PostInput, useCreatePostMutation } from '@/generated/graphql'
 import { useUploadImage } from '@/hooks'
+import { CommunityInfo } from '@/types'
 import CommunitySelect from './community-select'
 import ImageUpload from './image-upload'
+import { LoadingIcon } from '../icons'
 
 type Tabs = {
     name: 'Post' | 'Image' | 'Link', icon: string
@@ -29,7 +31,8 @@ const getActiveTab = (media: string | string[] | undefined, url: string | string
     return 'Post'
 }
 
-function CreatePost() {
+// eslint-disable-next-line react/require-default-props
+function CreatePost({ communityInfo }: { communityInfo?: CommunityInfo }) {
     // React hooks
     const router = useRouter();
     const { media, url } = router.query;
@@ -42,7 +45,7 @@ function CreatePost() {
     const [imageUrl, setImageUrl] = useState('')
     const [urlLink, setUrlLink] = useState('')
     const communityIdRef = useRef(0)
-    const handleSetCommunityId = (value: number) => {
+    const onSelectCommunity = (value: number) => {
         communityIdRef.current = value;
     };
 
@@ -72,7 +75,6 @@ function CreatePost() {
 
     // GraphQL hooks
     const [createPost, { loading, error }] = useCreatePostMutation()
-    const { data } = useUserCommunitiesQuery()
 
     // Utils
     if (error) {
@@ -104,9 +106,11 @@ function CreatePost() {
             })
             const postData = response.data?.createPost.post
             if (postData) {
+                toast.success('Successfully create a new post!')
                 router.push(`/static/r/${postData.community.name}/comments/${postData.id}`)
             }
         } catch (err) {
+            toast.error('Sorry, something went wrong when creating your post!')
             console.log(err)
         }
     }
@@ -116,11 +120,10 @@ function CreatePost() {
             <h2>Create a post</h2>
             <div className="h-[1px] w-full bg-white" />
             <form className='w-full' autoComplete='off' onSubmit={(e) => handleSubmit(e)}>
-                {data?.userCommunities ?
-                    <CommunitySelect
-                        setCommunityId={handleSetCommunityId}
-                        communitiesData={data?.userCommunities} />
-                    : <div className='w-[300px] h-[40px] bg-white border border-medium' />}
+                <CommunitySelect
+                    initialValue={communityInfo}
+                    onSelectCommunity={onSelectCommunity}
+                />
                 {/* Tabs */}
                 <div className='bg-white w-full mt-2'>
                     <div className='w-full flex-around font-bold'>
@@ -176,7 +179,7 @@ function CreatePost() {
                         {/* Post Btn */}
                         <div className='flex-end gap-[10px] p-2'>
                             <Link href='/static' className='button-main-outline'>Cancel</Link>
-                            <button type="submit" className='button-main disable:cursor-not-allowed disabled:bg-medium' disabled={text === '' && urlLink === '' && imageUrl === ''}>{loading ? 'Loading' : 'Post'}</button>
+                            <button type="submit" className='button-main disable:cursor-not-allowed disabled:bg-medium' disabled={text === '' && urlLink === '' && imageUrl === ''}>{loading ? <LoadingIcon /> : 'Post'}</button>
                         </div>
                     </div>
                 </div>

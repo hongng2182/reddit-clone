@@ -5,3 +5,15 @@ export type MeData = {
     email: string;
     profileUrl?: string | null | undefined;
 }
+
+export type Feeds = {
+    title: string,
+    sub_feed:
+    { icon: string, name: string, iconFill: string, link: string }[],
+}
+
+export type FeedTab = {
+    icon: string,
+    iconFill: string | null,
+    name: string
+}

@@ -1,9 +1,10 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
+import Link from 'next/link'
+import { useUserCommunitiesQuery } from '@/generated/graphql'
 import { DropdownIcon } from '@/components/icons'
 import { useModal } from '@/hooks'
-import { CommunityFragment, UserCommunities } from '@/types'
+import { CommunityFragment, CommunityInfo } from '@/types'
 import { defaultCommunityIcon } from '@/lib/constants'
 import CommunityCreatePopup from './community-create-popup'
 import Modal from './modal'
@@ -18,40 +19,45 @@ const defaultValue: CommunityFragment = {
 }
 
 type Props = {
-    communitiesData: UserCommunities,
-    setCommunityId: (value: number) => void
+    onSelectCommunity: (value: number) => void,
+    // eslint-disable-next-line react/require-default-props
+    initialValue?: Partial<CommunityInfo>
 }
 
-function CommunitySelect({ communitiesData, setCommunityId }: Props) {
-    // community name query in communitiesData => setactive
-
-    const router = useRouter()
-    const currentName = router.query.community as string
-    const community = communitiesData.filter(item => item.community.name === currentName)
-    const initialValue = community.length > 0 ? community[0].community : defaultValue
-    const activeTab = useRef<CommunityFragment>(initialValue)
+function CommunitySelect({ onSelectCommunity, initialValue }: Props) {
+    const { data } = useUserCommunitiesQuery()
+    const activeTab = useRef<Partial<CommunityInfo>>(initialValue || defaultValue)
     const [showTab, setShowTab] = useState(false)
     const { isOpen, openModal, closeModal } = useModal()
 
+    useEffect(() => {
+        if (activeTab.current.id && activeTab.current.id !== 0) {
+            onSelectCommunity(activeTab.current.id)
+        }
+    }, [activeTab.current])
+
+    if (!data?.userCommunities) {
+        return <div className='w-[300px] h-[40px] bg-white border border-medium' />
+    }
     return (<div className="bg-white relative w-[300px] z-[1]" >
         <div className={`w-full h-[40px] border border-medium p-[5px] flex-between-10 cursor-pointer ${showTab ? 'border-medium' : 'border-transparent'}`}
             onClick={() => setShowTab(!showTab)}
         >
-            <div className='flex-start-10'>
+            <div className='flex-start-10 ml-2'>
                 {activeTab.current.communityIconUrl !== undefined ? <Image
                     alt='community'
                     width='0'
                     height='0'
                     src={activeTab.current.communityIconUrl || defaultCommunityIcon}
                     sizes='100%'
-                    className='w-[20px] rounded-full'
+                    className='img-20'
                 /> : <span className='w-[20px] h-[20px] border border-dashed rounded-full' />}
-                <span>{activeTab.current.name}</span>
+                <span className='font-bold'>{activeTab.current.name}</span>
             </div>
             <span><DropdownIcon width={14} fill='#7C7C7C' /></span>
         </div>
         {
-            showTab && <div className="w-[300px] absolute top-[40px] max-h-[300px] flex-col-start-10 bg-white border border-medium border-t-0 z-0 overflow-y-scroll">
+            showTab && !initialValue && <div className="w-[300px] absolute top-[40px] max-h-[300px] flex-col-start-10 bg-white border border-medium border-t-0 z-0 overflow-y-scroll py-2">
                 {/* COMMUNITIES LIST */}
                 <div className="flex-between w-full py-2">
                     <h4 className='label-sm pl-[15px] w-full'>YOUR COMMUNITITES</h4>
@@ -63,33 +69,31 @@ function CommunitySelect({ communitiesData, setCommunityId }: Props) {
                         }}
                     >Create New</button>
                 </div>
-                {communitiesData.length === 0 && <div className='m-3 flex-col-center-10'>
+                {data.userCommunities.length === 0 && <div className='m-3 flex-col-center-10'>
                     <p className='text-center'>Start joining community to create your own posts</p>
-                    <p className='button-main-outline '>Start now</p>
+                    <Link href="/static/r/popular" type="button" className='button-main-outline'>Start now</Link>
                 </div>}
-                {communitiesData.map(data => <button
-                    key={data.community.id}
+                {data.userCommunities.map(communityData => <button
+                    key={communityData.community.id}
                     type='button'
                     className="feed-tab w-full flex-start-10 cursor-pointer"
                     onClick={() => {
-                        activeTab.current = data.community
-                        setCommunityId(data.community.id)
+                        activeTab.current = communityData.community
+                        onSelectCommunity(communityData.community.id)
                         setShowTab(false)
                     }}
                 >
-                    <div className='w-[24px] h-[24px]'>
-                        <Image
-                            alt='community'
-                            width='0'
-                            height='0'
-                            src={data.community.communityIconUrl || defaultCommunityIcon}
-                            sizes='100%'
-                            className='w-[24px] rounded-full'
-                        />
-                    </div>
+                    <Image
+                        alt='community'
+                        width='0'
+                        height='0'
+                        src={communityData.community.communityIconUrl || defaultCommunityIcon}
+                        sizes='100%'
+                        className='img-24 border-medium'
+                    />
                     <div className="flex flex-col items-start text-sm">
-                        <span className='font-bold'>{data.community.name}</span>
-                        <span className='text-gray'>{data.community.numMembers} members</span>
+                        <span className='font-bold'>{communityData.community.name}</span>
+                        <span className='text-gray'>{communityData.community.numMembers} members</span>
                     </div>
                 </button>)}
             </div>
@@ -99,7 +103,7 @@ function CommunitySelect({ communitiesData, setCommunityId }: Props) {
         >
             <CommunityCreatePopup closeModal={closeModal} />
         </Modal>
-    </div>
+    </div >
     )
 }
 

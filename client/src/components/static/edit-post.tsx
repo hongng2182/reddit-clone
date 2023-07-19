@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useUpdatePostMutation, PostDocument } from '@/generated/graphql'
+import { LoadingIcon } from '../icons'
 
 function EditPost({ hideEdit, postText, postId }: { hideEdit: () => void, postText: string, postId: number }) {
     const [editText, setEditText] = useState(postText)
@@ -45,7 +46,7 @@ function EditPost({ hideEdit, postText, postId }: { hideEdit: () => void, postTe
                         <button type="submit"
                             disabled={editText === "" || editText === postText} className='button-main'
                             onClick={handleSubmit}
-                        >{loading ? 'Loading' : 'Save'}</button>
+                        >{loading ? <LoadingIcon /> : 'Save'}</button>
                     </div>
                 </div>
             </div>

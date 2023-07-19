@@ -7,10 +7,10 @@ import toast from 'react-hot-toast'
 import { PostInfo, VoteStatusValues } from '@/types'
 import { getTimeAgo } from '@/utils'
 import { defaultCommunityIcon } from '@/lib/constants'
-import { PaginatedPosts, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
+import { PaginatedPosts, UserCommunitiesDocument, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
 import { useGlobalState, useModal, useCreateRootCommentHook } from '@/hooks'
 import { setShowSignInModal } from '@/action'
-import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon, AddIcon } from '../icons'
+import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon, AddIcon, LoadingIcon } from '../icons'
 import EditPost from './edit-post'
 import Modal from './modal'
 import CommentForm from './comment-form'
@@ -52,7 +52,11 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
     const [vote] = useVoteMutation()
     const { data: meData } = useMeQuery()
     const [delelePost, { loading: isDeleteLoading }] = useDeletePostMutation()
-    const [joinCommunity, { data: joinData }] = useJoinCommunityMutation()
+    const [joinCommunity, { data: joinData }] = useJoinCommunityMutation({
+        refetchQueries: [
+            { query: UserCommunitiesDocument }
+        ]
+    })
     // Other Hooks
     const { onCommentSubmit } = useCreateRootCommentHook({ postId: id })
 
@@ -216,11 +220,11 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                 {isTrendingPost ?
                     <div>
                         <h2 className='pr-3 label-md'>{title}</h2>
-                        {urlLink && <Link className='text-xs text-cate-blue' href={urlLink}>{urlLink.slice(0, 30)}...</Link>}
+                        {urlLink && <Link target='_blank' className='text-xs text-cate-blue' href={urlLink}>{urlLink.slice(0, 30)}...</Link>}
                     </div>
                     : <div>
                         <h2 className='pr-3'>{title}</h2>
-                        {urlLink && <Link className='text-sm text-cate-blue' href={urlLink}>{urlLink.slice(0, 30)}...</Link>}
+                        {urlLink && <Link target='_blank' className='text-sm text-cate-blue' href={urlLink}>{urlLink.slice(0, 30)}...</Link>}
                     </div>
                 }
                 {!isTrendingPost && <>
@@ -326,7 +330,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                         onClick={(e) => {
                             e.stopPropagation()
                             handleDeletePost(post.id)
-                        }}>{isDeleteLoading ? 'Loading' : 'Delete'}</button>
+                        }}>{isDeleteLoading ? <LoadingIcon /> : 'Delete'}</button>
                 </div>
             </div>
         </Modal>

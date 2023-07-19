@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/router'
 import { useCreateCommunityMutation } from '@/generated/graphql'
 import { PrivacyType } from '@/types'
-import { LockIcon, ProfileIcon, RestrictedIcon } from '../icons'
+import { LockIcon, ProfileIcon, RestrictedIcon, LoadingIcon } from '../icons'
 
 function CommunityCreatePopup({ closeModal }: { closeModal: () => void }) {
   // React hooks 
@@ -91,7 +91,7 @@ function CommunityCreatePopup({ closeModal }: { closeModal: () => void }) {
       {/* Cancel and Submit Buttons */}
       <div className='h-[50px] mt-4 flex-end gap-[10px] w-full'>
         <button type="button" className='button-main-outline' onClick={closeModal}>Cancel</button>
-        <button type="button" className='button-main' onClick={handleCreateCommunity}>{loading ? 'Loading' : 'Create Community'}
+        <button type="button" className='button-main' onClick={handleCreateCommunity}>{loading ? <LoadingIcon /> : 'Create Community'}
         </button>
       </div>
     </>

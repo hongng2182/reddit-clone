@@ -3,7 +3,7 @@ import Image from 'next/image'
 import toast from 'react-hot-toast'
 import { CommunityInfo } from '@/types'
 import { useGlobalState } from '@/hooks'
-import { CommunityDocument, useJoinCommunityMutation, useLeaveCommunityMutation } from '@/generated/graphql'
+import { CommunityDocument, UserCommunitiesDocument, useJoinCommunityMutation, useLeaveCommunityMutation } from '@/generated/graphql'
 import { setShowSignInModal } from '@/action'
 import { defaultCommunityIcon } from '@/lib/constants'
 
@@ -30,7 +30,10 @@ function CommunityBanner({ communityInfo, userId }: Props) {
                     }
                 }))
             }
-        }
+        },
+        refetchQueries: [
+            { query: UserCommunitiesDocument }
+        ]
     })
     const [leaveCommunity] = useLeaveCommunityMutation({
         update(cache, { data }) {

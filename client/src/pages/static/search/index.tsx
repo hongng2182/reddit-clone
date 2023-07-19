@@ -1,15 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Image from 'next/image';
 import { useRouter } from 'next/router'
 import { PageContainer, PageContentLayout, PostBox } from '@/components';
 import { communities_mockup } from '@/mockup';
 import { usePostsQuery } from '@/generated/graphql';
+import { tabs } from '@/lib/constants';
+import { setActiveFeedTab } from '@/action';
+import { useGlobalState } from '@/hooks';
 
 // TODO: create FE for search page
 function SearchPage() {
+    const { dispatch } = useGlobalState()
     const router = useRouter();
     const { q } = router.query;
     const { data } = usePostsQuery({ variables: { first: 10, after: null }, notifyOnNetworkStatusChange: true })
+
+    useEffect(() => {
+        dispatch(setActiveFeedTab(tabs.search))
+    }, [])
 
 
     return <PageContainer>

@@ -1,6 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { PageContainer, PageContentLayout, PostBox } from '@/components'
-import { usePostsQuery } from '@/generated/graphql'
+import { useMeQuery, usePostsQuery } from '@/generated/graphql'
+import { useGlobalState } from '@/hooks'
+import { setActiveFeedTab } from '@/action'
+import { defaultProfileIcon } from '@/lib/constants'
 
 type Tabs = {
     name: string, icon: string
@@ -26,9 +29,21 @@ const tabs: Tabs[] = [
 // TODO: public show Overview, pots, comments. Private show remained
 
 function UserPage() {
+    const { dispatch } = useGlobalState()
+    const { data: meData } = useMeQuery()
     const [active, setActive] = useState('OVERVIEW')
     const [showTab, setshowTab] = useState(false)
     const { data } = usePostsQuery({ variables: { first: 10, after: null }, notifyOnNetworkStatusChange: true })
+
+    useEffect(() => {
+        if (meData?.me) {
+            dispatch(setActiveFeedTab({
+                name: `u/${meData?.me?.username}`,
+                icon: meData?.me?.profileUrl || defaultProfileIcon,
+                iconFill: null
+            }))
+        }
+    }, [])
 
     return (
         <>

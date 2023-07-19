@@ -7,15 +7,22 @@ import React, {
     useReducer,
 } from 'react'
 import { GlobalAction } from '@/action'
+import { FeedTab } from '@/types'
 
 // State
 type GlobalState = {
     showSignInModal: boolean
+    activeFeedTab: FeedTab
 }
 
 // Initial State
 const globalInitialState: GlobalState = {
     showSignInModal: false,
+    activeFeedTab: {
+        icon: '/icons/arrow-outline.svg',
+        iconFill: '/icons/arrow-fill.svg',
+        name: 'Popular'
+    }
 }
 
 // Reducer 
@@ -30,6 +37,14 @@ const globalReducer = (
             return {
                 ...state,
                 showSignInModal: value,
+            }
+        }
+        case 'SET_ACTIVE_FEED_TAB': {
+            const { value } = payload
+
+            return {
+                ...state,
+                activeFeedTab: value,
             }
         }
         default:
