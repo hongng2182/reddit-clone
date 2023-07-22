@@ -1,0 +1,10 @@
+query SearchPosts($keyword: String!) {
+  searchPosts(keyword: $keyword) {
+    errors
+    posts {
+      ...PostInfo
+      ...PostRelations
+    }
+    totalCount
+  }
+}

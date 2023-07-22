@@ -1,4 +1,5 @@
-import { Resolver, Mutation, UseMiddleware, Ctx, InputType, Field, Arg, ObjectType, Int } from "type-graphql";
+import { Resolver, Mutation, UseMiddleware, Ctx, InputType, Field, Arg, ObjectType, Int, Query } from "type-graphql";
+import { AppDataSource } from "../index";
 import { isAuth } from "../middleware/isAuth";
 import { Comment, Post, User } from "../entities";
 import { MyContext } from "../types";
@@ -20,6 +21,17 @@ class CommentResponse {
     @Field(() => Comment, { nullable: true })
     comment?: Comment
 }
+
+@ObjectType()
+class CommentSearchResponse {
+    @Field(() => String, { nullable: true })
+    errors?: string
+    @Field(() => [Comment], { nullable: true })
+    comments?: Comment[]
+    @Field(() => Int, { nullable: true })
+    totalCount?: number
+}
+
 
 
 @Resolver(_of => Comment)
@@ -124,6 +136,29 @@ export class CommentResolver {
             return false
         }
     }
+
+    @Query(() => CommentSearchResponse)
+    async getUserComments(
+        @Arg("username", () => String) username: string
+    ): Promise<CommentSearchResponse> {
+        const user = await User.findOne({ where: { username } })
+
+        if (!user) {
+            return { errors: "No user found with this name!" }
+        }
+        // Get posts with pagination
+        const [comments, totalCount] = await AppDataSource.getRepository(Comment).findAndCount({
+            order: { createdAt: 'DESC' },
+            where: { userId: user.id },
+            relations: {
+                post: true
+            }
+        })
+
+        return { comments, totalCount }
+
+    }
+
 
 }
 

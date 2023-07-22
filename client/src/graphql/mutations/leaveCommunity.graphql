@@ -4,6 +4,7 @@ mutation LeaveCommunity($communityName: String!) {
     community {
       hasJoined
       numMembers
+      name
     }
   }
 }

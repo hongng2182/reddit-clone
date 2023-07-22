@@ -1,68 +1,113 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { trending_posts } from '@/mockup'
-import { ArrowIcon, SearchIcon } from '../icons'
+import { useRouter } from 'next/router'
+import { debounce } from 'lodash'
+import Link from 'next/link'
+import { CloseIcon, SearchIcon } from '../icons'
+import { useSearchCommunitiesLazyQuery } from '@/generated/graphql'
+import { defaultCommunityIcon } from '@/lib/constants'
 
 function SearchBar() {
     const [inputFocus, setInputFocus] = useState(false)
     const [value, setValue] = useState('')
+    const [searchCommunities, { data }] = useSearchCommunitiesLazyQuery()
+    const searchBarRef = useRef<HTMLDivElement | null>(null);
+    const router = useRouter()
 
-  return (
-      <div className={`max-w-[690px] min-w-[40px] w-full relative z-[2] ${inputFocus && 'rounded-b-none'}`}>
-          <form action='/static/search' autoComplete='off' >
-              <div
-                  className={`flex-start bg-light hover-border-blue rounded-3xl py-1 px-3 ${inputFocus && 'rounded-b-none'}`}
-              >
-                  <SearchIcon />
-                  <input name="q" id='q' type="text" placeholder='Search' className='border-none w-full p-1'
-                      value={value}
-                      onFocus={() => setInputFocus(!inputFocus)}
-                      onChange={(e) => setValue(e.target.value)}
-                  />
-              </div>
-              {inputFocus && <div className='absolute w-full top-[44px] left-0 bg-white text-gray text-sm smM:overflow-scroll smM:h-[400px]'>
-                  <h4 className='label-sm px-3 py-2'>TRENDING TODAY</h4>
-                  {trending_posts.map(post => <button type="submit"
-                      className="hover:bg-light cursor-pointer"
-                      key={post.id}
-                  >
-                      <div className="p-3 flex-start" onClick={() => setValue(post.topic)}>
-                          <div className="flex-[4] flex-col-start-10 items-start mr-2">
-                              <div className='flex-start-10'>
-                                  <div className='w-[20px]'>
-                                      <ArrowIcon type='outline' fill='#0079d3' />
-                                  </div>
-                                  <p className='font-bold text-black'>{post.topic}</p>
-                              </div>
-                              <p className='text-sm ml-[30px] text-left'>{post.shortDesc}</p>
-                              <div className='flex-start text-sm mt-2'>
-                                  <Image
-                                      height='0'
-                                      width='0'
-                                      src={post.communityImg}
-                                      alt='logo'
-                                      sizes='80%'
-                                      className='h-[20px] w-[20px] mr-[10px] rounded-full'
-                                  />
-                                  r/{post.community} and more</div>
-                          </div>
-                          <div className="flex-1">
-                              <Image
-                                  width='0'
-                                  height='0'
-                                  src={post.imgUrl}
-                                  alt='search-icon'
-                                  className='h-auto w-full rounded-[4px]'
-                                  sizes='sizes="(max-width: 768px) 100%"'
-                              />
-                          </div>
-                      </div>
-                  </button>
-                  )}
-              </div>}
-          </form>
-      </div>
-  )
+    const debouncedSearchCommunities = useCallback(
+        debounce((keyword) => {
+            searchCommunities({ variables: { keyword, limit: 4 } })
+        }, 300),
+        []
+    )
+
+    useEffect(() => {
+        if (data?.searchCommunities)
+            setInputFocus(true)
+    }, [data?.searchCommunities])
+
+    // Event listener to capture clicks on the document
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
+                setInputFocus(false);
+            }
+        }
+
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
+
+
+    return (
+        <div ref={searchBarRef} className={`max-w-[690px] min-w-[40px] w-full relative z-[2] ${value.length > 0 && 'rounded-b-none'}`}>
+            <form action='/static/search' autoComplete='off' >
+                <div
+                    className={`flex-start bg-light hover-border-blue focus-within:border-cate-blue rounded-3xl py-1 px-3 ${value.length > 0 && 'rounded-b-none'}`}
+                >
+                    <SearchIcon />
+                    <input name="q" id='q' type="text" placeholder='Search' className='border-none w-full p-1'
+                        value={value}
+                        onFocus={() => setInputFocus(true)}
+                        onChange={(e) => {
+                            const keyword = e.target.value;
+                            setValue(keyword);
+                            debouncedSearchCommunities(keyword);
+                        }}
+                    />
+                    {inputFocus && value.length > 0 && <span className='relative right-2 cursor-pointer' onClick={() => {
+                        setInputFocus(false)
+                        setValue('')
+                    }}><CloseIcon /></span>}
+                </div>
+                {
+                    inputFocus && value.length > 0 && <div className='absolute w-full top-[42px] left-0 bg-white text-sm text-black max-h-[400px] overflow-y-auto border border-medium shadow-2xl'>
+                        {data?.searchCommunities?.totalCount === 0 && <p className='text-center'><Link
+                            href={`/static/search/?q=${value}`}
+                            onClick={() => setInputFocus(false)} className='flex-start-10 hover:bg-light cursor-pointer w-full p-3'>
+                            <SearchIcon />
+                            <p className='text-sm'>Search for &ldquo;{value}&ldquo;</p>
+                        </Link></p>}
+                        {(data?.searchCommunities?.totalCount ?? 0) > 0 &&
+                            <div className='flex-col-start-10'>
+                                <h4 className='label-md px-3 pt-2'>Communities</h4>
+                                {data?.searchCommunities?.communities?.map(community => <Link
+                                    href={`/static/r/${community.name}`}
+                                    onClick={() => setInputFocus(false)}
+                                    key={community.id}
+                                    className='flex-start-10 hover:bg-light cursor-pointer w-full p-2'>
+                                    <Image
+                                        alt='img'
+                                        width='24'
+                                        height='24'
+                                        src={community.communityIconUrl || defaultCommunityIcon}
+                                        className='img-24'
+                                    />
+                                    <p className='text-sm'>
+                                        <p className='font-bold'>r/{community.name}</p>
+                                        <p className='text-gray text-xs'>Community • {community.numMembers} members</p>
+                                    </p>
+                                </Link>)}
+                                <Link
+                                    href={`/static/search/?q=${value}`}
+                                    onClick={() => {
+                                        router.push({
+                                            pathname: '/static/search',
+                                            query: { q: value },
+
+                                        })
+                                        setInputFocus(false)
+                                    }} className='flex-start-10 hover:bg-light cursor-pointer w-full p-3'>
+                                    <SearchIcon />
+                                    <p className='text-sm'>Search for &ldquo;{value}&ldquo;</p>
+                                </Link>
+                            </div>
+                        }
+                    </div>
+                }
+            </form >
+        </div >
+    )
 }
 
 export default SearchBar

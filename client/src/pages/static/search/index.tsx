@@ -1,64 +1,170 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { useRouter } from 'next/router'
-import { PageContainer, PageContentLayout, PostBox } from '@/components';
-import { communities_mockup } from '@/mockup';
-import { usePostsQuery } from '@/generated/graphql';
-import { tabs } from '@/lib/constants';
-import { setActiveFeedTab } from '@/action';
+import Link from 'next/link';
+import toast from 'react-hot-toast';
+import { PageContainer, PostBox } from '@/components';
+import { useJoinCommunityMutation, useMeQuery, useSearchCommunitiesLazyQuery, useSearchPostsQuery, SearchCommunitiesDocument, UserCommunitiesDocument, useLeaveCommunityMutation } from '@/generated/graphql';
+import { defaultCommunityIcon, tabs } from '@/lib/constants';
+import { setActiveFeedTab, setShowSignInModal } from '@/action';
 import { useGlobalState } from '@/hooks';
+import { LoadingIcon } from '@/components/icons';
+import { SearchCommunity } from '@/types';
 
-// TODO: create FE for search page
+const filterTabs = ['Posts', 'Communities']
+
 function SearchPage() {
     const { dispatch } = useGlobalState()
+    const [active, setActive] = useState(filterTabs[0])
+    const { data: meData } = useMeQuery()
     const router = useRouter();
     const { q } = router.query;
-    const { data } = usePostsQuery({ variables: { first: 10, after: null }, notifyOnNetworkStatusChange: true })
+    const { data, loading } = useSearchPostsQuery({ variables: { keyword: q as string } })
+    const [joinCommunity] = useJoinCommunityMutation({
+        update(cache, { data: newData }) {
+            const joinedData = newData?.joinCommunity.community
+            if (joinedData) {
+                cache.updateQuery({
+                    query: SearchCommunitiesDocument,
+                    variables: { keyword: q as string }
+                }, (cacheData) => (
+                    {
+                        searchCommunities:
+                        {
+                            ...cacheData.searchCommunities,
+                            communities:
+                                cacheData.searchCommunities.communities.map((community: SearchCommunity) => community.name === joinedData.name ? ({ ...community, hasJoined: true, numMembers: community.numMembers + 1 }) : community)
+                        }
+                    }
+                )
+                )
+            }
+        },
+        refetchQueries: [
+            { query: UserCommunitiesDocument }
+        ]
+    })
+
+    const [leaveCommunity] = useLeaveCommunityMutation({
+        update(cache, { data: responseData }) {
+            const leaveData = responseData?.leaveCommunity.community
+            if (leaveData) {
+                cache.updateQuery({
+                    query: SearchCommunitiesDocument,
+                    variables: { keyword: q as string }
+                }, (cacheData) => ({
+                    searchCommunities:
+                    {
+                        ...cacheData.searchCommunities,
+                        communities:
+                            cacheData.searchCommunities.communities.map((community: SearchCommunity) => community.name === leaveData.name ? ({ ...community, hasJoined: false, numMembers: community.numMembers - 1 }) : community)
+                    }
+                }))
+            }
+        },
+        refetchQueries: [
+            { query: UserCommunitiesDocument }
+        ]
+    })
+
+    const [searchCommunity, { data: communitiesData, loading: communitiesLoading }] = useSearchCommunitiesLazyQuery()
 
     useEffect(() => {
         dispatch(setActiveFeedTab(tabs.search))
     }, [])
 
+    // Query communitites again if user current in tab community and search for another keyword
+    useEffect(() => {
+        if (active === "Communities") {
+            searchCommunity({ variables: { keyword: q as string } })
+        }
+    }, [q, active, searchCommunity])
+
+    const handleJoinLeave = async (communityName: string, hasJoined: boolean) => {
+        if (!meData?.me) {
+            dispatch(setShowSignInModal(true))
+            return
+        }
+        if (hasJoined) {
+            const response = await leaveCommunity({
+                variables: { communityName }
+            })
+            if (response.data?.leaveCommunity.community) {
+                toast.success(`Successfully leave r/${communityName}`, { position: 'bottom-center' })
+            }
+            if (response.data?.leaveCommunity.errors) {
+                toast.error(response.data?.leaveCommunity.errors, { position: 'bottom-center' })
+            }
+        } else {
+            const response = await joinCommunity({ variables: { communityName } })
+            if (response.data?.joinCommunity.community) {
+                toast.success(`Successfully join r/${communityName}`, { position: 'bottom-center' })
+            }
+            if (response.data?.joinCommunity.errors) {
+                toast.error(response.data?.joinCommunity.errors, { position: 'bottom-center' })
+            }
+        }
+    }
+
 
     return <PageContainer>
-        <h3 className='w-fit bg-light px-4 py-2 mt-[25px] mb-[10px] rounded-full h-[45px]'>Posts on {q}</h3>
-        <PageContentLayout
-            containerClassname='mt-[20px]'
-            left={<div className='flex-col-start'>
-                <div className='w-full'>
-                    {data?.posts.paginatedPosts.map(post => <PostBox post={post}
-                        hideJoinBtn
-                        isTrendingPost
-                    />)}
-                </div>
+        <div className='flex-start-10 mt-[25px] mb-[10px]'>
+            {filterTabs.map(tab => <button
+                type="button"
+                className={`font-bold px-4 py-2 hover:bg-light rounded-full cursor-pointer ${active === tab ? 'bg-light ' : ''}`}
+                onClick={() => {
+                    setActive(tab)
+                    if (tab === 'Communities') {
+                        searchCommunity({ variables: { keyword: q as string } })
+                    }
+                }
+                }>{tab}
+            </button>)
+            }
+        </div>
+        <div className='w-full'>
+            {loading || communitiesLoading && <LoadingIcon />}
+            {/* Posts tab */}
+            {active === "Posts" && data?.searchPosts?.posts?.map(post => <PostBox post={post}
+                hideJoinBtn
+                isSearchPost
+            />)}
+            {active === "Posts" && data?.searchPosts?.totalCount === 0 && <p className='pl-4'>No posts found.</p>}
 
-            </div>}
-            right={<div className='w-full'>
-                <h3 className='pl-[20px] pt-4'>Communities</h3>
-                {communities_mockup.map(community =>
-                    <div className='flex-between cursor-pointer border-b border-medium pr-2'>
-                        <div
-                            className="w-full feed-tab flex-start-10"
-                        >
-                            <div className='w-[30px] h-[30px]'>
-                                <Image
-                                    alt='community'
-                                    width='0'
-                                    height='0'
-                                    src={community.imgSrc}
-                                    sizes='100%'
-                                    className='w-[30px] rounded-full'
-                                />
-                            </div>
-                            <div className="flex flex-col items-start text-sm">
-                                <span className='font-bold'>{community.name}</span>
-                                <span className='text-gray text-xs'>{community.numOfMember} members</span>
+            {/* Communities tab */}
+            {active === "Communities" && communitiesData?.searchCommunities?.totalCount === 0 && <p className='pl-4'>No communities found.</p>}
+            {active === "Communities" && (communitiesData?.searchCommunities?.totalCount ?? 0) > 0 &&
+                <div className='flex-col-start'>
+                    {communitiesData?.searchCommunities?.communities?.map(community => <Link
+                        href={`/static/r/${community.name}`}
+                        key={community.id}
+                        className='white-gray-rounded flex-between cursor-pointer w-full p-2'>
+                        <div className='flex-start-10'>
+                            <Image
+                                alt='img'
+                                width='0'
+                                height='0'
+                                sizes='50%'
+                                src={community.communityIconUrl || defaultCommunityIcon}
+                                className='img-40'
+                            />
+                            <div className='text-sm'>
+                                <p className='font-bold'>r/{community.name} <span className='text-gray font-light text-xs'>• {community.numMembers} members</span></p>
+                                <p className='text-gray text-xs'>{community.description?.slice(0, 250)}</p>
                             </div>
                         </div>
-                        <button type="button" className='button-hover bg-light px-5'>Join</button>
-                    </div>)}
-            </div>}
-        />
+                        <button
+                            className={`${community.hasJoined ? 'button-main-outline after:content-["Joined"] hover:after:content-["Leave"]' : 'button-main'} cursor-pointer`} type='button'
+                            onClick={
+                                (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation()
+                                    handleJoinLeave(community.name, community.hasJoined)
+                                }}
+                        >{community.hasJoined ? '' : 'Join'}</button>
+                    </Link>)}
+                </div>}
+        </div>
     </PageContainer>
 }
 

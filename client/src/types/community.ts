@@ -14,6 +14,16 @@ export type CommunityFragment = {
     numMembers: number;
 }
 
+export type SearchCommunity = {
+    __typename?: "Community" | undefined;
+    id: number;
+    name: string;
+    communityIconUrl?: string | null | undefined;
+    numMembers: number;
+    description?: string | null | undefined;
+    hasJoined: boolean;
+}
+
 export type UserCommunities = {
     __typename?: "UserCommunities" | undefined;
     isModerator: boolean;

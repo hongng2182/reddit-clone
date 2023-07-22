@@ -1,0 +1,14 @@
+query SearchCommunities($limit: Int, $keyword: String!) {
+  searchCommunities(limit: $limit, keyword: $keyword) {
+    errors
+    communities {
+      id
+      name
+      communityIconUrl
+      numMembers
+      description
+      hasJoined
+    }
+    totalCount
+  }
+}

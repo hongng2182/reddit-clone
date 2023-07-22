@@ -4,6 +4,7 @@ import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddlewa
 import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../index";
 import { UserInputError } from "apollo-server-express";
+import { Raw } from "typeorm";
 
 registerEnumType(VoteType, {
     name: 'VoteType'
@@ -52,6 +53,17 @@ class PostResponse {
     @Field(() => Post, { nullable: true })
     post?: Post
 }
+
+@ObjectType()
+class PostSearchResponse {
+    @Field(() => String, { nullable: true })
+    errors?: string
+    @Field(() => [Post], { nullable: true })
+    posts?: Post[]
+    @Field(() => Int, { nullable: true })
+    totalCount?: number
+}
+
 
 @Resolver(_of => Post)
 export class PostResolver {
@@ -170,10 +182,92 @@ export class PostResolver {
 
     }
 
+    @Query(() => PostSearchResponse)
+    async getUserPosts(
+        @Arg("username", () => String) username: string
+    ): Promise<PostSearchResponse> {
+        const user = await User.findOne({ where: { username } })
+
+        if (!user) {
+            return { errors: "No user found with this name!" }
+        }
+        // Get posts with pagination
+        const [posts, totalCount] = await AppDataSource.getRepository(Post).findAndCount({
+            order: { createdAt: 'DESC' },
+            where: { ownerId: user.id }
+        })
+
+        return { posts: posts, totalCount }
+
+    }
+
+    @Query(() => PostSearchResponse)
+    async getUpvotePosts(
+        @Arg("username", () => String) username: string
+    ): Promise<PostSearchResponse> {
+        const user = await User.findOne({ where: { username } })
+
+        if (!user) {
+            return { errors: "No user found with this name!" }
+        }
+        // Get posts with pagination
+        const [votes, totalCount] = await AppDataSource.getRepository(Vote).findAndCount({
+            where: {
+                userId: user.id,
+                value: 1
+            },
+            relations: { post: true }
+        })
+
+
+        return { posts: votes.map(item => item.post), totalCount }
+
+    }
+
+    @Query(() => PostSearchResponse)
+    async getDownvotePosts(
+        @Arg("username", () => String) username: string
+    ): Promise<PostSearchResponse> {
+        const user = await User.findOne({ where: { username } })
+
+        if (!user) {
+            return { errors: "No user found with this name!" }
+        }
+        // Get posts with pagination
+        const [votes, totalCount] = await AppDataSource.getRepository(Vote).findAndCount({
+            where: {
+                userId: user.id,
+                value: -1
+            },
+            relations: { post: true }
+        })
+
+
+        return { posts: votes.map(item => item.post), totalCount }
+
+    }
+
     @Query(() => Post, { nullable: true })
     async post(@Arg("id") id: number): Promise<Post | null> {
         return await AppDataSource.getRepository(Post).findOneBy({ id })
         // Post.findOne({ where: { id } })
+    }
+
+    @Query(() => PostSearchResponse, { nullable: true })
+    async searchPosts(
+        @Arg("keyword", () => String) keyword: string
+    ): Promise<PostSearchResponse> {
+        if (!keyword) { return { errors: 'Invalid query' } }
+        // Find community startwith keyword
+        const [result, totalCount] = await Post.findAndCount({
+            where: {
+                title: Raw(alias => `LOWER(${alias}) Like '%${keyword.toLowerCase()}%'`)
+            }
+        })
+        return {
+            posts: result,
+            totalCount
+        }
     }
 
     @Mutation(() => PostResponse)

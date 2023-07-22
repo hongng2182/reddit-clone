@@ -37,6 +37,13 @@ export type CommentResponse = {
   errors?: Maybe<Scalars['String']>;
 };
 
+export type CommentSearchResponse = {
+  __typename?: 'CommentSearchResponse';
+  comments?: Maybe<Array<Comment>>;
+  errors?: Maybe<Scalars['String']>;
+  totalCount?: Maybe<Scalars['Int']>;
+};
+
 export type Community = {
   __typename?: 'Community';
   communityIconUrl?: Maybe<Scalars['String']>;
@@ -203,7 +210,7 @@ export type PaginatedPosts = {
 
 export type Post = {
   __typename?: 'Post';
-  comments: Array<Comment>;
+  comments?: Maybe<Array<Comment>>;
   community: Community;
   communityId: Scalars['Float'];
   createdAt: Scalars['String'];
@@ -235,13 +242,26 @@ export type PostResponse = {
   post?: Maybe<Post>;
 };
 
+export type PostSearchResponse = {
+  __typename?: 'PostSearchResponse';
+  errors?: Maybe<Scalars['String']>;
+  posts?: Maybe<Array<Post>>;
+  totalCount?: Maybe<Scalars['Int']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   community?: Maybe<Community>;
   getCommunityPosts: PaginatedPosts;
+  getDownvotePosts: PostSearchResponse;
+  getUpvotePosts: PostSearchResponse;
+  getUserComments: CommentSearchResponse;
+  getUserPosts: PostSearchResponse;
   me?: Maybe<User>;
   post?: Maybe<Post>;
   posts: PaginatedPosts;
+  searchCommunities?: Maybe<SearchResponse>;
+  searchPosts?: Maybe<PostSearchResponse>;
   userCommunities?: Maybe<Array<UserCommunities>>;
 };
 
@@ -258,6 +278,26 @@ export type QueryGetCommunityPostsArgs = {
 };
 
 
+export type QueryGetDownvotePostsArgs = {
+  username: Scalars['String'];
+};
+
+
+export type QueryGetUpvotePostsArgs = {
+  username: Scalars['String'];
+};
+
+
+export type QueryGetUserCommentsArgs = {
+  username: Scalars['String'];
+};
+
+
+export type QueryGetUserPostsArgs = {
+  username: Scalars['String'];
+};
+
+
 export type QueryPostArgs = {
   id: Scalars['Float'];
 };
@@ -266,6 +306,24 @@ export type QueryPostArgs = {
 export type QueryPostsArgs = {
   after?: InputMaybe<Scalars['String']>;
   first: Scalars['Int'];
+};
+
+
+export type QuerySearchCommunitiesArgs = {
+  keyword: Scalars['String'];
+  limit?: InputMaybe<Scalars['Int']>;
+};
+
+
+export type QuerySearchPostsArgs = {
+  keyword: Scalars['String'];
+};
+
+export type SearchResponse = {
+  __typename?: 'SearchResponse';
+  communities?: Maybe<Array<Community>>;
+  errors?: Maybe<Scalars['String']>;
+  totalCount?: Maybe<Scalars['Int']>;
 };
 
 export type User = {
@@ -308,7 +366,7 @@ export type CommunityInfoFragment = { __typename?: 'Community', id: number, name
 
 export type PostInfoFragment = { __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number };
 
-export type PostRelationsFragment = { __typename?: 'Post', user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> };
+export type PostRelationsFragment = { __typename?: 'Post', user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments?: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> | null };
 
 export type UserInfoFragment = { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null };
 
@@ -367,14 +425,14 @@ export type JoinCommunityMutationVariables = Exact<{
 }>;
 
 
-export type JoinCommunityMutation = { __typename?: 'Mutation', joinCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', hasJoined: boolean, numMembers: number } | null } };
+export type JoinCommunityMutation = { __typename?: 'Mutation', joinCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', name: string, hasJoined: boolean, numMembers: number } | null } };
 
 export type LeaveCommunityMutationVariables = Exact<{
   communityName: Scalars['String'];
 }>;
 
 
-export type LeaveCommunityMutation = { __typename?: 'Mutation', leaveCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', hasJoined: boolean, numMembers: number } | null } };
+export type LeaveCommunityMutation = { __typename?: 'Mutation', leaveCommunity: { __typename?: 'CommunityResponse', errors?: string | null, community?: { __typename?: 'Community', hasJoined: boolean, numMembers: number, name: string } | null } };
 
 export type LoginMutationVariables = Exact<{
   password: Scalars['String'];
@@ -435,7 +493,7 @@ export type GetCommunityPostsQueryVariables = Exact<{
 }>;
 
 
-export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> }> } };
+export type GetCommunityPostsQuery = { __typename?: 'Query', getCommunityPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments?: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> | null }> } };
 
 export type CommunityQueryVariables = Exact<{
   communityName: Scalars['String'];
@@ -454,7 +512,7 @@ export type PostQueryVariables = Exact<{
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments?: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> | null } | null };
 
 export type PostsQueryVariables = Exact<{
   first: Scalars['Int'];
@@ -462,7 +520,22 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments?: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> | null }> } };
+
+export type SearchCommunitiesQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']>;
+  keyword: Scalars['String'];
+}>;
+
+
+export type SearchCommunitiesQuery = { __typename?: 'Query', searchCommunities?: { __typename?: 'SearchResponse', errors?: string | null, totalCount?: number | null, communities?: Array<{ __typename?: 'Community', id: number, name: string, communityIconUrl?: string | null, numMembers: number, description?: string | null, hasJoined: boolean }> | null } | null };
+
+export type SearchPostsQueryVariables = Exact<{
+  keyword: Scalars['String'];
+}>;
+
+
+export type SearchPostsQuery = { __typename?: 'Query', searchPosts?: { __typename?: 'PostSearchResponse', errors?: string | null, totalCount?: number | null, posts?: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments?: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> | null }> | null } | null };
 
 export type UserCommunitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -794,6 +867,7 @@ export const JoinCommunityDocument = gql`
   joinCommunity(communityName: $communityName) {
     errors
     community {
+      name
       hasJoined
       numMembers
     }
@@ -833,6 +907,7 @@ export const LeaveCommunityDocument = gql`
     community {
       hasJoined
       numMembers
+      name
     }
   }
 }
@@ -1314,6 +1389,92 @@ export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Post
 export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
 export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
+export const SearchCommunitiesDocument = gql`
+    query SearchCommunities($limit: Int, $keyword: String!) {
+  searchCommunities(limit: $limit, keyword: $keyword) {
+    errors
+    communities {
+      id
+      name
+      communityIconUrl
+      numMembers
+      description
+      hasJoined
+    }
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useSearchCommunitiesQuery__
+ *
+ * To run a query within a React component, call `useSearchCommunitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchCommunitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchCommunitiesQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      keyword: // value for 'keyword'
+ *   },
+ * });
+ */
+export function useSearchCommunitiesQuery(baseOptions: Apollo.QueryHookOptions<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>(SearchCommunitiesDocument, options);
+      }
+export function useSearchCommunitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>(SearchCommunitiesDocument, options);
+        }
+export type SearchCommunitiesQueryHookResult = ReturnType<typeof useSearchCommunitiesQuery>;
+export type SearchCommunitiesLazyQueryHookResult = ReturnType<typeof useSearchCommunitiesLazyQuery>;
+export type SearchCommunitiesQueryResult = Apollo.QueryResult<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>;
+export const SearchPostsDocument = gql`
+    query SearchPosts($keyword: String!) {
+  searchPosts(keyword: $keyword) {
+    errors
+    posts {
+      ...PostInfo
+      ...PostRelations
+    }
+    totalCount
+  }
+}
+    ${PostInfoFragmentDoc}
+${PostRelationsFragmentDoc}`;
+
+/**
+ * __useSearchPostsQuery__
+ *
+ * To run a query within a React component, call `useSearchPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchPostsQuery({
+ *   variables: {
+ *      keyword: // value for 'keyword'
+ *   },
+ * });
+ */
+export function useSearchPostsQuery(baseOptions: Apollo.QueryHookOptions<SearchPostsQuery, SearchPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchPostsQuery, SearchPostsQueryVariables>(SearchPostsDocument, options);
+      }
+export function useSearchPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchPostsQuery, SearchPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchPostsQuery, SearchPostsQueryVariables>(SearchPostsDocument, options);
+        }
+export type SearchPostsQueryHookResult = ReturnType<typeof useSearchPostsQuery>;
+export type SearchPostsLazyQueryHookResult = ReturnType<typeof useSearchPostsLazyQuery>;
+export type SearchPostsQueryResult = Apollo.QueryResult<SearchPostsQuery, SearchPostsQueryVariables>;
 export const UserCommunitiesDocument = gql`
     query UserCommunities {
   userCommunities {

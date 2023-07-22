@@ -20,7 +20,7 @@ type PostBoxProps = {
     hideCommunity?: boolean,
     hideJoinBtn?: boolean,
     comments?: ReactNode,
-    isTrendingPost?: boolean,
+    isSearchPost?: boolean,
     isSinglePost?: boolean,
     isEditing?: boolean
 }
@@ -35,7 +35,7 @@ const getPointsColorClassname = (voteStatus: number) => {
             return 'text-black'
     }
 }
-function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, isSinglePost, isEditing }: PostBoxProps) {
+function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isSinglePost, isEditing }: PostBoxProps) {
     // Object destructure from post
     const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt, community: { name: communityName, hasJoined, communityIconUrl }, numComments, imageUrl, urlLink } = post
     const pointsClassname = getPointsColorClassname(voteStatus)
@@ -156,9 +156,9 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
     return (<>
         <div onClick={(e) => handlePostClick(e)}
             className={`${comments ? 'border-transparent' : 'hover:border-gray cursor-pointer'}
-            ${isTrendingPost && 'p-2'} white-gray-rounded flex shadow-md w-full`}>
+            ${isSearchPost && 'p-2'} white-gray-rounded flex shadow-md w-full`}>
             {/* LEFT UPDOOT */}
-            {!isTrendingPost && <div className={`${comments ? 'bg-white' : 'bg-light'}w-[40px] text-xs font-bold p-1 flex flex-col items-center`} id='upvote' >
+            {!isSearchPost && <div className={`${comments ? 'bg-white' : 'bg-light'} w-[40px] text-xs font-bold p-1 flex flex-col items-center`} id='upvote' >
                 <ArrowUpDown
                     type='up'
                     variant={voteStatus === VoteStatusValues.Upvote ? 'fill' : 'outline'}
@@ -217,7 +217,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                         disabled={joinData?.joinCommunity.community?.hasJoined}
                     >{joinData?.joinCommunity.community?.hasJoined ? 'Joined' : 'Join'}</button>}
                 </div>
-                {isTrendingPost ?
+                {isSearchPost ?
                     <div>
                         <h2 className='pr-3 label-md'>{title}</h2>
                         {urlLink && <Link target='_blank' className='text-xs text-cate-blue' href={urlLink}>{urlLink.slice(0, 30)}...</Link>}
@@ -227,7 +227,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                         {urlLink && <Link target='_blank' className='text-sm text-cate-blue' href={urlLink}>{urlLink.slice(0, 30)}...</Link>}
                     </div>
                 }
-                {!isTrendingPost && <>
+                {!isSearchPost && <>
                     {!showEdit && <p>{isSinglePost ? text : textSnippet}</p>}
                     {imageUrl &&
                         <div className="relative h-auto w-full bg-gray-200 object-contain">
@@ -291,7 +291,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                         </>}
                     </div>
                 </>}
-                {isTrendingPost &&
+                {isSearchPost &&
                     <div className="flex-start-10">
                         <p className='text-gray text-xs'>
                             {points} upvotes
@@ -317,6 +317,15 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isTrendingPost, i
                 }
                 {comments && comments}
             </div>
+            {isSearchPost && imageUrl && <div className='flex-center'>
+                <Image
+                src={imageUrl}
+                alt="post-img"
+                width={100}
+                height={75}
+                sizes='50%'
+                    className='w-[138px] h-[98px] object-cover object-[center,top] rounded-lg' />
+            </div>}
         </div >
         <Modal isOpen={isOpen}
             closeModal={closeModal}
@@ -342,7 +351,7 @@ PostBox.defaultProps = {
     hideCommunity: false,
     hideJoinBtn: false,
     comments: null,
-    isTrendingPost: false,
+    isSearchPost: false,
     isSinglePost: false,
     isEditing: false
 }

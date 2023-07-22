@@ -2,6 +2,7 @@ import { MyContext, PrivacyType } from "../types/index";
 import { Community, UserCommunity } from "../entities";
 import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware, FieldResolver, Root, ObjectType, registerEnumType } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
+import { Raw } from "typeorm";
 
 registerEnumType(PrivacyType, {
     name: 'PrivacyType'
@@ -44,13 +45,24 @@ class UserCommunities {
 }
 
 
+@ObjectType()
+class SearchResponse {
+    @Field(() => String, { nullable: true })
+    errors?: string
+    @Field(() => [Community], { nullable: true })
+    communities?: Community[]
+    @Field(() => Int, { nullable: true })
+    totalCount?: number
+}
+
+
 @Resolver(_of => Community)
 export class CommunityResolver {
 
 
     @FieldResolver(() => Int)
     async numMembers(@Root() root: Community,
-     @Ctx() { dataLoaders: { numMembersLoader } }: MyContext) {
+        @Ctx() { dataLoaders: { numMembersLoader } }: MyContext) {
         // const [_, totalCount] = await UserCommunity.findAndCountBy({ communityId: root.id })
         // return totalCount
         return await numMembersLoader.load(root.id)
@@ -91,6 +103,25 @@ export class CommunityResolver {
             return null
         }
         return community
+    }
+
+    @Query(() => SearchResponse, { nullable: true })
+    async searchCommunities(
+        @Arg("keyword", () => String) keyword: string,
+        @Arg("limit", () => Int, { nullable: true }) limit?: number
+    ): Promise<SearchResponse> {
+        if (!keyword) { return { errors: 'Invalid query' } }
+        // Find community includes keyword
+        const [result, totalCount] = await Community.findAndCount({
+            where: {
+                name: limit ? Raw(alias => `LOWER(${alias}) Like '${keyword.toLowerCase()}%'`) : Raw(alias => `LOWER(${alias}) Like '%${keyword.toLowerCase()}%'`)
+            },
+            take: limit
+        })
+        return {
+            communities: result,
+            totalCount
+        }
     }
 
     @Mutation(() => CommunityResponse)
@@ -200,11 +231,15 @@ export class CommunityResolver {
         if (!community) {
             return { errors: 'No community found!' }
         }
+        if (community.creatorId === req.session.userId) {
+            return { errors: "Can't leave community cause you are the moderator!" }
+        }
         // update table user-community and minus community members
         try {
             await UserCommunity.delete({
                 userId: req.session.userId,
-                communityId: community.id
+                communityId: community.id,
+                isModerator: false
             })
             return { community }
         } catch (err) {

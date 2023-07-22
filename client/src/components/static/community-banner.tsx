@@ -25,12 +25,13 @@ function CommunityBanner({ communityInfo, userId }: Props) {
                 }, (cacheData) => ({
                     community: {
                         ...cacheData.community,
-                        hasJoined: joinedData.hasJoined,
+                        hasJoined: true,
                         numMembers: joinedData.numMembers
                     }
                 }))
             }
         },
+        // For feed nav
         refetchQueries: [
             { query: UserCommunitiesDocument }
         ]
@@ -50,7 +51,10 @@ function CommunityBanner({ communityInfo, userId }: Props) {
                     }
                 }))
             }
-        }
+        },
+        refetchQueries: [
+            { query: UserCommunitiesDocument }
+        ]
     })
     const isMod = userId === creatorId
 
@@ -93,7 +97,7 @@ function CommunityBanner({ communityInfo, userId }: Props) {
                         <div className='mt-[20px] flex-col-start'>
                             <div className='flex-start gap-[20px]'>
                                 <h1>{displayName}</h1>
-                                <button type="button" disabled={isMod} className={`${hasJoined ? 'button-main-outline after:content-["Joined"] hover:after:content-["Leave"]' : 'button-main'} cursor-pointer`}
+                                <button type="button" disabled={isMod} className={`${hasJoined ? 'button-main-outline after:content-["Joined"] hover:after:content-["Leave"]' : 'button-main'} cursor-pointer disabled:cursor-not-allowed disabled:hover:after:content-["Joined"]`}
                                     onClick={handleJoinLeave}
                                 >{hasJoined ? "" : "Join"}</button>
                             </div>

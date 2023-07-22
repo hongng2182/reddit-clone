@@ -2,6 +2,7 @@ mutation JoinCommunity($communityName: String!) {
   joinCommunity(communityName: $communityName) {
     errors
     community {
+      name
       hasJoined
       numMembers
     }
