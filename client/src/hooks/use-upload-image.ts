@@ -6,9 +6,10 @@ import { storage } from '@/lib/firebase'
 type Props = {
     onUploadComplete: (downloadURL: string) => void
     firebaseFolderName: string
+    oldImageUrl?: string
 }
 
-const useUploadImage = ({ onUploadComplete, firebaseFolderName }: Props) => {
+const useUploadImage = ({ onUploadComplete, firebaseFolderName, oldImageUrl }: Props) => {
     // Define photoFile here rather than in the component itself is to keep state of file when upload
     const [photoFile, setPhotoFile] = useState<File | null>(null)
     const downloadUrlRef = useRef('')
@@ -24,6 +25,7 @@ const useUploadImage = ({ onUploadComplete, firebaseFolderName }: Props) => {
             deleteObject(desertRef).catch(deleteError => {
                 console.log(deleteError)
             })
+            console.log('delete success')
         }
     }
 
@@ -75,6 +77,7 @@ const useUploadImage = ({ onUploadComplete, firebaseFolderName }: Props) => {
                         downloadUrlRef.current = downloadURL
                         onUploadComplete(downloadURL)
                         setIsUploading(false)
+                        if (oldImageUrl) { deleteFirebaseImage(oldImageUrl)}
                     },
                 })
                 // reject if file aren't right format and oversize
@@ -82,6 +85,7 @@ const useUploadImage = ({ onUploadComplete, firebaseFolderName }: Props) => {
                 toast.error('Please choose the correct image file type and size!', {
                     position: 'top-center',
                 })
+                setIsUploading(false)
             }
         }
     };

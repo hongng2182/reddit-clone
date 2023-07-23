@@ -28,7 +28,7 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
     const { data: meData } = useMeQuery()
     const { data: communityData } = useCommunityQuery({ variables: { communityName } })
     const [updateCommunity] = useUpdateCommunityMutation()
-    useSetActiveFeed({ communityData })
+    useSetActiveFeed({ communityData: communityData?.community })
 
     // Form state
     const [displayName, setDisplayName] = useState<string>('')

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { gql } from '@apollo/client'
 import dynamic from 'next/dynamic'
 import toast from 'react-hot-toast'
+import { useRouter } from 'next/router'
 import { useDeleteCommentMutation, useMeQuery, useUpdateCommentMutation } from '@/generated/graphql';
 import { CommentInfo } from '@/types'
 import { useCreateRootCommentHook, useModal } from '@/hooks'
@@ -28,6 +29,8 @@ function CommentDetail({ comment, commentsByParentId }: {
         [key: number]: CommentInfo[];
     }
 }) {
+    const router = useRouter()
+    const { context } = router.query
     const { id, postId, createdAt, updatedAt, message, isDeleted, user: { username, profileUrl, id: ownerId } } = comment
     const [showReplyComment, setShowReplyComment] = useState(false)
     const [isEditingComment, setIsEditingComment] = useState(false)
@@ -116,7 +119,8 @@ function CommentDetail({ comment, commentsByParentId }: {
 
             </div>}
             {showComment && <><div className='absolute h-full w-[2px] bg-medium hover:bg-primary cursor-pointer' onClick={() => setShowComment(false)} />
-                <div className='flex-start-col-10 w-full' >
+                <div className='flex-start-col-10 w-full'
+                    style={{ backgroundColor: `${Number(context) === id ? 'rgba(0, 121, 211, 0.05)' : ''}` }} >
                     <Image
                         width='0'
                         height='0'

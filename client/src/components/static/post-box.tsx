@@ -10,7 +10,7 @@ import { defaultCommunityIcon } from '@/lib/constants'
 import { PaginatedPosts, UserCommunitiesDocument, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
 import { useGlobalState, useModal, useCreateRootCommentHook } from '@/hooks'
 import { setShowSignInModal } from '@/action'
-import { ArrowUpDown, CommentIcon, ShareIcon, SaveIcon, EditIcon, DeleteIcon, AddIcon, LoadingIcon } from '../icons'
+import { ArrowUpDown, CommentIcon, ShareIcon, EditIcon, DeleteIcon, AddIcon, LoadingIcon } from '../icons'
 import EditPost from './edit-post'
 import Modal from './modal'
 import CommentForm from './comment-form'
@@ -256,10 +256,6 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
                             <ShareIcon />
                             Share
                         </div>
-                        {meData?.me && <div className='post-action'>
-                            <SaveIcon />
-                            Save
-                        </div>}
 
                         {meData?.me?.id === post.ownerId && <>
                             {text && <button className='post-action'

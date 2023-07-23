@@ -5,6 +5,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { PostDocument, usePostQuery } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
 import { PageContainer, PostBox, CommentSection, Error } from '@/components'
+import { useSetActiveFeed } from '@/hooks'
 
 function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
     if (isErrorFromServer) {
@@ -14,7 +15,9 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
     const router = useRouter()
     const { options, id: postId } = router.query
     const { data } = usePostQuery({ variables: { postId: Number(postId) } })
-
+    useSetActiveFeed({communityData: data?.post?.community})
+   
+    
     return (
         <PageContainer>
             <div className='h-[30px]' />
@@ -27,7 +30,7 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
                         hideJoinBtn
                         isSinglePost
                         isEditing={options === 'edit'}
-                        comments={<CommentSection commentsData={data.post.comments} />} />
+                        comments={data.post.comments && <CommentSection commentsData={data.post.comments} />} />
                 </div>
             }
         </PageContainer>

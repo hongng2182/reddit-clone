@@ -1,9 +1,10 @@
-import { User } from "../entities";
+import { Community, User } from "../entities";
 import { MyContext } from "../types";
-import { Arg, Ctx, Resolver, Mutation, InputType, Field, ObjectType, Query } from "type-graphql";
+import { Arg, Ctx, Resolver, Mutation, InputType, Field, ObjectType, Query, UseMiddleware } from "type-graphql";
 import argon2 from 'argon2'
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import { getEmailTemplate, sendEmail } from "../utils/sendEmail";
+import { isAuth } from "../middleware/isAuth";
 import { v4 as uuidv4 } from 'uuid';
 
 @InputType()
@@ -33,6 +34,25 @@ class UserResponse {
 }
 
 @ObjectType()
+class PartialUser implements Partial<User> {
+    @Field()
+    username!: string;
+    @Field({ nullable: true })
+    profileUrl!: string;
+    @Field(() => String)
+    createdAt: Date;
+}
+@ObjectType()
+class UserCommonInfoResponse {
+    @Field(() => String, { nullable: true })
+    errors?: string
+    @Field(() => PartialUser)
+    user?: Partial<User>
+    @Field(() => [Community])
+    moderators?: Community[]
+}
+
+@ObjectType()
 class ForgotPasswordResponse {
     @Field(() => [FieldError], { nullable: true })
     errors?: FieldError[]
@@ -50,6 +70,60 @@ export class UserResolver {
             return null
         }
         return User.findOne({ where: { id: req.session.userId } })
+    }
+
+    @Query(() => UserCommonInfoResponse)
+    async userCommonInfo(
+        @Arg('userName', () => String) userName: string): Promise<UserCommonInfoResponse> {
+        const user = await User.findOne({ where: { username: userName } })
+
+        if (!user) {
+            return { errors: "No user found with this name!" }
+        }
+
+        const { username, createdAt, profileUrl } = user
+
+        // Get communities where user is moderator
+        const communities = await Community.findBy({ creatorId: user.id })
+
+        return { user: { username, createdAt, profileUrl }, moderators: communities }
+
+    }
+
+    @Mutation(() => UserResponse)
+    @UseMiddleware(isAuth)
+    async updateUserProfile(
+        @Arg("profileUrl", () => String) profileUrl: string,
+        @Ctx() { req }: MyContext): Promise<UserResponse> {
+        const userId = req.session.userId
+        if (!userId) {
+            return {
+                errors: [{
+                    field: '', message: "You're not allowed to perform this action"
+                }]
+            }
+        }
+        const user = await User.findOne({ where: { id: userId } })
+        if (!user) {
+            return {
+                errors: [{
+                    field: '', message: "No user found!"
+                }]
+            }
+        }
+
+        if (profileUrl === '') {
+            return {
+                errors: [{
+                    field: '', message: "Profile image can't be empty!"
+                }]
+            }
+        }
+
+        user.profileUrl = profileUrl
+
+        await user.save()
+        return { user }
     }
 
     @Mutation(() => UserResponse)

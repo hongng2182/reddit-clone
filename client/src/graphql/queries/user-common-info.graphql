@@ -1,0 +1,15 @@
+query UserCommonInfo($userName: String!) {
+  userCommonInfo(userName: $userName) {
+    errors
+    user {
+      username
+      profileUrl
+      createdAt
+    }
+    moderators {
+      numMembers
+      communityIconUrl
+      name
+    }
+  }
+}

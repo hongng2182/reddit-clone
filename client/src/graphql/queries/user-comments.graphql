@@ -1,0 +1,24 @@
+query GetUserComments($username: String!) {
+  getUserComments(username: $username) {
+    errors
+    comments {
+      id
+      post {
+        title
+        id
+        user {
+          username
+        }
+        community {
+          name
+        }
+      }
+      message
+      createdAt
+      user {
+        username
+      }
+    }
+    totalCount
+  }
+}

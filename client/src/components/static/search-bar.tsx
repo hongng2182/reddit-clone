@@ -3,9 +3,10 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { debounce } from 'lodash'
 import Link from 'next/link'
-import { CloseIcon, SearchIcon } from '../icons'
 import { useSearchCommunitiesLazyQuery } from '@/generated/graphql'
 import { defaultCommunityIcon } from '@/lib/constants'
+import { CloseIcon, SearchIcon } from '../icons'
+
 
 function SearchBar() {
     const [inputFocus, setInputFocus] = useState(false)

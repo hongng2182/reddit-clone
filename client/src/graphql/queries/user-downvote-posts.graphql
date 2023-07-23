@@ -1,0 +1,10 @@
+query GetDownvotePosts($username: String!) {
+  getDownvotePosts(username: $username) {
+    errors
+    posts {
+      ...PostInfo
+      ...PostRelations
+    }
+    totalCount
+  }
+}

@@ -1,0 +1,10 @@
+query GetUserPosts($username: String!) {
+  getUserPosts(username: $username) {
+    errors
+    posts {
+      ...PostInfo
+      ...PostRelations
+    }
+    totalCount
+  }
+}

@@ -1,23 +1,27 @@
 import { useEffect } from "react"
 import { setActiveFeedTab } from "@/action"
-import { CommunityQuery } from "@/generated/graphql"
 import { defaultCommunityIcon } from "@/lib/constants"
 import useGlobalState from "./use-global-state"
 
+type CommunityData = {
+        __typename?: "Community" | undefined;
+        name: string;
+        hasJoined: boolean;
+        communityIconUrl?: string | null | undefined;
+    } | undefined | null
 
-function useSetActiveFeed({ communityData }: { communityData: CommunityQuery | undefined }) {
+function useSetActiveFeed({ communityData }: { communityData: CommunityData }) {
     const { dispatch } = useGlobalState()
 
     // Hooks
     useEffect(() => {
-        const community = communityData?.community
-        if (community)
+        if (communityData)
             dispatch(setActiveFeedTab({
-                icon: community.communityIconUrl || defaultCommunityIcon,
-                name: `r/${community.name}`,
+                icon: communityData.communityIconUrl || defaultCommunityIcon,
+                name: `r/${communityData.name}`,
                 iconFill: null
             }))
-    }, [communityData?.community, dispatch])
+    }, [communityData, dispatch])
 
 }
 

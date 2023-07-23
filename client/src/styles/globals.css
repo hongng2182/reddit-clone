@@ -184,6 +184,9 @@ button:disabled{
   .img-40 {
     @apply w-[40px] h-[40px] rounded-full object-cover object-[center,top]
   }
+  .img-80 {
+    @apply w-[80px] h-[80px] object-cover object-[center,top] rounded-md
+  }
 
   .username {
     @apply text-sm text-black-light font-bold mr-1

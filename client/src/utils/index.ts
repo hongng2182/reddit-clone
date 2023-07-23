@@ -38,4 +38,13 @@ function getTimeAgo(time: number): string {
     return '';
 }
 
-export { toErrorMap, getTimeAgo }
+
+function getTimeString (createdAt: string)  {
+    return new Date(Number(createdAt)).toLocaleDateString('en-US', {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    })
+}
+
+export { toErrorMap, getTimeAgo, getTimeString }

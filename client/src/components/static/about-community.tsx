@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import toast from 'react-hot-toast'
 import { CommunityInfo, PrivacyType } from '@/types'
 import { defaultCommunityIcon } from '@/lib/constants'
+import { getTimeString } from '@/utils'
 import { useUpdateCommunityMutation } from '@/generated/graphql'
 import { CalendarIcon, EditIcon, LockIcon, ProfileIcon, RestrictedIcon, ShieldIcon } from '../icons'
 
@@ -30,11 +31,7 @@ function AboutCommunity({ communityInfo, isSubmitPost, isMod, isUserLogin }: Pro
 
     // Utils
     const remainCharacters = 500 - descriptionInput.length
-    const dateCreated = new Date(Number(createdAt)).toLocaleDateString('en-US', {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    })
+    const dateCreated = getTimeString(createdAt)
 
     const handleEditDescription = async () => {
         if (descriptionInput !== '' && descriptionInput !== description) {

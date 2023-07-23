@@ -1,0 +1,11 @@
+mutation UpdateUserProfile($profileUrl: String!) {
+  updateUserProfile(profileUrl: $profileUrl) {
+    user {
+      profileUrl
+    }
+    errors {
+      message
+      field
+    }
+  }
+}

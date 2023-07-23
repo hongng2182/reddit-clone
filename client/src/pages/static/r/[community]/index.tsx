@@ -18,7 +18,7 @@ function CommunityPage() {
     const { data, fetchMore, networkStatus } = useGetCommunityPostsQuery({ variables: { communityName, first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
 
     const isLoadingMorePosts = networkStatus === NetworkStatus.fetchMore
-    useSetActiveFeed({ communityData })
+    useSetActiveFeed({ communityData: communityData?.community })
     // Hooks
 
     // Return no community match

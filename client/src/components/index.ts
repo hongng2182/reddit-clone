@@ -17,6 +17,8 @@ import CreatePostRules from './static/create-post-rules'
 import UserHomeSidebar from './static/user-home-sidebar'
 import Error from './static/error'
 import ImageUpload from './static/image-upload'
+import UserInfo from './static/user-info'
+import ProfileNav from './static/profile-nav'
 
 
-export { Navbar, Header, TrendingPosts, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, AboutCommunity, CommentSection, Modal, CreatePost, PopularCommunity, EditPost, CreatePostRules, UserHomeSidebar, Error, ImageUpload }
+export { Navbar, Header, TrendingPosts, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, AboutCommunity, CommentSection, Modal, CreatePost, PopularCommunity, EditPost, CreatePostRules, UserHomeSidebar, Error, ImageUpload, UserInfo, ProfileNav }

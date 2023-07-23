@@ -151,7 +151,8 @@ export class CommentResolver {
             order: { createdAt: 'DESC' },
             where: { userId: user.id },
             relations: {
-                post: true
+                post: true,
+                user: true
             }
         })
 

@@ -1,0 +1,10 @@
+query GetUpvotePosts($username: String!) {
+  getUpvotePosts(username: $username) {
+    errors
+    posts {
+      ...PostInfo
+      ...PostRelations
+    }
+    totalCount
+  }
+}
