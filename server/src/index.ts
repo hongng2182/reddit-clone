@@ -19,9 +19,10 @@ const main = async () => {
     // Connect db
     await AppDataSource.initialize()
 
-    // if (__prod__) {
-    // console.log('migration run')
-    // await AppDataSource.runMigrations()
+    if (__prod__) {
+        console.log('migration run')
+        await AppDataSource.runMigrations()
+    }
 
 
     const app = express()
