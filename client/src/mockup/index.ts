@@ -39,6 +39,3 @@ export const communities_mockup = [{
     name: 'r/community3',
     numOfMember: 36521
 }]
-
-
-export const postingRules = ['1. Remember the human', '2. Behave like you would in real life', '3. Look for the original source of content', '4. Search for duplicates before posting', '5. Read the community’s rules']

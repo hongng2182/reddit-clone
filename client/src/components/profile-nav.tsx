@@ -1,30 +1,7 @@
-import { MeQuery } from '@/generated/graphql'
-import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-
-type Tabs = {
-    name: string, icon: string, url: string
-}
-const tabs: Tabs[] = [
-    {
-        name: 'POSTS',
-        icon: 'new',
-        url: '/user/[username]'
-    }, {
-        name: 'COMMENTS',
-        icon: 'top',
-        url: '/user/[username]/comments'
-    },
-    {
-        name: 'UPVOTED',
-        icon: 'top',
-        url: '/user/[username]/upvotes'
-    }, {
-        name: 'DOWNVOTED',
-        icon: 'top',
-        url: '/user/[username]/downvotes'
-    }]
-
+import { useRouter } from 'next/router'
+import { MeQuery } from '@/generated/graphql'
+import { userPageTabs } from '@/lib/constants'
 
 function ProfileNav({ activeTab, username, meData }: { activeTab: string, username: string, meData: MeQuery | undefined }) {
     const router = useRouter()
@@ -32,7 +9,7 @@ function ProfileNav({ activeTab, username, meData }: { activeTab: string, userna
     const [showTab, setshowTab] = useState(false)
     const isProfileOwner = username === meData?.me?.username
 
-    const shownTabs = isProfileOwner ? tabs : tabs.slice(0, 2)
+    const shownTabs = isProfileOwner ? userPageTabs : userPageTabs.slice(0, 2)
 
     return (
         <div className='border-t border-medium bg-white'>
@@ -50,7 +27,7 @@ function ProfileNav({ activeTab, username, meData }: { activeTab: string, userna
                     onMouseLeave={() => setshowTab(false)}
                 >...
                     {showTab && <div className='absolute bg-white border-medium right-0 top-[40px]'>
-                        {tabs.slice(3,).map((tab) => <button key={tab.name} type='button'
+                        {userPageTabs.slice(3,).map((tab) => <button key={tab.name} type='button'
                             className={`px-4 py-2 font-bold w-full hover:bg-primary-light text-black
                     ${active === tab.name ? 'text-cate-blue' : ''}
                     `}

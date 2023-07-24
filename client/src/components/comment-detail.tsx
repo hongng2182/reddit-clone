@@ -2,19 +2,18 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { gql } from '@apollo/client'
 import dynamic from 'next/dynamic'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
-import { useDeleteCommentMutation, useMeQuery, useUpdateCommentMutation } from '@/generated/graphql';
+import { useMeQuery } from '@/generated/graphql';
 import { CommentInfo } from '@/types'
-import { useCreateRootCommentHook, useModal } from '@/hooks'
+import { useCreateRootCommentHook, useModal, useUpdateDeleteComment } from '@/hooks'
 import { defaultDeleteIcon, defaultProfileIcon } from '@/lib/constants'
 import CommentForm from './comment-form'
 import Modal from './modal'
 import { CommentIcon, DeleteIcon, EditIcon, ExpandIcon, LoadingIcon } from './icons'
 
-
+// Utils
 function getReplies(parentId: string | number, commentsByParentId: {
     [key: string]: CommentInfo[];
     [key: number]: CommentInfo[];
@@ -24,52 +23,42 @@ function getReplies(parentId: string | number, commentsByParentId: {
 
 const DynamicTimeAgo = dynamic(() => import('./time-ago'), { ssr: false })
 
-function CommentDetail({ comment, commentsByParentId }: {
+// Types
+type Props = {
     comment: CommentInfo, commentsByParentId: {
         [key: string]: CommentInfo[];
         [key: number]: CommentInfo[];
     }
-}) {
+}
+
+// Main Component
+function CommentDetail({ comment, commentsByParentId }: Props) {
+    // Props destructuring
+    const { id, postId, createdAt, updatedAt, message, isDeleted, user: { username, profileUrl, id: ownerId } } = comment
+
+    // React hooks
     const router = useRouter()
     const { context } = router.query
-    const { id, postId, createdAt, updatedAt, message, isDeleted, user: { username, profileUrl, id: ownerId } } = comment
     const [showReplyComment, setShowReplyComment] = useState(false)
     const [isEditingComment, setIsEditingComment] = useState(false)
-    const { isOpen, openModal, closeModal } = useModal()
     const [showComment, setShowComment] = useState(true)
+
+    // GraphQL hooks
     const { data: meData } = useMeQuery()
+
+    // Custom hooks
+    const { isOpen, openModal, closeModal } = useModal()
     const childComments = getReplies(comment.id, commentsByParentId)
-    const [updateComment] = useUpdateCommentMutation()
-    const [deleteComment, { loading: isDeleteLoading }] = useDeleteCommentMutation({
-        update(cache, { data }) {
-            const deleteResult = data?.deleteComment
-            if (deleteResult) {
-                try {
-                    const commentCacheKey = `Comment:${id}`;
-                    cache.writeFragment({
-                        id: commentCacheKey,
-                        fragment: gql`
-          fragment UpdatedComment on Comment {
-            isDeleted
-            updatedAt
-          }
-        `,
-                        data: {
-                            isDeleted: true,
-                            updatedAt: Date.now()
-                        },
-                    });
 
-                } catch (err) { console.log(err) }
-            }
-        }
-    })
-
+   // update + delete comment
+    const { updateComment, deleteComment, updateCommentLoading, isDeleteLoading } = useUpdateDeleteComment({ commentId: id })
 
     const onReplyCommentSuccess = () => {
         setShowReplyComment(false)
     }
-    const { onCommentReplySubmit } = useCreateRootCommentHook({ postId, parentId: id, onReplyCommentSuccess })
+    
+    // create comment
+    const { onCommentReplySubmit, createCommentLoading } = useCreateRootCommentHook({ postId, parentId: id, onReplyCommentSuccess })
 
     const onCommentUpdateSubmit = async (updateMessage: string) => {
         const response = await updateComment({ variables: { updateCommentId: id, message: updateMessage } })
@@ -92,7 +81,6 @@ function CommentDetail({ comment, commentsByParentId }: {
             closeModal()
         }
     }
-
 
     return (<>
         <div className='w-full max-w-full relative mb-2 box-border'>
@@ -136,6 +124,7 @@ function CommentDetail({ comment, commentsByParentId }: {
                             <span className='text-gray text-xs'><DynamicTimeAgo time={createdAt} /></span>
                         </div>
                         {isEditingComment ? <CommentForm
+                            isLoading={updateCommentLoading}
                             initialValue={message}
                             onSubmit={onCommentUpdateSubmit}
                             onCancel={() => setIsEditingComment(false)}
@@ -163,6 +152,7 @@ function CommentDetail({ comment, commentsByParentId }: {
                         </div>}
                         {showReplyComment &&
                             <CommentForm
+                                isLoading={createCommentLoading}
                                 initialValue=''
                                 onSubmit={onCommentReplySubmit}
                                 onCancel={() => setShowReplyComment(false)}

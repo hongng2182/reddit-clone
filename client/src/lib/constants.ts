@@ -1,6 +1,6 @@
-import { Feeds } from "@/types"
+import { Feeds, UserPageTabs } from "@/types"
 
-// Post
+// Post Fetch Limit
 export const FETCH_LIMIT = 10
 
 // Images Name
@@ -8,6 +8,7 @@ export const defaultCommunityIcon = '/default-community.jpg'
 export const defaultProfileIcon = '/default-profile.jpg'
 export const defaultDeleteIcon = '/delete-image.png'
 
+// Default feed tabs
 export const feeds: Feeds = {
     title: 'FEEDS',
     sub_feed: [{
@@ -24,6 +25,7 @@ export const feeds: Feeds = {
     }],
 }
 
+// All feed tabs
 export const tabs = {
     createCommunity: {
         icon: "/icons/add-outline.svg",
@@ -51,3 +53,29 @@ export const tabs = {
         name: 'Search Results',
     }
 }
+
+// Posting Rules
+export const postingRules = ['1. Remember the human', '2. Behave like you would in real life', '3. Look for the original source of content', '4. Search for duplicates before posting', '5. Read the community’s rules']
+
+// Tabs in user page
+export const userPageTabs: UserPageTabs[] = [
+    {
+        name: 'POSTS',
+        icon: 'new',
+        url: '/user/[username]'
+    }, {
+        name: 'COMMENTS',
+        icon: 'top',
+        url: '/user/[username]/comments'
+    },
+    {
+        name: 'UPVOTED',
+        icon: 'top',
+        url: '/user/[username]/upvotes'
+    }, {
+        name: 'DOWNVOTED',
+        icon: 'top',
+        url: '/user/[username]/downvotes'
+    }]
+
+

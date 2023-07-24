@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useGlobalState } from '@/hooks'
+import { useClickOutside, useGlobalState } from '@/hooks'
 import { useLogoutMutation, useMeQuery } from '@/generated/graphql'
 import { setShowSignInModal } from '@/action'
 import { defaultProfileIcon } from '@/lib/constants'
@@ -30,9 +30,13 @@ function Header() {
             router.reload()
         }
     }
+    
+    // Custom hooks
+    const { elementRef } = useClickOutside({ onClickComplete: () => setProfileFocus(false) })
 
     return (<>
         <nav className='flex-start smM:px-[5px] px-[20px] bg-white h-[48px]'>
+            {/* Logo + Feed + Searchbar */}
             <div className="grow-[1] flex gap-[7px] md:gap-[20px]">
                 <Link href='/' className="flex-start-10 min-w-[37px]">
                     <Image
@@ -59,12 +63,12 @@ function Header() {
                     <SearchBar />
                 </div>
             </div>
+            {/* User Profile Nav */}
             <div className="grow-0 flex-end gap-[1.5rem]">
                 {!data?.me && <button type="button" className='button-main smM:hidden'
                     onClick={() => dispatch(setShowSignInModal(true))}>Login</button>}
-                <div className="relative flex-start gap-[5px] border border-transparent hover:border-medium p-1 rounded-md cursor-pointer min-h-[40px]"
-                    onMouseEnter={() => setProfileFocus(true)}
-                    onMouseLeave={() => setProfileFocus(false)}
+                <div ref={elementRef} className="relative flex-start gap-[5px] border border-transparent hover:border-medium p-1 rounded-md cursor-pointer min-h-[40px]"
+                    onClick={() => setProfileFocus(true)}
                 >
                     {!data?.me && <ProfileIcon type='outline' />}
                     {data && data.me && <div className='flex-start gap-[5px] min-w-[30px]'>
@@ -78,16 +82,18 @@ function Header() {
                         <span className='label-md smM:hidden'>{data.me.username}</span>
                     </div>}
                     <DropdownIcon width={12} />
+                    {/* User Profile Nav Dropdown */}
                     {profileFocus && <div className="absolute h-auto bg-white border border-medium top-[40px] right-0 py-[10px]">
-                        {data && data.me && <><Link
-                            href={`/user/${data.me.username}`}
-                            className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
-                        >
-                            <div className='w-[24px] h-[24px]'>
-                                <ProfileIcon fill='#212121' type='outline' />
-                            </div>
-                            <span>My Profile</span>
-                        </Link>
+                        {data && data.me && <>
+                            <Link
+                                href={`/user/${data.me.username}`}
+                                className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
+                            >
+                                <div className='w-[24px] h-[24px]'>
+                                    <ProfileIcon fill='#212121' type='outline' />
+                                </div>
+                                <span>My Profile</span>
+                            </Link>
                             <button
                                 type='button'
                                 className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"

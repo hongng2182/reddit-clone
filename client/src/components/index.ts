@@ -1,4 +1,4 @@
-import Header from './navbar'
+import Header from './header'
 import TrendingPosts from './trending-posts'
 import CreatePostFragment from './create-post-fragment'
 import FilterBox from './filter-box'

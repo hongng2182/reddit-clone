@@ -17,9 +17,14 @@ type Props = {
 }
 
 function UserInfo({ userInfo, meData }: Props) {
+    // Props destructure
     const { user: { username, profileUrl, createdAt }, moderators } = userInfo
     const dateCreated = getTimeString(createdAt)
     const isProfileOwner = meData?.me?.username === username
+    // React hook
+    const inputFileRef = useRef<HTMLInputElement>(null)
+
+    // GraphQL
     const [updateProfileUrl] = useUpdateUserProfileMutation({
         update(cache, { data }) {
             const newProfileUrl = data?.updateUserProfile.user?.profileUrl
@@ -47,13 +52,8 @@ function UserInfo({ userInfo, meData }: Props) {
             }
         }
     })
-    const inputFileRef = useRef<HTMLInputElement>(null)
-    const handleOpenFile = () => {
-        if (inputFileRef.current) {
-            inputFileRef.current.click()
-        }
-    }
-    // Image Upload hooks
+
+    // Custom: Image Upload hooks
     const onUploadComplete = async (downloadURL: string) => {
         const response = await updateProfileUrl({ variables: { profileUrl: downloadURL } })
         if (response.data?.updateUserProfile.user) {
@@ -63,12 +63,20 @@ function UserInfo({ userInfo, meData }: Props) {
             toast.error(response.data?.updateUserProfile.errors[0].message)
         }
     }
+
     const { isUploading, handleFileInput } = useUploadImage({
         onUploadComplete,
         firebaseFolderName: 'user-profile',
         oldImageUrl: profileUrl as string
     })
 
+    // Utils
+    const handleOpenFile = () => {
+        if (inputFileRef.current) {
+            inputFileRef.current.click()
+        }
+    }
+   
     return (<>
         <div className='w-full mb-3 white-gray-rounded'>
             {/* Title */}

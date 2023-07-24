@@ -1,4 +1,5 @@
 import { FieldError } from "@/generated/graphql";
+import { VoteStatusValues } from "@/types";
 
 function toErrorMap(errors: FieldError[]) {
     const errorMap: Record<string, string> = {};
@@ -47,4 +48,17 @@ function getTimeString (createdAt: string)  {
     })
 }
 
-export { toErrorMap, getTimeAgo, getTimeString }
+const getPointsColorClassname = (voteStatus: number) => {
+    switch (voteStatus) {
+        case VoteStatusValues.Upvote:
+            return 'text-secondary'
+        case VoteStatusValues.Downvote:
+            return 'text-primary'
+        default:
+            return 'text-black'
+    }
+}
+
+
+
+export { toErrorMap, getTimeAgo, getTimeString, getPointsColorClassname }

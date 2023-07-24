@@ -1,26 +1,14 @@
-import React, { useState, useRef } from 'react'
-import { useRouter } from 'next/router'
-import { MeDocument, MeQuery, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from '@/generated/graphql'
-import { toErrorMap } from '@/utils'
-import { initializeApollo } from '@/lib/apolloClient'
-import { useGlobalState } from '@/hooks'
-import { setShowSignInModal } from '@/action'
+import React, { useState } from 'react'
+import { useUserAuth } from '@/hooks'
 import { LoadingIcon } from './icons'
+
 
 function AuthenticatePopup() {
     // React hooks
     const [active, setActive] = useState<'login' | 'signup' | 'forgot'>('login')
-    const router = useRouter()
-    const formRef = useRef({ username: '', password: '', email: '', usernameOrEmail: '' })
-    const [errorState, setError] = useState<{ [key: string]: string }>({})
 
-    // Created hooks
-    const { dispatch } = useGlobalState()
-
-    // GraphQL hooks
-    const [register, { loading: registerLoading }] = useRegisterMutation()
-    const [login, { loading: logInloading }] = useLoginMutation()
-    const [forgotPassword, { data: forgotPasswordData }] = useForgotPasswordMutation()
+    // Custom hooks
+    const { errorState, setError, handleLogIn, handleRegister, handleForgotPassword, formRef, registerLoading, logInloading, forgotPasswordData, resetPasswordLoading } = useUserAuth()
 
     // Utils
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,71 +16,6 @@ function AuthenticatePopup() {
         formRef.current = {
             ...formRef.current,
             [name]: value
-        }
-    }
-
-    // handleRegister
-    const handleRegister = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault()
-        setError({})
-        const { username, email, password } = formRef.current
-        const response = await register({
-            variables: { options: { username, email, password } }, update(cache, { data }) {
-                if (data?.register) {
-                    cache.writeQuery<MeQuery>({
-                        query: MeDocument,
-                        data: { me: data.register.user }
-                    })
-                }
-            }
-        })
-        if (response.data?.register.errors) {
-            const fieldName = response.data.register.errors
-            const errorMap = toErrorMap(fieldName)
-            setError(errorMap)
-        } else if (response.data?.register.user) {
-            dispatch(setShowSignInModal(false))
-            router.push('/')
-        }
-    }
-
-    // handleLogIn
-    const handleLogIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault()
-        setError({})
-        const { usernameOrEmail, password } = formRef.current
-        const response = await login({
-            variables: { usernameOrEmail, password }, update(cache, { data }) {
-                if (data?.login) {
-                    cache.writeQuery<MeQuery>({
-                        query: MeDocument,
-                        data: { me: data.login.user }
-                    })
-                }
-            }
-        })
-        if (response.data?.login.errors) {
-            const fieldName = response.data.login.errors
-            const errorMap = toErrorMap(fieldName)
-            setError(errorMap)
-        } else if (response.data?.login.user) {
-            const apolloClient = initializeApollo()
-            await apolloClient.resetStore()
-            dispatch(setShowSignInModal(false))
-        }
-    }
-
-    // handleForgotPassword
-    const handleForgotPassword = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault()
-        setError({})
-        const response = await forgotPassword({
-            variables: { email: formRef.current.email }
-        })
-        if (response.data?.forgotPassword.errors) {
-            const fieldName = response.data.forgotPassword.errors
-            const errorMap = toErrorMap(fieldName)
-            setError(errorMap)
         }
     }
 
@@ -182,8 +105,9 @@ function AuthenticatePopup() {
                 {active === 'forgot' &&
                     <>
                         <button className='button-main w-full py-2' type='button'
+                            disabled={resetPasswordLoading}
                             onClick={handleForgotPassword}>
-                            Reset Password
+                            {resetPasswordLoading ? <LoadingIcon /> : 'Reset Password'}
                         </button>
 
                         {/* Forgot Password Message */}

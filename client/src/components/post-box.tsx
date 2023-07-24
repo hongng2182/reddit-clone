@@ -2,13 +2,12 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { Reference } from '@apollo/client'
 import toast from 'react-hot-toast'
 import { PostInfo, VoteStatusValues } from '@/types'
-import { getTimeAgo } from '@/utils'
+import { getPointsColorClassname, getTimeAgo } from '@/utils'
 import { defaultCommunityIcon } from '@/lib/constants'
-import { PaginatedPosts, UserCommunitiesDocument, VoteType, useDeletePostMutation, useJoinCommunityMutation, useMeQuery, useVoteMutation } from "@/generated/graphql"
-import { useGlobalState, useModal, useCreateRootCommentHook } from '@/hooks'
+import { UserCommunitiesDocument, useJoinCommunityMutation, useMeQuery } from "@/generated/graphql"
+import { useGlobalState, useModal, useCreateRootCommentHook, useVoting, useDeletePost } from '@/hooks'
 import { setShowSignInModal } from '@/action'
 import { ArrowUpDown, CommentIcon, ShareIcon, EditIcon, DeleteIcon, AddIcon, LoadingIcon } from './icons'
 import EditPost from './edit-post'
@@ -25,21 +24,12 @@ type PostBoxProps = {
     isEditing?: boolean
 }
 
-const getPointsColorClassname = (voteStatus: number) => {
-    switch (voteStatus) {
-        case VoteStatusValues.Upvote:
-            return 'text-secondary'
-        case VoteStatusValues.Downvote:
-            return 'text-primary'
-        default:
-            return 'text-black'
-    }
-}
 function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isSinglePost, isEditing }: PostBoxProps) {
     // Object destructure from post
     const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt, community: { name: communityName, hasJoined, communityIconUrl }, numComments, imageUrl, urlLink } = post
     const pointsClassname = getPointsColorClassname(voteStatus)
     const timeAgo = getTimeAgo(Number(createdAt))
+
     // React hooks
     const router = useRouter()
     const { options } = router.query
@@ -49,58 +39,27 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
     const { isOpen, openModal, closeModal } = useModal()
 
     // GraphQL hooks
-    const [vote] = useVoteMutation()
     const { data: meData } = useMeQuery()
-    const [delelePost, { loading: isDeleteLoading }] = useDeletePostMutation()
     const [joinCommunity, { data: joinData }] = useJoinCommunityMutation({
         refetchQueries: [
             { query: UserCommunitiesDocument }
         ]
     })
-    // Other Hooks
-    const { onCommentSubmit } = useCreateRootCommentHook({ postId: id })
+
+    // Custom Hooks
+    const { upVote, downVote } = useVoting({ meData })
+    const { onCommentSubmit, createCommentLoading } = useCreateRootCommentHook({ postId: id })
+
+    const onDeletePostSuccess = () => {
+        closeModal()
+        if (router.pathname === '/r/[community]/comments/[id]') { router.push('/') }
+    }
+    const { isDeleteLoading, handleDeletePost } = useDeletePost({ onDeletePostSuccess })
 
     // Utils
     const handlePostClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation()
         if (!comments) router.push(`/r/${communityName}/comments/${id}`)
-    }
-
-    const handleDeletePost = async (postId: number) => {
-        await delelePost({
-            variables: { deletePostId: postId }, update(cache, { data: deleteData }) {
-                if (deleteData?.deletePost) {
-                    toast.success('Successfully delete post!')
-                    cache.modify({
-                        fields: {
-                            posts(existing: Pick<PaginatedPosts,
-                                '__typename' | 'pageInfo'> & { paginatedPosts: Reference[] }) {
-
-                                const newEndCursor = existing.pageInfo.endCursor ? parseInt
-                                    (Buffer.from(existing.pageInfo.endCursor, 'base64').toString(), 10) - 1 : null
-
-                                const newpageInfo = newEndCursor ?
-                                    {
-                                        ...existing.pageInfo,
-                                        endCursor: Buffer.from((newEndCursor).toString()).toString('base64')
-                                    } :
-                                    { ...existing.pageInfo }
-
-                                const newPostsAfterDelete = {
-                                    ...existing,
-                                    pageInfo: newpageInfo,
-                                    // eslint-disable-next-line no-underscore-dangle
-                                    paginatedPosts: existing.paginatedPosts.filter(postRef => postRef.__ref !== `Post:${postId}`)
-                                }
-                                return newPostsAfterDelete
-                            }
-                        }
-                    })
-                    closeModal()
-                    if (router.pathname === '/r/[community]/comments/[id]') { router.push('/') }
-                }
-            }
-        })
     }
 
     const handleJoinCommunity = async () => {
@@ -119,39 +78,9 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
         }
     }
 
-    const upVote = async (voteValue: number, postId: number) => {
-        if (!meData?.me) {
-            dispatch(setShowSignInModal(true))
-            return
-        }
-        if (voteValue !== VoteStatusValues.Upvote) {
-            await vote({
-                variables: {
-                    postId,
-                    voteValue: VoteType.Upvote
-                }
-            })
-        }
-    }
-
-    const downVote = async (voteValue: number, postId: number) => {
-        if (!meData?.me) {
-            dispatch(setShowSignInModal(true))
-            return
-        }
-        if (voteValue !== VoteStatusValues.Downvote) {
-            await vote({
-                variables: {
-                    postId,
-                    voteValue: VoteType.Downvote
-                }
-            })
-        }
-    }
-
     useEffect(() => {
         if (isEditing && text) setShowEdit(true)
-    }, [isEditing])
+    }, [isEditing, text])
 
     return (<>
         <div onClick={(e) => handlePostClick(e)}
@@ -301,6 +230,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
                 {isSinglePost && meData?.me &&
                     <><span className='label-md'>Comment as {meData?.me.username}</span>
                         <CommentForm
+                            isLoading={createCommentLoading}
                             initialValue=''
                             onSubmit={onCommentSubmit} />
                     </>}
@@ -315,11 +245,11 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
             </div>
             {isSearchPost && imageUrl && <div className='flex-center'>
                 <Image
-                src={imageUrl}
-                alt="post-img"
-                width={100}
-                height={75}
-                sizes='50%'
+                    src={imageUrl}
+                    alt="post-img"
+                    width={100}
+                    height={75}
+                    sizes='50%'
                     className='w-[138px] h-[98px] object-cover object-[center,top] rounded-lg' />
             </div>}
         </div >

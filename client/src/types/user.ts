@@ -17,3 +17,7 @@ export type FeedTab = {
     iconFill: string | null,
     name: string
 }
+
+export type UserPageTabs = {
+    name: string, icon: string, url: string
+}

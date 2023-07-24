@@ -29,3 +29,10 @@ export type UserCommunities = {
     isModerator: boolean;
     community: CommunityFragment
 }[]
+
+export type JoinLeaveCommunityResponse = {
+    __typename?: "Community" | undefined;
+    name: string;
+    hasJoined: boolean;
+    numMembers: number;
+}

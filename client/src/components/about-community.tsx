@@ -19,6 +19,7 @@ type Props = {
 function AboutCommunity({ communityInfo, isSubmitPost, isMod, isUserLogin }: Props) {
     // Props destructure
     const { id, numMembers, createdAt, description, communityIconUrl, name, privacyType } = communityInfo
+    const dateCreated = getTimeString(createdAt)
 
     // React hooks
     const router = useRouter()
@@ -31,7 +32,6 @@ function AboutCommunity({ communityInfo, isSubmitPost, isMod, isUserLogin }: Pro
 
     // Utils
     const remainCharacters = 500 - descriptionInput.length
-    const dateCreated = getTimeString(createdAt)
 
     const handleEditDescription = async () => {
         if (descriptionInput !== '' && descriptionInput !== description) {

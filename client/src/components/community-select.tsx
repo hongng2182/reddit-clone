@@ -34,7 +34,7 @@ function CommunitySelect({ onSelectCommunity, initialValue }: Props) {
         if (activeTab.current.id && activeTab.current.id !== 0) {
             onSelectCommunity(activeTab.current.id)
         }
-    }, [activeTab.current])
+    }, [activeTab.current, onSelectCommunity])
 
     if (!data?.userCommunities) {
         return <div className='w-[300px] h-[40px] bg-white border border-medium' />

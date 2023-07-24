@@ -84,7 +84,8 @@ export class CommunityResolver {
         const record = await UserCommunity.find({
             relations: {
                 community: true,
-            }, where: { userId: req.session.userId }
+            },
+            where: { userId: req.session.userId ?? 0 }
         })
         const commuity = record.map(item => ({
             community: item.community,

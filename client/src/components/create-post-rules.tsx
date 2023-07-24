@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react'
-import { postingRules } from '@/mockup'
+import { postingRules } from '@/lib/constants'
 import { RulesIcon } from './icons'
 
 function CreatePostRules() {

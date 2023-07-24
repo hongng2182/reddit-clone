@@ -1,6 +1,7 @@
 /* eslint-disable react/require-default-props */
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
+import { LoadingIcon } from './icons'
 
 type Props = {
     initialValue: string
@@ -8,9 +9,10 @@ type Props = {
     isReply?: boolean
     isEdit?: boolean
     onCancel?: () => void
+    isLoading: boolean
 }
 
-function CommentForm({ initialValue, onSubmit, isReply, isEdit, onCancel }: Props) {
+function CommentForm({ initialValue, onSubmit, isReply, isEdit, onCancel, isLoading }: Props) {
     const [message, setMessage] = useState(initialValue)
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -36,10 +38,12 @@ function CommentForm({ initialValue, onSubmit, isReply, isEdit, onCancel }: Prop
                     {(isReply || isEdit) && <button type="button"
                         onClick={onCancel && onCancel} className='button-main-outline'>Cancel</button>}
                     <button type="submit"
+                        disabled={isLoading}
                         className='button-main'>
-                        {isReply && 'Reply'}
-                        {isEdit && 'Save'}
-                        {!isReply && !isEdit && 'Comment'}
+                        {isLoading && <LoadingIcon />}
+                        {!isLoading && isReply && 'Reply'}
+                        {!isLoading && isEdit && 'Save'}
+                        {!isLoading && !isReply && !isEdit && 'Comment'}
                     </button>
                 </div>
             </div>

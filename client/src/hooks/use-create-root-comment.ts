@@ -3,7 +3,7 @@ import { PostDocument, useCreateCommentMutation } from "@/generated/graphql"
 
 const useCreateRootCommentHook = ({ postId, parentId, onReplyCommentSuccess }: { postId: number, parentId?: number, onReplyCommentSuccess?: () => void }) => {
 
-    const [createComment] = useCreateCommentMutation({
+    const [createComment, {loading: createCommentLoading}] = useCreateCommentMutation({
         update(cache, { data }) {
             const newCommentData = data?.createComment.comment
             if (newCommentData) {
@@ -60,7 +60,7 @@ const useCreateRootCommentHook = ({ postId, parentId, onReplyCommentSuccess }: {
         }
     }
 
-    return { onCommentSubmit, onCommentReplySubmit }
+    return { onCommentSubmit, onCommentReplySubmit, createCommentLoading }
 }
 
 export default useCreateRootCommentHook

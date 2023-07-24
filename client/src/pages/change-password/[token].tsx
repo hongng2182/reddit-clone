@@ -7,6 +7,7 @@ import { toErrorMap } from '@/utils'
 import { PageContainer } from '@/components'
 import { useGlobalState } from '@/hooks'
 import { setShowSignInModal } from '@/action'
+import { LoadingIcon } from '@/components/icons'
 
 
 const ChangePassword: NextPage = () => {
@@ -14,7 +15,7 @@ const ChangePassword: NextPage = () => {
     const { dispatch } = useGlobalState()
     const [password, setPassword] = useState('')
     const [errorState, setError] = useState<{ [key: string]: string }>({})
-    const [changePassword] = useChangePasswordMutation()
+    const [changePassword, { loading }] = useChangePasswordMutation()
 
     const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -72,7 +73,9 @@ const ChangePassword: NextPage = () => {
                         </>
                     }
 
-                    {!errorState.token && <button type="submit" className='button-main mx-auto'>Change Password</button>}
+                    {!errorState.token && <button type="submit" className='button-main mx-auto'
+                        disabled={loading}
+                    >{loading ? <LoadingIcon /> : 'Change Password'}</button>}
                 </form>
             </div>
         </PageContainer>
