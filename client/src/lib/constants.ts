@@ -14,13 +14,13 @@ export const feeds: Feeds = {
         icon: '/icons/home-outline.svg',
         iconFill: '/icons/home-fill.svg',
         name: 'Home',
-        link: '/static'
+        link: '/'
     },
     {
         icon: '/icons/arrow-outline.svg',
         iconFill: '/icons/arrow-fill.svg',
         name: 'Popular',
-        link: '/static/r/popular'
+        link: '/r/popular'
     }],
 }
 

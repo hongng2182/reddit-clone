@@ -1,73 +1,125 @@
-import React from 'react'
+import React, { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { Reference, gql } from '@apollo/client'
-import { MeDocument, MeQuery, useLogoutMutation, useMeQuery } from '@/generated/graphql'
+import { useRouter } from 'next/router'
+import { useGlobalState } from '@/hooks'
+import { useLogoutMutation, useMeQuery } from '@/generated/graphql'
+import { setShowSignInModal } from '@/action'
+import { defaultProfileIcon } from '@/lib/constants'
+import Feed from './feed'
+import { DropdownIcon, ProfileIcon, LogOutIcon } from './icons'
+import SearchBar from './search-bar'
+import AuthenticatePopup from './authenticate-popup'
+import Modal from './modal'
 
-function Navbar() {
-    const { loading, data } = useMeQuery()
+function Header() {
+    // React hooks
+    const router = useRouter()
+    const [profileFocus, setProfileFocus] = useState(false)
+    const { dispatch, state: { showSignInModal } } = useGlobalState()
+
+    // Graphql Hooks
+    const { data } = useMeQuery()
     const [logout] = useLogoutMutation()
 
-    let body
-
-    if (loading) {
-        body = null
-    } else if (!data?.me) {
-        body = <>
-            <li><Link href="/register">Register</Link></li>
-            <li><Link href="/login">Login</Link></li>
-        </>
-    } else {
-        body = <>
-            <button type="button" className='bg-blue-500  w-[10rem] rounded-xl p-1 text-white'>
-                <Link href="/create-post">Create Post</Link>
-            </button>
-            <li>{data.me.username}</li>
-            <li><button
-                type="button"
-                onClick={() => {
-                    logout({
-                        update(cache, { data: logoutData }) {
-                            if (logoutData?.logout) {
-                                cache.writeQuery<MeQuery>({
-                                    query: MeDocument,
-                                    data: { me: null }
-                                })
-
-                                cache.modify({
-                                    fields: {
-                                        posts(existing) {
-                                            existing.paginatedPosts.forEach((post: Reference) => {
-                                                cache.writeFragment({
-                                                    // eslint-disable-next-line no-underscore-dangle
-                                                    id: post.__ref,
-                                                    fragment: gql`
-                                                fragment voteStatus on Post {
-                                                    voteStatus
-                                                }
-                                                `,
-                                                    data: {
-                                                        voteStatus: 0
-                                                    }
-                                                })
-                                            })
-                                            return existing
-                                        }
-                                    }
-                                })
-                            }
-                        }
-                    })
-                }}>Logout</button></li>
-        </>
+    // Utils
+    const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault()
+        const response = await logout()
+        if (response.data?.logout) {
+            router.reload()
+        }
     }
 
-    return (
-        <div className='h-[4rem] bg-blue-200 p-2'>
-            <ul className='h-full flex justify-end items-center gap-[10px]'>
-                {body}
-            </ul>
-        </div>
+    return (<>
+        <nav className='flex-start smM:px-[5px] px-[20px] bg-white h-[48px]'>
+            <div className="grow-[1] flex gap-[7px] md:gap-[20px]">
+                <Link href='/' className="flex-start-10 min-w-[37px]">
+                    <Image
+                        height='0'
+                        width='0'
+                        src='/logo-cat.png'
+                        alt='logo'
+                        sizes='100%'
+                        className='w-[35px]'
+                    />
+                    <Image
+                        height='40'
+                        width='0'
+                        src='/logo-text.png'
+                        alt='logo'
+                        sizes='80%'
+                        className='h-auto w-[150px] lgM:hidden'
+                    />
+                </Link>
+                <div className="flex-center">
+                    <Feed isUserLogIn={Boolean(data?.me)} />
+                </div>
+                <div className="flex-[2] flex-start">
+                    <SearchBar />
+                </div>
+            </div>
+            <div className="grow-0 flex-end gap-[1.5rem]">
+                {!data?.me && <button type="button" className='button-main smM:hidden'
+                    onClick={() => dispatch(setShowSignInModal(true))}>Login</button>}
+                <div className="relative flex-start gap-[5px] border border-transparent hover:border-medium p-1 rounded-md cursor-pointer min-h-[40px]"
+                    onMouseEnter={() => setProfileFocus(true)}
+                    onMouseLeave={() => setProfileFocus(false)}
+                >
+                    {!data?.me && <ProfileIcon type='outline' />}
+                    {data && data.me && <div className='flex-start gap-[5px] min-w-[30px]'>
+                        <Image
+                            src={data.me.profileUrl ? data.me.profileUrl : defaultProfileIcon}
+                            alt='avatar'
+                            width='35'
+                            height='35'
+                            sizes='100%'
+                            className='img-35' />
+                        <span className='label-md smM:hidden'>{data.me.username}</span>
+                    </div>}
+                    <DropdownIcon width={12} />
+                    {profileFocus && <div className="absolute h-auto bg-white border border-medium top-[40px] right-0 py-[10px]">
+                        {data && data.me && <><Link
+                            href={`/user/${data.me.username}`}
+                            className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
+                        >
+                            <div className='w-[24px] h-[24px]'>
+                                <ProfileIcon fill='#212121' type='outline' />
+                            </div>
+                            <span>My Profile</span>
+                        </Link>
+                            <button
+                                type='button'
+                                className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
+                                onClick={handleLogout}
+                            >
+                                <div className='w-[24px] h-[24px]'>
+                                    <LogOutIcon />
+                                </div>
+                                <span>Log Out</span>
+                            </button>
+                        </>}
+                        {!data?.me && <button
+                            type='button'
+                            className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
+                            onClick={() => dispatch(setShowSignInModal(true))}
+                        >
+                            <div className='w-[24px] h-[24px]'>
+                                <LogOutIcon />
+                            </div>
+                            <span>Log In/ Sign Up</span>
+                        </button>}
+                    </div>}
+                </div>
+            </div >
+        </nav >
+        <Modal
+            isOpen={showSignInModal}
+            closeModal={() => dispatch(setShowSignInModal(false))}>
+            <AuthenticatePopup />
+        </Modal>
+    </>
     )
 }
 
-export default Navbar
+export default Header

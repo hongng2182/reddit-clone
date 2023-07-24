@@ -2,6 +2,7 @@ import { Field, ObjectType } from "type-graphql";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from "typeorm";
 import { UserCommunity } from "./UserCommunity";
 import { PrivacyType } from "../types";
+import { Post } from "./Post";
 
 
 @ObjectType()
@@ -41,6 +42,9 @@ export class Community extends BaseEntity {
 
     @OneToMany(() => UserCommunity, (userCommunity) => userCommunity.community)
     userCommunities: UserCommunity[]
+
+    @OneToMany(() => Post, (post) => post.community)
+    posts: Post[]
 
     @Field(() => String)
     @CreateDateColumn()

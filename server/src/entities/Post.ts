@@ -3,6 +3,7 @@ import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, Pri
 import { User } from "./User";
 import { Vote } from "./Vote";
 import { Comment } from "./Comment";
+import { Community } from "./Community";
 
 @ObjectType()
 @Entity()
@@ -45,6 +46,9 @@ export class Post extends BaseEntity {
 
     @ManyToOne(() => User, (user) => user.posts)
     owner: User
+
+    @ManyToOne(() => Community, (community) => community.posts)
+    community: Community
 
     @OneToMany(() => Vote, (upvote) => upvote.post)
     upvotes: Vote[]
