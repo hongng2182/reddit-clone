@@ -22,7 +22,7 @@ export async function sendEmail(to: string, html: string) {
     let info = await transporter.sendMail({
         from: process.env.NODEMAILER_USER, // sender address
         to: to, // list of receivers
-        subject: "Mini Reddit - Change Password", // Subject line
+        subject: "MiniReddit - Change Password", // Subject line
         html, // plain text body
     });
 
@@ -41,7 +41,7 @@ export function getEmailTemplate(token: string): string {
 <html lang="en-US">
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <title>Reddit Clone - Reset Password Email</title>
+    <title>MiniReddit - Reset Password Email</title>
     <meta name="description" content="Reset Password Email.">
     <style type="text/css">
         a:hover {text-decoration: underline !important;}

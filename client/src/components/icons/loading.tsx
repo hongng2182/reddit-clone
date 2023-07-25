@@ -10,9 +10,10 @@ function LoadingIcon(props: SVGProps<SVGSVGElement>) {
         shapeRendering: 'auto'
       }}
       preserveAspectRatio="xMidYMid"
+      stroke="#ffffff"
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}>
-      <circle cx="50" cy="50" r="35" strokeWidth="12" stroke="#ffffff" strokeDasharray="54.97787143782138 54.97787143782138" fill="none" strokeLinecap="round">
+      <circle cx="50" cy="50" r="35" strokeWidth="12" strokeDasharray="54.97787143782138 54.97787143782138" fill="none" strokeLinecap="round">
         <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50" />
       </circle>
     </svg>

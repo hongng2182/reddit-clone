@@ -15,13 +15,12 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
     const router = useRouter()
     const { options, id: postId } = router.query
     const { data } = usePostQuery({ variables: { postId: Number(postId) } })
-    useSetActiveFeed({communityData: data?.post?.community})
-   
-    
+    useSetActiveFeed({ communityData: data?.post?.community })
+
     return (
         <PageContainer>
             <div className='h-[30px]' />
-            {!data?.post && <p>Post does not exist</p>}
+            {!data?.post && <h3>Post does not exist.</h3>}
 
             {data && data.post &&
                 <div className='my-[30px]'>
@@ -30,7 +29,8 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
                         hideJoinBtn
                         isSinglePost
                         isEditing={options === 'edit'}
-                        comments={data.post.comments && <CommentSection commentsData={data.post.comments} />} />
+                        comments={data.post.comments && <CommentSection commentsData={data.post.comments} />}
+                    />
                 </div>
             }
         </PageContainer>

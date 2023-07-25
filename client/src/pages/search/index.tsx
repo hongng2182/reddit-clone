@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { useRouter } from 'next/router'
 import Link from 'next/link';
-import { PageContainer, PostBox } from '@/components';
+import { PageContainer, PostBox, PostBoxSkeleton, CommunityBoxSkeleton } from '@/components';
 import { useMeQuery, useSearchCommunitiesLazyQuery, useSearchPostsQuery } from '@/generated/graphql';
-import { defaultCommunityIcon, tabs } from '@/lib/constants';
+import { ArrayOfTen, defaultCommunityIcon, tabs } from '@/lib/constants';
 import { setActiveFeedTab } from '@/action';
 import { useGlobalState, useJoinLeaveCommunity } from '@/hooks';
-import { LoadingIcon } from '@/components/icons';
 
 const filterTabs = ['Posts', 'Communities']
 
@@ -20,11 +19,11 @@ function SearchPage() {
 
     // GraphQL
     const { data: meData } = useMeQuery()
-    const { data, loading } = useSearchPostsQuery({ variables: { keyword: q as string } })
+    const { data, loading: postsLoading } = useSearchPostsQuery({ variables: { keyword: q as string } })
     const [searchCommunity, { data: communitiesData, loading: communitiesLoading }] = useSearchCommunitiesLazyQuery()
 
     // Custom hooks
-    const {  handleJoinLeave } = useJoinLeaveCommunity({ keyword: q as string })
+    const { handleJoinLeave } = useJoinLeaveCommunity({ keyword: q as string })
 
     // Use Effect hooks
     useEffect(() => {
@@ -54,7 +53,7 @@ function SearchPage() {
             }
         </div>
         <div className='w-full'>
-            {loading || communitiesLoading && <LoadingIcon />}
+            {postsLoading && active === "Posts" && ArrayOfTen.map(item => <PostBoxSkeleton key={item} isSearchPost />)}
             {/* Posts tab */}
             {active === "Posts" && data?.searchPosts?.posts?.map(post => <PostBox post={post}
                 hideJoinBtn
@@ -63,6 +62,7 @@ function SearchPage() {
             {active === "Posts" && data?.searchPosts?.totalCount === 0 && <p className='pl-4'>No posts found.</p>}
 
             {/* Communities tab */}
+            {active === "Communities" && communitiesLoading && ArrayOfTen.map(item => <CommunityBoxSkeleton key={item} />)}
             {active === "Communities" && communitiesData?.searchCommunities?.totalCount === 0 && <p className='pl-4'>No communities found.</p>}
             {active === "Communities" && (communitiesData?.searchCommunities?.totalCount ?? 0) > 0 &&
                 <div className='flex-col-start'>

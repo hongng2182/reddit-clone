@@ -1,12 +1,13 @@
+/* eslint-disable react/no-array-index-key */
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { PageContainer, PageContentLayout, ProfileNav, UserInfo } from '@/components'
+import { CommentSkeleton, PageContainer, PageContentLayout, ProfileNav, UserInfo, UserInfoSkeleton } from '@/components'
 import { useGetUserCommentsQuery, useMeQuery, useUserCommonInfoQuery } from '@/generated/graphql'
 import { useGlobalState } from '@/hooks'
 import { setActiveFeedTab } from '@/action'
-import { defaultProfileIcon } from '@/lib/constants'
+import { ArrayOfFive, defaultProfileIcon } from '@/lib/constants'
 import { CommentIcon } from '@/components/icons'
 
 type CommentInfo = { __typename?: 'Comment', id: number, message: string, createdAt: string, post: { __typename?: 'Post', title: string, id: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string } }, user: { __typename?: 'User', username: string } }
@@ -17,9 +18,9 @@ const DynamicTimeAgo = dynamic(() => import('@/components/time-ago'), { ssr: fal
 function UserPage() {
     const router = useRouter()
     const { username } = router.query
-    const { data: meData } = useMeQuery()
-    const { data: userComments } = useGetUserCommentsQuery({ variables: { username: username as string } })
-    const { data: userCommonInfo } = useUserCommonInfoQuery({ variables: { userName: username as string } })
+    const { data: meData, loading: meLoading } = useMeQuery()
+    const { data: userComments, loading: userCommentsLoading } = useGetUserCommentsQuery({ variables: { username: username as string } })
+    const { data: userCommonInfo, loading: userInfoLoading } = useUserCommonInfoQuery({ variables: { userName: username as string } })
     const { dispatch } = useGlobalState()
 
     useEffect(() => {
@@ -39,30 +40,33 @@ function UserPage() {
         groupedComments[postId].push(comment);
     });
 
-
     return (
         <>
-            <ProfileNav activeTab="COMMENTS" username={username as string} meData={meData} />
+            {meLoading && <div className='h-[42px] border-t border-medium bg-white' />}
+            {meData?.me && <ProfileNav activeTab="COMMENTS" username={username as string} meData={meData.me} />}
             <PageContainer>
                 <PageContentLayout
                     containerClassname='mt-[40px]'
-                    left={Object.keys(groupedComments).length > 0 ?
-                        <div className='flex-col-start-10'>
-                            {Object.keys(groupedComments).map((postId) => {
+                    left={
+                        <div className='flex-col-start-10 w-full'>
+                            {Object.keys(groupedComments).map(postId => {
                                 const { post } = groupedComments[postId][0]
                                 return (
                                     <div key={postId} className='w-full'>
                                         <div className='white-gray-rounded hover:border-gray flex-start-10 p-2'>
-                                            <CommentIcon />
+                                            <div className='w-[24px]'>
+                                                <CommentIcon />
+                                            </div>
                                             <div className='text-sm text-gray'>
                                                 <Link href={`/user/${username}`} className='text-cate-blue hover:underline'> {username} </Link>commented on <Link href={`/r/${post.community.name}/comments/${post.id}`} className='text-base font-bold cursor-pointer'>{post.title} </Link>
                                                 · <Link href={`/r/${post.community.name}`} className='hover:underline label-md'> r/{post.community.name} </Link>
                                                 · Posted by <Link href={`/user/${post.user.username}`} className='hover:underline'> u/{post.user.username} </Link>
                                             </div>
                                         </div>
-                                        {groupedComments[postId].map(comment => {
+                                        {groupedComments[postId].map((comment, index) => {
                                             const { id: commentId, post: { id, community: { name: communityName } }, message, createdAt, user: { username: commentOwner } } = comment
-                                            return <div key={id} className='white-gray-rounded hover:border-gray' onClick={() => router.push(`/r/${communityName}/comments/${id}?context=${commentId}`)}>
+
+                                            return <div key={`${id}-${index}`} className='white-gray-rounded hover:border-gray' onClick={() => router.push(`/r/${communityName}/comments/${id}?context=${commentId}`)}>
                                                 <div className='flex-col-start pl-[30px] py-2'>
                                                     <div>
                                                         <span className='username'>{commentOwner} ·</span>
@@ -76,15 +80,19 @@ function UserPage() {
                                     </div>
                                 )
                             })}
-                        </div> :
-                        <div className='text-center'>No comments found.</div>
+                            {userComments?.getUserComments.totalCount === 0 && <div className='text-center'>No comments found.</div>}
+                            {userCommentsLoading && ArrayOfFive.map(item => <CommentSkeleton key={item} />)}
+                        </div>
                     }
-                    right={userCommonInfo?.userCommonInfo && <UserInfo
-                        meData={meData}
-                        userInfo={{
-                            user: userCommonInfo?.userCommonInfo.user,
-                            moderators: userCommonInfo?.userCommonInfo.moderators
-                        }} />} />
+                    right={<>
+                        {userInfoLoading && <UserInfoSkeleton />}
+                        {userCommonInfo?.userCommonInfo && <UserInfo
+                            meData={meData}
+                            userInfo={{
+                                user: userCommonInfo?.userCommonInfo.user,
+                                moderators: userCommonInfo?.userCommonInfo.moderators
+                            }} />}
+                    </>} />
             </PageContainer>
         </>
     )

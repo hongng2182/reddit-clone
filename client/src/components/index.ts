@@ -1,5 +1,4 @@
 import Header from './header'
-import TrendingPosts from './trending-posts'
 import CreatePostFragment from './create-post-fragment'
 import FilterBox from './filter-box'
 import PageContentLayout from './page-content-layout'
@@ -19,5 +18,6 @@ import ImageUpload from './image-upload'
 import UserInfo from './user-info'
 import ProfileNav from './profile-nav'
 
+export { Header, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, AboutCommunity, CommentSection, Modal, CreatePost, PopularCommunity, EditPost, CreatePostRules, UserHomeSidebar, Error, ImageUpload, UserInfo, ProfileNav }
 
-export { Header, TrendingPosts, CreatePostFragment, FilterBox, PageContentLayout, PageContainer, PostBox, CommunityBanner, AboutCommunity, CommentSection, Modal, CreatePost, PopularCommunity, EditPost, CreatePostRules, UserHomeSidebar, Error, ImageUpload, UserInfo, ProfileNav }
+export * from './skeleton'

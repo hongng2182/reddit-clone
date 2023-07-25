@@ -30,7 +30,7 @@ function Header() {
             router.reload()
         }
     }
-    
+
     // Custom hooks
     const { elementRef } = useClickOutside({ onClickComplete: () => setProfileFocus(false) })
 
@@ -64,13 +64,14 @@ function Header() {
                 </div>
             </div>
             {/* User Profile Nav */}
-            <div className="grow-0 flex-end gap-[1.5rem]">
-                {!data?.me && <button type="button" className='button-main smM:hidden'
-                    onClick={() => dispatch(setShowSignInModal(true))}>Login</button>}
+            <div className="grow-0 flex-end gap-[1.5rem] sm:min-w-[130px] min-w-[62px]">
+                {data?.me === null &&
+                    <button type="button" className='button-main smM:hidden'
+                        onClick={() => dispatch(setShowSignInModal(true))}>Login</button>}
                 <div ref={elementRef} className="relative flex-start gap-[5px] border border-transparent hover:border-medium p-1 rounded-md cursor-pointer min-h-[40px]"
-                    onClick={() => setProfileFocus(true)}
+                    onClick={() => setProfileFocus(!profileFocus)}
                 >
-                    {!data?.me && <ProfileIcon type='outline' />}
+                    {data?.me === null && <ProfileIcon type='outline' />}
                     {data && data.me && <div className='flex-start gap-[5px] min-w-[30px]'>
                         <Image
                             src={data.me.profileUrl ? data.me.profileUrl : defaultProfileIcon}
@@ -81,7 +82,7 @@ function Header() {
                             className='img-35' />
                         <span className='label-md smM:hidden'>{data.me.username}</span>
                     </div>}
-                    <DropdownIcon width={12} />
+                    {data?.me !== undefined && <DropdownIcon width={12} />}
                     {/* User Profile Nav Dropdown */}
                     {profileFocus && <div className="absolute h-auto bg-white border border-medium top-[40px] right-0 py-[10px]">
                         {data && data.me && <>
@@ -105,7 +106,7 @@ function Header() {
                                 <span>Log Out</span>
                             </button>
                         </>}
-                        {!data?.me && <button
+                        {data?.me === null && <button
                             type='button'
                             className="feed-tab flex-start-10 cursor-pointer hover:bg-light w-[270px]"
                             onClick={() => dispatch(setShowSignInModal(true))}

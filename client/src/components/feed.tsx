@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useClickOutside, useGlobalState, useModal } from '@/hooks'
 import { useUserCommunitiesQuery } from '@/generated/graphql'
-import { defaultCommunityIcon, feeds, tabs } from '@/lib/constants'
+import { ArrayOfFive, defaultCommunityIcon, feeds, tabs } from '@/lib/constants'
 import { setActiveFeedTab } from '@/action'
 import { FeedTab } from '@/types'
 import Modal from './modal'
@@ -31,7 +31,7 @@ function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
     const router = useRouter()
 
     // GraphQL hooks
-    const { data } = useUserCommunitiesQuery()
+    const { data, loading: userCommunitiesLoading } = useUserCommunitiesQuery()
     const moderatingCommunities = data?.userCommunities?.filter(community => community.isModerator)
 
     const { elementRef } = useClickOutside({ onClickComplete: () => setShowTab(false) })
@@ -54,10 +54,17 @@ function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
                 </span>
                 <span><DropdownIcon width={20} fill='#000' /></span>
             </div>
-            {showTab && <div className={`${isUserLogIn ? 'h-[360px]' : 'h-[150px]'} w-[270px] absolute top-[38px] flex-col-start-10 bg-white border border-medium border-t-0 z-10 overflow-y-scroll`}>
+            {showTab && <div className={`${isUserLogIn ? 'h-[360px]' : 'h-[150px]'} w-[270px] absolute top-[38px] flex-col-start-10 bg-white border border-medium border-t-0 z-10 overflow-y-scroll pb-2`}>
                 {/* MODERATING */}
+                {userCommunitiesLoading && <>
+                    <h4 className='feed-tab label-sm'>MODERATING</h4>
+                    {ArrayOfFive.map(item => <div key={item} className='w-full animate-pulse'>
+                        <div className='h-[20px] w-[230px] mx-auto bg-medium' />
+                    </div>)}
+                </>}
                 {moderatingCommunities && moderatingCommunities.length > 0 && <>
-                    <h4 className='feed-tab label-sm'>MODERATING</h4>{moderatingCommunities.map(item =>
+                    <h4 className='feed-tab label-sm'>MODERATING</h4>
+                    {moderatingCommunities.map(item =>
                         <Tab key={item.community.name}
                             handleClick={() => {
                                 setActiveTab({
@@ -99,6 +106,9 @@ function Feed({ isUserLogIn }: { isUserLogIn: boolean }) {
                             name={`r/${item.community.name}`}
                             isActive={false} />)
                     }
+                    {userCommunitiesLoading && ArrayOfFive.map(item => <div key={item} className='w-full animate-pulse'>
+                        <div className='h-[20px] w-[230px] mx-auto bg-medium' />
+                    </div>)}
                 </>}
                 {/* FEEDS */}
                 <h4 className='feed-tab label-sm'>{feeds.title}</h4>

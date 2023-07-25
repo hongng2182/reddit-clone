@@ -108,7 +108,7 @@ function CommentDetail({ comment, commentsByParentId }: Props) {
             </div>}
             {showComment && <><div className='absolute h-full w-[2px] bg-medium hover:bg-primary cursor-pointer' onClick={() => setShowComment(false)} />
                 <div className='flex-start-col-10 w-full'
-                    style={{ backgroundColor: `${Number(context) === id ? 'rgba(0, 121, 211, 0.05)' : ''}` }} >
+                    style={{ backgroundColor: `${Number(context) === id ? 'rgba(0, 121, 211, 0.05)' : 'white'}` }} >
                     <Image
                         width='0'
                         height='0'

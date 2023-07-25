@@ -46,9 +46,9 @@ class PartialUser implements Partial<User> {
 class UserCommonInfoResponse {
     @Field(() => String, { nullable: true })
     errors?: string
-    @Field(() => PartialUser)
+    @Field(() => PartialUser, { nullable: true })
     user?: Partial<User>
-    @Field(() => [Community])
+    @Field(() => [Community], { nullable: true })
     moderators?: Community[]
 }
 
@@ -228,7 +228,7 @@ export class UserResolver {
 
             await sendEmail(email, emailContent)
             return {
-                message: "Thanks! If your Reddit username and email address match, you'll get an email with a link to reset your password shortly"
+                message: "Thanks! If your MiniReddit username and email address match, you'll get an email with a link to reset your password shortly"
             }
         } catch (error) {
             return { errors: [{ field: "email", message: "Error sending forgot password intructions to your email!" }] }

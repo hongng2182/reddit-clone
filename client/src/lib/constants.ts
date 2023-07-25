@@ -78,4 +78,9 @@ export const userPageTabs: UserPageTabs[] = [
         url: '/user/[username]/downvotes'
     }]
 
+export const ArrayOfTen = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+export const ArrayOfThree = [1, 2, 3]
+export const ArrayOfFive = [1, 2, 3, 4, 5]
+
+
 

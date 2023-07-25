@@ -23,7 +23,7 @@ function UserHomeSidebar() {
                     />
                     <h3>Home</h3>
                 </div>
-                <p className='text-justify'>Your personal Reddit frontpage. Come here to check in with your favorite communities.</p>
+                <p className='text-justify'>Your personal MiniReddit frontpage. Come here to check in with your favorite communities.</p>
                 <div className='w-full h-[1px] bg-medium' />
                 <Link href='/submit' className='button-main w-full text-center'>Create Post</Link>
                 <button type="button" className='button-main-outline w-full'

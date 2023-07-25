@@ -7,7 +7,7 @@ import { CommunityInfo, PrivacyType } from '@/types'
 import { defaultCommunityIcon } from '@/lib/constants'
 import { getTimeString } from '@/utils'
 import { useUpdateCommunityMutation } from '@/generated/graphql'
-import { CalendarIcon, EditIcon, LockIcon, ProfileIcon, RestrictedIcon, ShieldIcon } from './icons'
+import { CalendarIcon, EditIcon, LoadingIcon, LockIcon, ProfileIcon, RestrictedIcon, ShieldIcon } from './icons'
 
 type Props = {
     communityInfo: CommunityInfo,
@@ -28,7 +28,7 @@ function AboutCommunity({ communityInfo, isSubmitPost, isMod, isUserLogin }: Pro
     const descriptionRef = useRef<HTMLSpanElement>(null)
 
     // GraphQL hooks
-    const [updateCommunity] = useUpdateCommunityMutation()
+    const [updateCommunity, { loading: editLoading }] = useUpdateCommunityMutation()
 
     // Utils
     const remainCharacters = 500 - descriptionInput.length
@@ -111,7 +111,8 @@ function AboutCommunity({ communityInfo, isSubmitPost, isMod, isUserLogin }: Pro
                                     setDescriptionInput(description || '')
                                 }}>Cancel</button>
                                 <button type="button" className='text-cate-blue'
-                                    onClick={handleEditDescription}>Edit</button>
+                                    disabled={editLoading}
+                                    onClick={handleEditDescription}>{editLoading ? <LoadingIcon stroke='#39B5E0' /> : 'Edit'}</button>
                             </div>
                         </div>
                     </div>}

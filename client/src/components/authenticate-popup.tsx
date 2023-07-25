@@ -31,9 +31,9 @@ function AuthenticatePopup() {
                 {/* Instruction */}
                 <p className='text-sm'>
                     {active !== 'forgot'
-                        ? <>By continuing, you are setting up a Reddit account and agree to our <span className='link'>User Agreement</span> and <span className='link'>Privacy Policy.</span></>
+                        ? <>By continuing, you are setting up a MiniReddit account and agree to our <span className='link'>User Agreement</span> and <span className='link'>Privacy Policy.</span></>
                         :
-                        <>Tell us your email address associated with your Reddit account, and we&apos;ll send you an email with a link to reset your password.</>
+                        <>Tell us your email address associated with your MiniReddit account, and we&apos;ll send you an email with a link to reset your password.</>
                     }</p>
                 {/* Email input */}
                 {active !== 'login' &&
@@ -119,7 +119,7 @@ function AuthenticatePopup() {
                 }
 
                 {/* Footer */}
-                {active === 'login' && <p className='text-sm'>New to Reddit? <button type='button' className='link underline'
+                {active === 'login' && <p className='text-sm'> New to MiniReddit? <button type='button' className='link underline'
                     onClick={() => {
                         setActive('signup')
                         setError({})

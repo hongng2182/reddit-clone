@@ -59,7 +59,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
     // Utils
     const handlePostClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation()
-        if (!comments) router.push(`/r/${communityName}/comments/${id}`)
+        if (!isSinglePost) router.push(`/r/${communityName}/comments/${id}`)
     }
 
     const handleJoinCommunity = async () => {
@@ -84,10 +84,10 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
 
     return (<>
         <div onClick={(e) => handlePostClick(e)}
-            className={`${comments ? 'border-transparent' : 'hover:border-gray cursor-pointer'}
+            className={`${isSinglePost ? 'border-transparent' : 'hover:border-gray cursor-pointer'}
             ${isSearchPost && 'p-2'} white-gray-rounded flex shadow-md w-full`}>
             {/* LEFT UPDOOT */}
-            {!isSearchPost && <div className={`${comments ? 'bg-white' : 'bg-light'} w-[40px] text-xs font-bold p-1 flex flex-col items-center`} id='upvote' >
+            {!isSearchPost && <div className={`${isSinglePost ? 'bg-white' : 'bg-light'} w-[40px] text-xs font-bold p-1 flex flex-col items-center`} id='upvote' >
                 <ArrowUpDown
                     type='up'
                     variant={voteStatus === VoteStatusValues.Upvote ? 'fill' : 'outline'}
@@ -177,7 +177,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
                     {/* EDIT POSTS */}
                     {showEdit && text && <EditPost postId={id} postText={text} hideEdit={() => setShowEdit(false)} />}
                     <div className='text-xs flex-start-10'>
-                        <div className={`${comments ? 'post-action-disable' : 'post-action'}`}>
+                        <div className={`${isSinglePost ? 'post-action-disable' : 'post-action'}`}>
                             <CommentIcon />
                             {numComments} Comments
                         </div>

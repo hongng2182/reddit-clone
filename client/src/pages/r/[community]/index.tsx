@@ -1,9 +1,9 @@
 import React from 'react'
 import { NetworkStatus } from "@apollo/client"
 import { useRouter } from 'next/router'
-import { CreatePostFragment, PageContentLayout, PageContainer, FilterBox, PostBox, CommunityBanner, AboutCommunity } from '@/components'
+import { CreatePostFragment, PageContentLayout, PageContainer, FilterBox, PostBox, CommunityBanner, AboutCommunity, AboutCommunitySkeleton, CommunityBannerSkeleton, PostBoxSkeleton } from '@/components'
 import { useCommunityQuery, useGetCommunityPostsQuery, useMeQuery } from '@/generated/graphql'
-import { FETCH_LIMIT } from "@/lib/constants"
+import { ArrayOfThree, FETCH_LIMIT } from "@/lib/constants"
 import { LoadingIcon } from '@/components/icons'
 import { useSetActiveFeed } from '@/hooks'
 
@@ -14,29 +14,34 @@ function CommunityPage() {
 
     // GraphQL hooks
     const { data: meData } = useMeQuery()
-    const { data: communityData } = useCommunityQuery({ variables: { communityName } })
-    const { data, fetchMore, networkStatus } = useGetCommunityPostsQuery({ variables: { communityName, first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
+    const { data: communityData, loading: communityInfoLoading } = useCommunityQuery({ variables: { communityName } })
+    const { data, fetchMore, networkStatus, loading: postsLoading } = useGetCommunityPostsQuery({ variables: { communityName, first: FETCH_LIMIT, after: null }, notifyOnNetworkStatusChange: true })
 
     const isLoadingMorePosts = networkStatus === NetworkStatus.fetchMore
     useSetActiveFeed({ communityData: communityData?.community })
     // Hooks
-
     // Return no community match
-    if (!communityData?.community) {
-        return "Sorry, there aren’t any communities on Reddit with that name."
+    if (communityData?.community === null) {
+        return <div className='h-[80vh] min-h-[400px] flex flex-col justify-center items-center gap-[15px]'>
+            <h3>Sorry, there aren’t any communities on MiniReddit with that name.</h3>
+        </div>
     }
-
 
     return (
         <>
-            <CommunityBanner userId={meData?.me?.id} communityInfo={communityData.community} />
-            {data?.getCommunityPosts && <PageContainer>
+            {communityInfoLoading && <CommunityBannerSkeleton />}
+            {communityData?.community && <CommunityBanner userId={meData?.me?.id} communityInfo={communityData.community} />}
+            <PageContainer>
                 <PageContentLayout
                     left={<>
                         {meData?.me && <CreatePostFragment meData={meData} pathname={`${router.asPath}/submit`} />}
                         <FilterBox />
                         <div className='flex-col-start-10 w-full'>
-                            {data?.getCommunityPosts.paginatedPosts.length > 0 ? data?.getCommunityPosts.paginatedPosts.map(post => <PostBox key={post.id} post={post} hideCommunity hideJoinBtn />) : 'No posts in this community'}
+                            {postsLoading && ArrayOfThree.map(item => <PostBoxSkeleton key={item} />)}
+
+                            {data?.getCommunityPosts && data?.getCommunityPosts.paginatedPosts.length > 0 ?
+                                data?.getCommunityPosts.paginatedPosts.map(post => <PostBox key={post.id} post={post} hideCommunity hideJoinBtn />)
+                                : 'No posts in this community'}
                             {
                                 data?.getCommunityPosts.pageInfo.hasNextPage &&
                                 <button
@@ -48,12 +53,15 @@ function CommunityPage() {
                             }
                         </div>
                     </>}
-                    right={<AboutCommunity
-                        isUserLogin={Boolean(meData?.me)}
-                        isMod={meData && communityData.community.creatorId === meData.me?.id}
-                        communityInfo={communityData.community} />}
+                    right={<>
+                        {communityInfoLoading && <AboutCommunitySkeleton />}
+                        {communityData?.community && <AboutCommunity
+                            isUserLogin={Boolean(meData?.me)}
+                            isMod={meData && communityData.community.creatorId === meData.me?.id}
+                            communityInfo={communityData.community} />}
+                    </>}
                 />
-            </PageContainer>}
+            </PageContainer>
         </>
     )
 }

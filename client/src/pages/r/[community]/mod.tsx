@@ -271,6 +271,7 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
         },
     }
 
+    console.log('headers', context.req.headers)
     try {
         const apolloClient = initializeApollo({ headers: context.req.headers })
         await apolloClient.query({

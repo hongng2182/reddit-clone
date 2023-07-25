@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/router'
-import { MeQuery } from '@/generated/graphql'
 import { userPageTabs } from '@/lib/constants'
+import { MeData } from '@/types'
 
-function ProfileNav({ activeTab, username, meData }: { activeTab: string, username: string, meData: MeQuery | undefined }) {
+function ProfileNav({ activeTab, username, meData }: { activeTab: string, username: string, meData: MeData }) {
     const router = useRouter()
     const [active, setActive] = useState(activeTab)
     const [showTab, setshowTab] = useState(false)
-    const isProfileOwner = username === meData?.me?.username
+    const isProfileOwner = username === meData.username
 
     const shownTabs = isProfileOwner ? userPageTabs : userPageTabs.slice(0, 2)
 
