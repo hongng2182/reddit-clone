@@ -55,11 +55,11 @@ const main = async () => {
             saveUninitialized: false, // recommended: only save session when data exists
             secret: process.env.SESSION_SECRET as string,
             cookie: {
-                maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+                maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
                 httpOnly: true,
                 secure: __prod__, // cookie only works in https
-                sameSite: 'lax', // csrf
-                // domain: __prod__ ? ".onrender.com" : undefined,
+                sameSite: __prod__ ? 'none' : 'lax', // csrf
+                domain: __prod__ ? ".vercel.app" : undefined,
             },
         })
     )
