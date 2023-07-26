@@ -32,7 +32,7 @@ function UserPage() {
 
     return (meData && meData.me?.username === username as string &&
         <>
-            <ProfileNav activeTab="UPVOTED" username={username as string} meData={meData.me} />
+            <ProfileNav activeTab="UPVOTED" username={username as string} meData={meData} />
             <PageContainer>
                 <PageContentLayout
                     containerClassname='mt-[40px]'

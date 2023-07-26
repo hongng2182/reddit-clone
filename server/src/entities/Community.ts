@@ -1,8 +1,9 @@
 import { Field, ObjectType } from "type-graphql";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, ManyToOne } from "typeorm";
 import { UserCommunity } from "./UserCommunity";
 import { PrivacyType } from "../types";
 import { Post } from "./Post";
+import { User } from "./User";
 
 
 @ObjectType()
@@ -31,6 +32,8 @@ export class Community extends BaseEntity {
     @Column()
     creatorId!: number;
 
+    @ManyToOne(() => User, (user) => user.communities)
+    creator: User
 
     @Field()
     @Column({ type: 'enum', enum: PrivacyType, default: PrivacyType.public })

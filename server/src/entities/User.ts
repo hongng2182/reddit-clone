@@ -4,6 +4,7 @@ import { Post } from "./Post";
 import { Vote } from "./Vote";
 import { Comment } from "./Comment";
 import { UserCommunity } from "./UserCommunity";
+import { Community } from "./Community";
 
 @ObjectType()
 @Entity()
@@ -28,6 +29,9 @@ export class User extends BaseEntity {
     @Field({ nullable: true })
     @Column({ nullable: true, default: null })
     profileUrl!: string;
+
+    @OneToMany(() => Community, (community) => community.creator)
+    communities: Community[]
 
     @OneToMany(() => Post, (post) => post.owner)
     posts: Post[]

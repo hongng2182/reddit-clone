@@ -18,7 +18,7 @@ const DynamicTimeAgo = dynamic(() => import('@/components/time-ago'), { ssr: fal
 function UserPage() {
     const router = useRouter()
     const { username } = router.query
-    const { data: meData, loading: meLoading } = useMeQuery()
+    const { data: meData } = useMeQuery()
     const { data: userComments, loading: userCommentsLoading } = useGetUserCommentsQuery({ variables: { username: username as string } })
     const { data: userCommonInfo, loading: userInfoLoading } = useUserCommonInfoQuery({ variables: { userName: username as string } })
     const { dispatch } = useGlobalState()
@@ -42,8 +42,7 @@ function UserPage() {
 
     return (
         <>
-            {meLoading && <div className='h-[42px] border-t border-medium bg-white' />}
-            {meData?.me && <ProfileNav activeTab="COMMENTS" username={username as string} meData={meData.me} />}
+            <ProfileNav activeTab="COMMENTS" username={username as string} meData={meData} />
             <PageContainer>
                 <PageContentLayout
                     containerClassname='mt-[40px]'
