@@ -1,10 +1,7 @@
 import React, { useEffect } from 'react'
-import { GetServerSideProps, GetServerSidePropsContext } from "next"
-import Head from 'next/head'
 import { NetworkStatus } from "@apollo/client"
-import { addApolloState, initializeApollo } from "@/lib/apolloClient"
 import { PageContainer, PageContentLayout, CreatePostFragment, FilterBox, PostBox, UserHomeSidebar, PopularCommunity, PostBoxSkeleton } from '@/components'
-import { PostsDocument, useMeQuery, usePostsQuery } from '@/generated/graphql'
+import { useMeQuery, usePostsQuery } from '@/generated/graphql'
 import { ArrayOfThree, FETCH_LIMIT, tabs } from "@/lib/constants"
 import { LoadingIcon } from '@/components/icons'
 import { setActiveFeedTab } from '@/action'
@@ -18,13 +15,9 @@ function HomePage() {
 
     useEffect(() => {
         dispatch(setActiveFeedTab(tabs.home))
-    }, [])
+    }, [dispatch])
 
     return (
-        <>
-            <Head>
-                <title>Mini Reddit</title>
-            </Head>
             <PageContainer>
                 <PageContentLayout
                     containerClassname='mt-[40px]'
@@ -47,22 +40,23 @@ function HomePage() {
                     </>}
                     right={meData?.me ? <UserHomeSidebar /> : <PopularCommunity />} />
             </PageContainer>
-        </>
     )
 }
 
 export default HomePage
 
-export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+// NOTE: This won't work if domain in BE and FE is different. Header cookie will not be sent along the request!
 
-    const apolloClient = initializeApollo({ headers: context.req.headers })
+// export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 
-    await apolloClient.query({
-        query: PostsDocument,
-        variables: { first: FETCH_LIMIT, after: null }
-    })
+//     const apolloClient = initializeApollo({ headers: context.req.headers })
 
-    return addApolloState(apolloClient, {
-        props: {}
-    })
-}
+//     await apolloClient.query({
+//         query: PostsDocument,
+//         variables: { first: FETCH_LIMIT, after: null }
+//     })
+
+//     return addApolloState(apolloClient, {
+//         props: {}
+//     })
+// }

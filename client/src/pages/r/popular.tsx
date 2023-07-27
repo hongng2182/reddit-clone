@@ -12,11 +12,11 @@ function PopularPage() {
 
   useEffect(() => {
     dispatch(setActiveFeedTab(tabs.popular))
-  }, [])
+  }, [dispatch])
 
 
   return (
-    <PageContainer>
+    <PageContainer title="MiniReddit - r/Popular">
       <h4 className='label-md mt-3'>Popular Posts</h4>
       <PageContentLayout
         containerClassname='mt-[20px]'

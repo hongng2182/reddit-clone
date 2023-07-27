@@ -23,19 +23,16 @@ function UserPage() {
         }))
     }, [username, userCommonInfo?.userCommonInfo?.user?.profileUrl, dispatch])
 
-    if (userCommonInfo?.userCommonInfo.errors === "No user found with this name!") {
-        return <div className='h-[80vh] min-h-[400px] flex flex-col justify-center items-center gap-[15px]'>
-            <h3>Sorry, nobody on MiniReddit goes by that name</h3>
-            <p className='text-gray'>The person may have been banned or the username is incorrect.
-            </p>
-            <Link href="/" className="button-main">Go gome</Link>
-        </div>
-    }
-
     return (
         <>
             <ProfileNav activeTab="POSTS" username={username as string} meData={meData} />
-            <PageContainer>
+            <PageContainer title={username as string && `${username} (u/${username}) - MiniReddit`}>
+                {userCommonInfo?.userCommonInfo.errors === "No user found with this name!" && <div className='h-[80vh] min-h-[400px] flex flex-col justify-center items-center gap-[15px]'>
+                    <h3>Sorry, nobody on MiniReddit goes by that name</h3>
+                    <p className='text-gray'>The person may have been banned or the username is incorrect.
+                    </p>
+                    <Link href="/" className="button-main">Go gome</Link>
+                </div>}
                 <PageContentLayout
                     containerClassname='mt-[40px]'
                     left={<div className='flex-col-start w-full'>

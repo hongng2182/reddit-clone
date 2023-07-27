@@ -20,7 +20,7 @@ function CreatePostPage() {
   }, [dispatch, meData?.me ])
 
   return (
-    <PageContainer>
+    <PageContainer title='Submit to MiniReddit'>
       {meData?.me && <PageContentLayout
         containerClassname='mt-[30px]'
         left={<CreatePost />}

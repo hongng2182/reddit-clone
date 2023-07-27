@@ -9,7 +9,6 @@ import { useGlobalState } from '@/hooks'
 import { setShowSignInModal } from '@/action'
 import { LoadingIcon } from '@/components/icons'
 
-
 const ChangePassword: NextPage = () => {
     const router = useRouter()
     const { dispatch } = useGlobalState()
@@ -39,7 +38,7 @@ const ChangePassword: NextPage = () => {
         }
     }
     return (
-        <PageContainer>
+        <PageContainer title="MiniReddit - Reset your password">
             <div className='white-gray-rounded py-[2rem] my-[30px] sm:w-[500px] w-[85%] mx-auto'>
                 <h1 className='text-center'>Change Your Password</h1>
                 <form

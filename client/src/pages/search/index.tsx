@@ -28,7 +28,7 @@ function SearchPage() {
     // Use Effect hooks
     useEffect(() => {
         dispatch(setActiveFeedTab(tabs.search))
-    }, [])
+    }, [dispatch])
 
     // Query communitites again if user current in tab community and search for another keyword
     useEffect(() => {
@@ -37,7 +37,7 @@ function SearchPage() {
         }
     }, [q, active, searchCommunity])
 
-    return <PageContainer>
+    return <PageContainer title="MiniReddit - Search!">
         <div className='flex-start-10 mt-[25px] mb-[10px]'>
             {filterTabs.map(tab => <button
                 type="button"

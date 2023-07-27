@@ -26,10 +26,10 @@ function UserPage() {
     useEffect(() => {
         dispatch(setActiveFeedTab({
             name: `u/${username as string}`,
-            icon: userCommonInfo?.userCommonInfo.user.profileUrl ? userCommonInfo?.userCommonInfo.user.profileUrl : defaultProfileIcon,
+            icon: userCommonInfo?.userCommonInfo.user?.profileUrl ? userCommonInfo?.userCommonInfo.user.profileUrl : defaultProfileIcon,
             iconFill: null
         }))
-    }, [username, userCommonInfo?.userCommonInfo.user.profileUrl, dispatch])
+    }, [username, userCommonInfo?.userCommonInfo?.user?.profileUrl, dispatch])
 
     const groupedComments: { [key: number | string]: CommentInfo[] } = {};
     userComments?.getUserComments?.comments?.forEach(comment => {
@@ -43,7 +43,13 @@ function UserPage() {
     return (
         <>
             <ProfileNav activeTab="COMMENTS" username={username as string} meData={meData} />
-            <PageContainer>
+            <PageContainer title={username as string && `${username} (u/${username}) - MiniReddit`}>
+                {userCommonInfo?.userCommonInfo.errors === "No user found with this name!" && <div className='h-[80vh] min-h-[400px] flex flex-col justify-center items-center gap-[15px]'>
+                    <h3>Sorry, nobody on MiniReddit goes by that name</h3>
+                    <p className='text-gray'>The person may have been banned or the username is incorrect.
+                    </p>
+                    <Link href="/" className="button-main">Go gome</Link>
+                </div>}
                 <PageContentLayout
                     containerClassname='mt-[40px]'
                     left={
@@ -85,7 +91,7 @@ function UserPage() {
                     }
                     right={<>
                         {userInfoLoading && <UserInfoSkeleton />}
-                        {userCommonInfo?.userCommonInfo && <UserInfo
+                        {userCommonInfo?.userCommonInfo.user && <UserInfo
                             meData={meData}
                             userInfo={{
                                 user: userCommonInfo?.userCommonInfo.user,

@@ -18,7 +18,7 @@ function SinglePostPage({ isError: isErrorFromServer }: { isError: boolean }) {
     useSetActiveFeed({ communityData: data?.post?.community })
 
     return (
-        <PageContainer>
+        <PageContainer title={data?.post?.title && data.post.title}>
             <div className='h-[30px]' />
             {!data?.post && <h3>Post does not exist.</h3>}
 

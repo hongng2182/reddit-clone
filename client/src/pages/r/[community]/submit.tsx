@@ -16,20 +16,24 @@ function CreatePostInCommunityPage() {
     const { dispatch } = useGlobalState()
 
     useEffect(() => {
-        if (!meData?.me) {
+        if (meData?.me === null) {
             dispatch(setShowSignInModal(true))
         }
         dispatch(setActiveFeedTab(tabs.createPost))
-    }, [])
+    }, [dispatch, meData?.me])
 
-    if (!communityData?.community) {
+    if (communityData?.community === undefined) {
+        return null
+    }
+
+    if (communityData?.community === null) {
         return <div className='h-[80vh] min-h-[400px] flex flex-col justify-center items-center gap-[15px]'>
             <h3>Sorry, there aren’t any communities on MiniReddit with that name!</h3>
         </div>
     }
 
     return (
-        <PageContainer>
+        <PageContainer title={communityData?.community?.name && `Submit to ${communityData?.community?.name} `}>
             {meData?.me && <PageContentLayout
                 containerClassname='mt-[30px]'
                 left={<CreatePost communityInfo={communityData.community} />}

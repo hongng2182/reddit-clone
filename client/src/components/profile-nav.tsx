@@ -8,7 +8,7 @@ function ProfileNav({ activeTab, username, meData }: { activeTab: string, userna
     const [active, setActive] = useState(activeTab)
     const [showTab, setshowTab] = useState(false)
 
-    if (meData === undefined) {
+    if (meData === undefined || meData?.me === null) {
         return <div className='h-[42px] border-t border-medium bg-white' />
     }
     const isProfileOwner = username === meData?.me?.username

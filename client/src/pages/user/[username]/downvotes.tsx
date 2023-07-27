@@ -17,23 +17,24 @@ function UserPage() {
     useEffect(() => {
         dispatch(setActiveFeedTab({
             name: `u/${username as string}`,
-            icon: userCommonInfo?.userCommonInfo.user.profileUrl ? userCommonInfo?.userCommonInfo.user.profileUrl : defaultProfileIcon,
+            icon: userCommonInfo?.userCommonInfo.user?.profileUrl ? userCommonInfo?.userCommonInfo.user.profileUrl : defaultProfileIcon,
             iconFill: null
         }))
-    }, [username, userCommonInfo?.userCommonInfo.user.profileUrl, dispatch])
+    }, [username, userCommonInfo?.userCommonInfo.user?.profileUrl, dispatch])
 
     if (meData && meData.me?.username !== username as string) {
-        return <div className='h-[80vh] min-h-[400px] flex flex-col justify-center items-center gap-[15px]'>
+        return <PageContainer> <div className='h-[80vh] min-h-[400px] flex flex-col justify-center items-center gap-[15px]'>
             <h3>You do not have permission to access this resource</h3>
             <p className='text-gray'>You can only look at your own saved posts and comments
             </p>
         </div>
+        </PageContainer>
     }
 
     return (meData && meData.me?.username === username as string &&
         <>
             <ProfileNav activeTab="DOWNVOTED" username={username as string} meData={meData} />
-            <PageContainer>
+            <PageContainer title={username as string && `${username} (u/${username}) - MiniReddit`}>
                 <PageContentLayout
                     containerClassname='mt-[40px]'
                     left={<>

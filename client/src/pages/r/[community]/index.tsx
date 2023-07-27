@@ -31,7 +31,7 @@ function CommunityPage() {
         <>
             {communityInfoLoading && <CommunityBannerSkeleton />}
             {communityData?.community && <CommunityBanner userId={meData?.me?.id} communityInfo={communityData.community} />}
-            <PageContainer>
+            <PageContainer title={communityData?.community?.displayName && communityData.community.displayName }>
                 <PageContentLayout
                     left={<>
                         {meData?.me && <CreatePostFragment meData={meData} pathname={`${router.asPath}/submit`} />}

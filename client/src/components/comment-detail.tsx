@@ -7,7 +7,8 @@ import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import { useMeQuery } from '@/generated/graphql';
 import { CommentInfo } from '@/types'
-import { useCreateRootCommentHook, useModal, useUpdateDeleteComment } from '@/hooks'
+import { useCreateRootCommentHook, useGlobalState, useModal, useUpdateDeleteComment } from '@/hooks'
+import { setShowSignInModal } from '@/action'
 import { defaultDeleteIcon, defaultProfileIcon } from '@/lib/constants'
 import CommentForm from './comment-form'
 import Modal from './modal'
@@ -42,6 +43,7 @@ function CommentDetail({ comment, commentsByParentId }: Props) {
     const [showReplyComment, setShowReplyComment] = useState(false)
     const [isEditingComment, setIsEditingComment] = useState(false)
     const [showComment, setShowComment] = useState(true)
+    const { dispatch } = useGlobalState()
 
     // GraphQL hooks
     const { data: meData } = useMeQuery()
@@ -50,7 +52,7 @@ function CommentDetail({ comment, commentsByParentId }: Props) {
     const { isOpen, openModal, closeModal } = useModal()
     const childComments = getReplies(comment.id, commentsByParentId)
 
-   // update + delete comment
+    // update + delete comment
     const { updateComment, deleteComment, updateCommentLoading, isDeleteLoading } = useUpdateDeleteComment({ commentId: id })
 
     const onReplyCommentSuccess = () => {
@@ -132,7 +134,14 @@ function CommentDetail({ comment, commentsByParentId }: Props) {
 
                         {!isEditingComment && <div className='text-xs flex-start-10 mb-3'>
                             <button type='button' className='post-action'
-                                onClick={() => { setShowReplyComment(!showReplyComment) }}>
+                                onClick={() => {
+                                    if (meData?.me) {
+                                        setShowReplyComment(!showReplyComment)
+                                    }
+                                    else {
+                                        dispatch(setShowSignInModal(true))
+                                    }
+                                }}>
                                 <CommentIcon />
                                 Reply
                             </button>

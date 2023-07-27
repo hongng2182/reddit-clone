@@ -67,7 +67,7 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
                 onDeleteImage={onDeleteImage}
             />
         )
-    }, [photoFile, handleFileInput, isUploading]);
+    }, [photoFile, handleFileInput, isUploading, deleteImage]);
 
     // Utils
     const remainNameCharacters = MAX_DISPLAYNAME_CHARACTERS - displayName.length
@@ -146,7 +146,7 @@ function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
                 </div>
             </div>
         </div>
-        <PageContainer>
+        <PageContainer title={communityData?.community?.name && communityData.community.name}>
             <div className='white-gray-rounded my-[40px] p-3 flex flex-col gap-[20px]'>
                 {/* Submit Button */}
                 <div className='flex-between'>
