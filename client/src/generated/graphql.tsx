@@ -54,7 +54,7 @@ export type Community = {
   hasJoined: Scalars['Boolean'];
   id: Scalars['Float'];
   name: Scalars['String'];
-  numMembers: Scalars['Int'];
+  numMembers: Scalars['Float'];
   privacyType: Scalars['String'];
 };
 
@@ -221,6 +221,14 @@ export type PartialUser = {
   username: Scalars['String'];
 };
 
+export type PopularCommunity = {
+  __typename?: 'PopularCommunity';
+  communityIconUrl?: Maybe<Scalars['String']>;
+  communityId: Scalars['Int'];
+  communityName: Scalars['String'];
+  numMembers: Scalars['Int'];
+};
+
 export type Post = {
   __typename?: 'Post';
   comments?: Maybe<Array<Comment>>;
@@ -271,6 +279,7 @@ export type Query = {
   getUserComments: CommentSearchResponse;
   getUserPosts: PostSearchResponse;
   me?: Maybe<User>;
+  popularCommunitities: Array<PopularCommunity>;
   popularPosts: PaginatedPosts;
   post?: Maybe<Post>;
   posts: PaginatedPosts;
@@ -546,6 +555,11 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null } | null };
+
+export type PopularCommunititiesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PopularCommunititiesQuery = { __typename?: 'Query', popularCommunitities: Array<{ __typename?: 'PopularCommunity', numMembers: number, communityName: string, communityId: number, communityIconUrl?: string | null }> };
 
 export type PopularPostsQueryVariables = Exact<{
   first: Scalars['Int'];
@@ -1429,6 +1443,43 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const PopularCommunititiesDocument = gql`
+    query PopularCommunitities {
+  popularCommunitities {
+    numMembers
+    communityName
+    communityId
+    communityIconUrl
+  }
+}
+    `;
+
+/**
+ * __usePopularCommunititiesQuery__
+ *
+ * To run a query within a React component, call `usePopularCommunititiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePopularCommunititiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePopularCommunititiesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePopularCommunititiesQuery(baseOptions?: Apollo.QueryHookOptions<PopularCommunititiesQuery, PopularCommunititiesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PopularCommunititiesQuery, PopularCommunititiesQueryVariables>(PopularCommunititiesDocument, options);
+      }
+export function usePopularCommunititiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PopularCommunititiesQuery, PopularCommunititiesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PopularCommunititiesQuery, PopularCommunititiesQueryVariables>(PopularCommunititiesDocument, options);
+        }
+export type PopularCommunititiesQueryHookResult = ReturnType<typeof usePopularCommunititiesQuery>;
+export type PopularCommunititiesLazyQueryHookResult = ReturnType<typeof usePopularCommunititiesLazyQuery>;
+export type PopularCommunititiesQueryResult = Apollo.QueryResult<PopularCommunititiesQuery, PopularCommunititiesQueryVariables>;
 export const PopularPostsDocument = gql`
     query PopularPosts($first: Int!, $after: String) {
   popularPosts(first: $first, after: $after) {

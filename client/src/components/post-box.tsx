@@ -9,10 +9,11 @@ import { defaultCommunityIcon } from '@/lib/constants'
 import { UserCommunitiesDocument, useJoinCommunityMutation, useMeQuery } from "@/generated/graphql"
 import { useGlobalState, useModal, useCreateRootCommentHook, useVoting, useDeletePost } from '@/hooks'
 import { setShowSignInModal } from '@/action'
-import { ArrowUpDown, CommentIcon, ShareIcon, EditIcon, DeleteIcon, AddIcon, LoadingIcon } from './icons'
+import { ArrowUpDown, CommentIcon, EditIcon, DeleteIcon, AddIcon, LoadingIcon } from './icons'
 import EditPost from './edit-post'
 import Modal from './modal'
 import CommentForm from './comment-form'
+import SocialShareLinks from './social-share'
 
 type PostBoxProps = {
     post: PostInfo,
@@ -56,6 +57,8 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
     }
     const { isDeleteLoading, handleDeletePost } = useDeletePost({ onDeletePostSuccess })
 
+    // const { elementRef } = useClickOutside({ onClickComplete: () => setShowShareOptions(false) })
+
     // Utils
     const handlePostClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation()
@@ -84,10 +87,10 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
 
     return (<>
         <div onClick={(e) => handlePostClick(e)}
-            className={`${isSinglePost ? 'border-transparent' : 'hover:border-gray cursor-pointer'}
+            className={`hover:shadow-lg ${isSinglePost ? 'border-transparent' : 'cursor-pointer p-1'}
             ${isSearchPost && 'p-2'} white-gray-rounded flex shadow-md w-full`}>
             {/* LEFT UPDOOT */}
-            {!isSearchPost && <div className={`${isSinglePost ? 'bg-white' : 'bg-light'} w-[40px] text-xs font-bold p-1 flex flex-col items-center`} id='upvote' >
+            {!isSearchPost && <div className={`${isSinglePost ? 'bg-transparent' : 'bg-transparent'} w-[40px] text-xs font-bold p-1 flex flex-col rounded-2xl items-center`} id='upvote' >
                 <ArrowUpDown
                     type='up'
                     variant={voteStatus === VoteStatusValues.Upvote ? 'fill' : 'outline'}
@@ -181,11 +184,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
                             <CommentIcon />
                             {numComments} Comments
                         </div>
-                        <div className='post-action'>
-                            <ShareIcon />
-                            Share
-                        </div>
-
+                        <SocialShareLinks tweet={title} url={`${process.env.NEXT_PUBLIC_DOMAIN as string}/r/${communityName}/comments/${id}`} />
                         {meData?.me?.id === post.ownerId && <>
                             {text && <button className='post-action'
                                 type='button'

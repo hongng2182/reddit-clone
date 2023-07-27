@@ -3,6 +3,7 @@ import { Community, UserCommunity } from "../entities";
 import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware, FieldResolver, Root, ObjectType, registerEnumType } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { Raw } from "typeorm";
+import { AppDataSource } from "../";
 
 registerEnumType(PrivacyType, {
     name: 'PrivacyType'
@@ -55,6 +56,18 @@ class SearchResponse {
     totalCount?: number
 }
 
+@ObjectType()
+class PopularCommunity {
+    @Field(() => Int)
+    communityId: number
+    @Field(() => String)
+    communityName: string
+    @Field(() => String, { nullable: true })
+    communityIconUrl: string
+    @Field(() => Int)
+    numMembers: number
+}
+
 
 @Resolver(_of => Community)
 export class CommunityResolver {
@@ -104,6 +117,23 @@ export class CommunityResolver {
             return null
         }
         return community
+    }
+
+    @Query(() => [PopularCommunity])
+    async popularCommunitities(): Promise<PopularCommunity[]> {
+        const communities = await AppDataSource
+            .getRepository(UserCommunity)
+            .createQueryBuilder("userCommunities")
+            .innerJoinAndSelect("userCommunities.community", "community")
+            .select("userCommunities.communityId", "communityId")
+            .addSelect("COUNT(userCommunities.userId)", "numMembers")
+            .addSelect("community.name", "communityName")
+            .addSelect("community.communityIconUrl", "communityIconUrl")
+            .groupBy("userCommunities.communityId, community.name, community.communityIconUrl")
+            .orderBy("COUNT(userCommunities.userId)", 'DESC')
+            .limit(10)
+            .getRawMany()
+        return communities;
     }
 
     @Query(() => SearchResponse, { nullable: true })

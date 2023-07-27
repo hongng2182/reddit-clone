@@ -8,7 +8,6 @@ import { setActiveFeedTab, setShowSignInModal } from '@/action'
 import { tabs } from '@/lib/constants'
 
 function CreatePostInCommunityPage() {
-    // TODO: textarea expand and word count
     const router = useRouter()
     const communityName = router.query.community as string
     const { data: communityData } = useCommunityQuery({ variables: { communityName } })

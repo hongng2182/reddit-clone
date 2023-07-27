@@ -9,15 +9,15 @@
   --color-black-light: #363938;
   --color-light-gray: #CCC;
   --color-gray: #7C7C7C;
-  --color-primary: #39B5E0;
+  --color-primary: #9376E0;
   --color-primary-light: #f5fafc;
   --color-secondary: #FF6363;
   --color-tertiary: #1EAE98;
-  --color-background: #DAE0E6;
-  --color-background-light: #F8F9FA;
+  --color-background: #DDE6ED;
+  --color-background-light: #fdfdff;
   --color-hover: #B2B7B8;
   --color-category-green: #62D878;
-  --color-category-blue: #287DBE;
+  --color-category-blue: #654E92;
   --color-category-purple: #A55F8D;
   --color-category-yellow: #FFDC53;
   --color-category-pink: #FF66AC;
@@ -154,11 +154,11 @@ button:disabled{
   }
 
   .white-gray-rounded {
-    @apply bg-white border border-light-gray rounded-sm
+    @apply bg-white border border-light-gray rounded-2xl
   }
 
   .post-action {
-    @apply flex-start gap-[5px] hover:bg-medium rounded-sm p-2 font-bold text-gray cursor-pointer
+    @apply flex-start gap-[5px] hover:bg-medium rounded-3xl p-2 font-bold text-gray cursor-pointer
   }
 
   .post-action-disable {

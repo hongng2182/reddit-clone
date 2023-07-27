@@ -8,7 +8,6 @@ import { tabs } from '@/lib/constants'
 
 
 function CreatePostPage() {
-  // TODO: textarea expand and word count
   const { data: meData } = useMeQuery()
   const { dispatch } = useGlobalState()
 

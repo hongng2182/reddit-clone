@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react'
+import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { NetworkStatus } from "@apollo/client"
 import { PageContainer, PageContentLayout, CreatePostFragment, PostBox, UserHomeSidebar, PopularCommunity, PostBoxSkeleton } from '@/components'
-import { useMeQuery, usePostsQuery } from '@/generated/graphql'
+import { PopularCommunititiesDocument, useMeQuery, usePostsQuery } from '@/generated/graphql'
 import { ArrayOfThree, FETCH_LIMIT, tabs } from "@/lib/constants"
 import { LoadingIcon } from '@/components/icons'
 import { setActiveFeedTab } from '@/action'
 import { useGlobalState, useInfiniteLoading } from '@/hooks'
+import { addApolloState, initializeApollo } from '@/lib/apolloClient'
 
 function HomePage() {
     const { dispatch } = useGlobalState()
@@ -59,16 +61,19 @@ export default HomePage
 
 // NOTE: This won't work if domain in BE and FE is different. Header cookie will not be sent along the request!
 
-// export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 
-//     const apolloClient = initializeApollo({ headers: context.req.headers })
+    const apolloClient = initializeApollo({ headers: context.req.headers })
 
-//     await apolloClient.query({
-//         query: PostsDocument,
-//         variables: { first: FETCH_LIMIT, after: null }
-//     })
+    // await apolloClient.query({
+    //     query: PostsDocument,
+    //     variables: { first: FETCH_LIMIT, after: null }
+    // })
+    await apolloClient.query({
+        query: PopularCommunititiesDocument
+    })
 
-//     return addApolloState(apolloClient, {
-//         props: {}
-//     })
-// }
+    return addApolloState(apolloClient, {
+        props: {}
+    })
+}

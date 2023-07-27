@@ -1,0 +1,8 @@
+query PopularCommunitities {
+  popularCommunitities {
+    numMembers
+    communityName
+    communityId
+    communityIconUrl
+  }
+}

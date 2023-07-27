@@ -19,7 +19,6 @@ const MAX_DISPLAYNAME_CHARACTERS = 100
 const MAX_DESCRIPTION_CHARACTERS = 500
 
 function ModPage({ isError: isErrorFromServer }: { isError: boolean }) {
-    // TODO: textarea expand
     // React hooks 
     const router = useRouter()
     const communityName = router.query.community as string
