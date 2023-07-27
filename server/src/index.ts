@@ -59,7 +59,6 @@ const main = async () => {
                 httpOnly: true,
                 secure: __prod__, // cookie only works in https
                 sameSite: __prod__ ? 'none' : 'lax', // csrf
-                domain: __prod__ ? ".vercel.app" : undefined,
             },
         })
     )
@@ -75,8 +74,8 @@ const main = async () => {
     await apolloServer.start()
     apolloServer.applyMiddleware({ app, cors: false })
 
-    app.listen(process.env.PORT || 4000, () => {
-        console.log('server is listening on localhost:4000')
+    app.listen(process.env.PORT || 8080, () => {
+        console.log('server is listening on localhost:8080')
     })
 }
 

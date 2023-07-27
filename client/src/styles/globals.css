@@ -56,7 +56,7 @@ button:disabled{
   }
 
   h2 {
-    @apply text-2xl font-bold
+    @apply text-[16px] sm:text-[19px] font-bold leading-5
   }
 
   h3 {

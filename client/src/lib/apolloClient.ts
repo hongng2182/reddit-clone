@@ -56,7 +56,7 @@ function createApolloClient(headers: IncomingHttpHeaders | null = null) {
             // here we pass the cookie along for each request
             Cookie: headers?.cookie ?? ''
         }
-    })
+    }).then((response) => response)
 
     const httpLink = new HttpLink({
         uri: process.env.NEXT_PUBLIC_API_URL as string, // Server URL (must be absolute)

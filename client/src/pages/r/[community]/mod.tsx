@@ -7,7 +7,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { Error, ImageUpload, PageContainer } from '@/components'
-import { CommunityDocument, CommunityUpdateInput, MeDocument, useCommunityQuery, useMeQuery, useUpdateCommunityMutation } from '@/generated/graphql'
+import { CommunityDocument, CommunityUpdateInput, useCommunityQuery, useMeQuery, useUpdateCommunityMutation } from '@/generated/graphql'
 import { addApolloState, initializeApollo } from '@/lib/apolloClient'
 import { defaultCommunityIcon } from '@/lib/constants'
 import { PrivacyType } from '@/types'
@@ -271,12 +271,8 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
         },
     }
 
-    console.log('headers', context.req.headers)
     try {
         const apolloClient = initializeApollo({ headers: context.req.headers })
-        await apolloClient.query({
-            query: MeDocument,
-        })
 
         await apolloClient.query({
             query: CommunityDocument,

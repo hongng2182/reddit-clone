@@ -20,8 +20,6 @@ function HomePage() {
         dispatch(setActiveFeedTab(tabs.home))
     }, [])
 
-    console.log('post loading', postsLoading)
-
     return (
         <>
             <Head>

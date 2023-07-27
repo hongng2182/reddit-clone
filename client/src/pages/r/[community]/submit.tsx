@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { AboutCommunity, CreatePost, CreatePostRules, PageContainer, PageContentLayout } from '@/components'
-import { MeDocument, useCommunityQuery, useMeQuery } from '@/generated/graphql'
-import { addApolloState, initializeApollo } from '@/lib/apolloClient'
+import { useCommunityQuery, useMeQuery } from '@/generated/graphql'
 import { useGlobalState } from '@/hooks'
 import { setActiveFeedTab, setShowSignInModal } from '@/action'
 import { tabs } from '@/lib/constants'
@@ -46,18 +44,3 @@ function CreatePostInCommunityPage() {
 }
 
 export default CreatePostInCommunityPage
-
-
-
-export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-
-    const apolloClient = initializeApollo({ headers: context.req.headers })
-
-    await apolloClient.query({
-        query: MeDocument,
-    })
-
-    return addApolloState(apolloClient, {
-        props: {}
-    })
-}
