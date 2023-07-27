@@ -8,11 +8,11 @@ function ProfileNav({ activeTab, username, meData }: { activeTab: string, userna
     const [active, setActive] = useState(activeTab)
     const [showTab, setshowTab] = useState(false)
 
-    if (meData === undefined || meData?.me === null) {
+    if (meData === undefined ) {
         return <div className='h-[42px] border-t border-medium bg-white' />
     }
     const isProfileOwner = username === meData?.me?.username
-    const shownTabs = isProfileOwner ? userPageTabs : userPageTabs.slice(0, 2)
+    const shownTabs = !isProfileOwner || meData?.me === null ? userPageTabs.slice(0, 2) : userPageTabs
     return (
         <div className='border-t border-medium bg-white'>
             <div className='xl:w-[1020px] w-[90%] mx-auto flex-center'>

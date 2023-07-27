@@ -1,10 +1,10 @@
 import { MyContext, VoteType } from "../types/index";
-import { Community, Post, User, Vote, Comment } from "../entities";
+import { Community, Post, User, Vote, Comment, UserCommunity } from "../entities";
 import { Arg, Int, Query, Resolver, Mutation, InputType, Field, Ctx, UseMiddleware, FieldResolver, Root, ObjectType, registerEnumType } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../index";
 import { UserInputError } from "apollo-server-express";
-import { Raw } from "typeorm";
+import { FindManyOptions, In, Not, Raw } from "typeorm";
 
 registerEnumType(VoteType, {
     name: 'VoteType'
@@ -115,19 +115,78 @@ export class PostResolver {
     @Query(() => PaginatedPosts)
     async posts(
         @Arg("after", () => String, { nullable: true }) after: string | null,
-        @Arg("first", () => Int) first: number
+        @Arg("first", () => Int) first: number,
+        @Ctx() { req }: MyContext
     ): Promise<PaginatedPosts> {
 
         // Calculate offset and limit based on the "after" and "first" parameters
         const offset = after ? parseInt(Buffer.from(after, 'base64').toString(), 10) : 0;
         const limit = Math.min(20, first);
 
-        // Get posts with pagination
-        const [posts, totalCount] = await AppDataSource.getRepository(Post).findAndCount({
+        // Find latest posts
+        const options: FindManyOptions<Post> = {
             order: { createdAt: 'DESC' },
             skip: offset,
             take: limit,
-        })
+        }
+        // Return posts in community that user has joined if user has login
+        if (req.session.userId) {
+            const record = await UserCommunity.find({
+                where: { userId: req.session.userId }
+            })
+            const community = record.map(item => item.communityId)
+            console.log('community array', community)
+            options.where = { communityId: In(community) }
+        }
+        // Get posts with pagination
+        const [posts, totalCount] = await AppDataSource.getRepository(Post).findAndCount(options)
+
+        // Calculate endCursor, and encode 
+        const hasNextPage = offset + limit < totalCount
+        const endCursor = hasNextPage ? Buffer.from((offset + limit).toString()).toString('base64') : null
+
+        // Calculate pageInfo
+        const pageInfo = {
+            endCursor,
+            hasNextPage,
+            hasPreviousPage: offset > 0,
+        };
+
+        return { paginatedPosts: posts, pageInfo: pageInfo }
+
+    }
+
+    @Query(() => PaginatedPosts)
+    async popularPosts(
+        @Arg("after", () => String, { nullable: true }) after: string | null,
+        @Arg("first", () => Int) first: number,
+        @Ctx() { req }: MyContext
+    ): Promise<PaginatedPosts> {
+
+        // Calculate offset and limit based on the "after" and "first" parameters
+        const offset = after ? parseInt(Buffer.from(after, 'base64').toString(), 10) : 0;
+        const limit = Math.min(20, first);
+
+        // Find latest posts and has highest points
+        const options: FindManyOptions<Post> = {
+            order: { createdAt: 'DESC', points: 'DESC' },
+            skip: offset,
+            take: limit,
+        }
+        // Return posts in community that user hasnt joined yet
+        if (req.session.userId) {
+            const record = await UserCommunity.find({
+                where: { userId: req.session.userId },
+                select: { communityId: true }
+            })
+            console.log('record', record)
+            const community = record.map(item => item.communityId)
+            console.log('community array', community)
+            options.where = { communityId: Not(In(community)) }
+            console.log('community not in', Not(In(community)))
+        }
+        // Get posts with pagination
+        const [posts, totalCount] = await AppDataSource.getRepository(Post).findAndCount(options)
 
         // Calculate endCursor, and encode 
         const hasNextPage = offset + limit < totalCount

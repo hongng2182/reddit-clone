@@ -42,7 +42,7 @@ function UserPage() {
                     </div>}
                     right={<>
                         {userInfoLoading && <UserInfoSkeleton />}
-                        {userCommonInfo?.userCommonInfo.user && <UserInfo
+                        {userCommonInfo?.userCommonInfo.user && userCommonInfo?.userCommonInfo.moderators && <UserInfo
                             meData={meData}
                             userInfo={{
                                 user: userCommonInfo?.userCommonInfo.user,

@@ -1,0 +1,13 @@
+query PopularPosts($first: Int!, $after: String) {
+  popularPosts(first: $first, after: $after) {
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    paginatedPosts {
+      ...PostInfo
+      ...PostRelations
+    }
+  }
+}

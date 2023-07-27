@@ -62,3 +62,10 @@ INSERT INTO public.vote ("userId","postId",value) VALUES (101,49,1);
 INSERT INTO public.vote ("userId","postId",value) VALUES (1,55,1);
 INSERT INTO public.vote ("userId","postId",value) VALUES (102,53,1);
 INSERT INTO public.vote ("userId","postId",value) VALUES (102,51,1);
+INSERT INTO public.vote ("userId","postId",value) VALUES (77,56,1);
+INSERT INTO public.vote ("userId","postId",value) VALUES (98,57,1);
+INSERT INTO public.vote ("userId","postId",value) VALUES (4,58,1);
+INSERT INTO public.vote ("userId","postId",value) VALUES (5,59,1);
+INSERT INTO public.vote ("userId","postId",value) VALUES (12,60,1);
+INSERT INTO public.vote ("userId","postId",value) VALUES (6,61,1);
+

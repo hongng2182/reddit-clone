@@ -26,7 +26,7 @@ function UserPage() {
     useEffect(() => {
         dispatch(setActiveFeedTab({
             name: `u/${username as string}`,
-            icon: userCommonInfo?.userCommonInfo.user?.profileUrl ? userCommonInfo?.userCommonInfo.user.profileUrl : defaultProfileIcon,
+            icon: userCommonInfo?.userCommonInfo.user?.profileUrl ? userCommonInfo?.userCommonInfo.user?.profileUrl : defaultProfileIcon,
             iconFill: null
         }))
     }, [username, userCommonInfo?.userCommonInfo?.user?.profileUrl, dispatch])
@@ -91,11 +91,11 @@ function UserPage() {
                     }
                     right={<>
                         {userInfoLoading && <UserInfoSkeleton />}
-                        {userCommonInfo?.userCommonInfo.user && <UserInfo
+                        {userCommonInfo?.userCommonInfo.user && userCommonInfo?.userCommonInfo?.moderators && <UserInfo
                             meData={meData}
                             userInfo={{
-                                user: userCommonInfo?.userCommonInfo.user,
-                                moderators: userCommonInfo?.userCommonInfo.moderators
+                                user: userCommonInfo?.userCommonInfo?.user,
+                                moderators: userCommonInfo?.userCommonInfo?.moderators
                             }} />}
                     </>} />
             </PageContainer>

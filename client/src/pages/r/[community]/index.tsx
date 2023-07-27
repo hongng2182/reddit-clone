@@ -1,11 +1,11 @@
 import React from 'react'
 import { NetworkStatus } from "@apollo/client"
 import { useRouter } from 'next/router'
-import { CreatePostFragment, PageContentLayout, PageContainer, FilterBox, PostBox, CommunityBanner, AboutCommunity, AboutCommunitySkeleton, CommunityBannerSkeleton, PostBoxSkeleton } from '@/components'
+import { CreatePostFragment, PageContentLayout, PageContainer, PostBox, CommunityBanner, AboutCommunity, AboutCommunitySkeleton, CommunityBannerSkeleton, PostBoxSkeleton } from '@/components'
 import { useCommunityQuery, useGetCommunityPostsQuery, useMeQuery } from '@/generated/graphql'
 import { ArrayOfThree, FETCH_LIMIT } from "@/lib/constants"
 import { LoadingIcon } from '@/components/icons'
-import { useSetActiveFeed } from '@/hooks'
+import { useInfiniteLoading, useSetActiveFeed } from '@/hooks'
 
 function CommunityPage() {
     // React hooks
@@ -19,6 +19,15 @@ function CommunityPage() {
 
     const isLoadingMorePosts = networkStatus === NetworkStatus.fetchMore
     useSetActiveFeed({ communityData: communityData?.community })
+
+    const { lastElement } = useInfiniteLoading({
+        fetchMore: () => {
+            fetchMore({ variables: { first: FETCH_LIMIT, after: data?.getCommunityPosts.pageInfo.endCursor } })
+        },
+        hasNextPage: data?.getCommunityPosts?.pageInfo.hasNextPage,
+        isLoadingMore: isLoadingMorePosts
+    })
+
     // Hooks
     // Return no community match
     if (communityData?.community === null) {
@@ -31,16 +40,20 @@ function CommunityPage() {
         <>
             {communityInfoLoading && <CommunityBannerSkeleton />}
             {communityData?.community && <CommunityBanner userId={meData?.me?.id} communityInfo={communityData.community} />}
-            <PageContainer title={communityData?.community?.displayName && communityData.community.displayName }>
+            <PageContainer title={communityData?.community?.displayName && communityData.community.displayName}>
                 <PageContentLayout
                     left={<>
                         {meData?.me && <CreatePostFragment meData={meData} pathname={`${router.asPath}/submit`} />}
-                        <FilterBox />
                         <div className='flex-col-start-10 w-full'>
                             {postsLoading && ArrayOfThree.map(item => <PostBoxSkeleton key={item} />)}
 
                             {data?.getCommunityPosts && data?.getCommunityPosts.paginatedPosts.length > 0 ?
-                                data?.getCommunityPosts.paginatedPosts.map(post => <PostBox key={post.id} post={post} hideCommunity hideJoinBtn />)
+                                data?.getCommunityPosts.paginatedPosts.map((post, index) =>
+                                    index === data.getCommunityPosts.paginatedPosts.length - 1
+                                        ? <div key={post.id} ref={lastElement} className='w-full'>
+                                            <PostBox post={post} hideCommunity hideJoinBtn />
+                                        </div>
+                                        : <PostBox key={post.id} post={post} hideCommunity hideJoinBtn />)
                                 : 'No posts in this community'}
                             {
                                 data?.getCommunityPosts.pageInfo.hasNextPage &&

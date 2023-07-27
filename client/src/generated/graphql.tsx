@@ -271,6 +271,7 @@ export type Query = {
   getUserComments: CommentSearchResponse;
   getUserPosts: PostSearchResponse;
   me?: Maybe<User>;
+  popularPosts: PaginatedPosts;
   post?: Maybe<Post>;
   posts: PaginatedPosts;
   searchCommunities?: Maybe<SearchResponse>;
@@ -309,6 +310,12 @@ export type QueryGetUserCommentsArgs = {
 
 export type QueryGetUserPostsArgs = {
   username: Scalars['String'];
+};
+
+
+export type QueryPopularPostsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  first: Scalars['Int'];
 };
 
 
@@ -359,8 +366,8 @@ export type User = {
 export type UserCommonInfoResponse = {
   __typename?: 'UserCommonInfoResponse';
   errors?: Maybe<Scalars['String']>;
-  moderators: Array<Community>;
-  user: PartialUser;
+  moderators?: Maybe<Array<Community>>;
+  user?: Maybe<PartialUser>;
 };
 
 export type UserCommunities = {
@@ -540,6 +547,14 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string, email: string, profileUrl?: string | null } | null };
 
+export type PopularPostsQueryVariables = Exact<{
+  first: Scalars['Int'];
+  after?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type PopularPostsQuery = { __typename?: 'Query', popularPosts: { __typename?: 'PaginatedPosts', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, paginatedPosts: Array<{ __typename?: 'Post', id: number, title: string, text?: string | null, points: number, textSnippet?: string | null, ownerId: number, createdAt: string, updatedAt: string, voteStatus: number, urlLink?: string | null, imageUrl?: string | null, numComments: number, communityId: number, user: { __typename?: 'User', username: string }, community: { __typename?: 'Community', name: string, hasJoined: boolean, communityIconUrl?: string | null }, comments?: Array<{ __typename?: 'Comment', id: number, message: string, postId: number, parentId?: number | null, isDeleted: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'User', profileUrl?: string | null, username: string, id: number } }> | null }> } };
+
 export type PostQueryVariables = Exact<{
   postId: Scalars['Float'];
 }>;
@@ -582,7 +597,7 @@ export type UserCommonInfoQueryVariables = Exact<{
 }>;
 
 
-export type UserCommonInfoQuery = { __typename?: 'Query', userCommonInfo: { __typename?: 'UserCommonInfoResponse', errors?: string | null, user: { __typename?: 'PartialUser', username: string, profileUrl?: string | null, createdAt: string }, moderators: Array<{ __typename?: 'Community', numMembers: number, communityIconUrl?: string | null, name: string }> } };
+export type UserCommonInfoQuery = { __typename?: 'Query', userCommonInfo: { __typename?: 'UserCommonInfoResponse', errors?: string | null, user?: { __typename?: 'PartialUser', username: string, profileUrl?: string | null, createdAt: string } | null, moderators?: Array<{ __typename?: 'Community', numMembers: number, communityIconUrl?: string | null, name: string }> | null } };
 
 export type UserCommunitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1414,6 +1429,51 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const PopularPostsDocument = gql`
+    query PopularPosts($first: Int!, $after: String) {
+  popularPosts(first: $first, after: $after) {
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    paginatedPosts {
+      ...PostInfo
+      ...PostRelations
+    }
+  }
+}
+    ${PostInfoFragmentDoc}
+${PostRelationsFragmentDoc}`;
+
+/**
+ * __usePopularPostsQuery__
+ *
+ * To run a query within a React component, call `usePopularPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePopularPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePopularPostsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function usePopularPostsQuery(baseOptions: Apollo.QueryHookOptions<PopularPostsQuery, PopularPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PopularPostsQuery, PopularPostsQueryVariables>(PopularPostsDocument, options);
+      }
+export function usePopularPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PopularPostsQuery, PopularPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PopularPostsQuery, PopularPostsQueryVariables>(PopularPostsDocument, options);
+        }
+export type PopularPostsQueryHookResult = ReturnType<typeof usePopularPostsQuery>;
+export type PopularPostsLazyQueryHookResult = ReturnType<typeof usePopularPostsLazyQuery>;
+export type PopularPostsQueryResult = Apollo.QueryResult<PopularPostsQuery, PopularPostsQueryVariables>;
 export const PostDocument = gql`
     query Post($postId: Float!) {
   post(id: $postId) {
