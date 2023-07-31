@@ -35,19 +35,25 @@
 ## Screenshots
 
 - Main page
+
 ![Main Page](screenshots/main-page.png)
 
 - Community page
+
 ![Community Page](screenshots/community-page.png)
 
 - User page
+
 ![User Page](screenshots/user-page.png)
 
 - Single post page with comments
+
 ![Single post Page](screenshots/single-post-page.png)
 
 - Communities search
+
 ![Communities Search](screenshots/communites-search.png)
 
 - Posts search
+
 ![Post Search](screenshots/posts-search.png)
