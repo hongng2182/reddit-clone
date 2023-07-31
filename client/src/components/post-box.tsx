@@ -27,7 +27,7 @@ type PostBoxProps = {
 
 function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isSinglePost, isEditing }: PostBoxProps) {
     // Object destructure from post
-    const { id, points, user: { username }, textSnippet, voteStatus, title, text, createdAt, community: { name: communityName, hasJoined, communityIconUrl }, numComments, imageUrl, urlLink } = post
+    const { id, points, user: { username }, voteStatus, title, text, createdAt, community: { name: communityName, hasJoined, communityIconUrl }, numComments, imageUrl, urlLink } = post
     const pointsClassname = getPointsColorClassname(voteStatus)
     const timeAgo = getTimeAgo(Number(createdAt))
 
@@ -160,7 +160,7 @@ function PostBox({ post, hideCommunity, hideJoinBtn, comments, isSearchPost, isS
                     </div>
                 }
                 {!isSearchPost && <>
-                    {!showEdit && <p>{isSinglePost ? text : textSnippet}</p>}
+                    {!showEdit && <p>{text}</p>}
                     {imageUrl &&
                         <div className="relative h-auto w-full bg-gray-200 object-contain">
                             <Image

@@ -24,7 +24,7 @@ function ProfileNav({ activeTab, username, meData }: { activeTab: string, userna
                         router.push(tab.url.replace('[username]', username))
                     }}
                 >{tab.name}</button>)}
-                <button type='button' className="relative px-4 py-2 font-bold hover:text-cate-blue md:hidden"
+                {isProfileOwner && <button type='button' className="relative px-4 py-2 font-bold hover:text-cate-blue md:hidden"
                     onMouseEnter={() => setshowTab(true)}
                     onMouseLeave={() => setshowTab(false)}
                 >...
@@ -33,10 +33,13 @@ function ProfileNav({ activeTab, username, meData }: { activeTab: string, userna
                             className={`px-4 py-2 font-bold w-full hover:bg-primary-light text-black
                     ${active === tab.name ? 'text-cate-blue' : ''}
                     `}
-                            onClick={() => setActive(tab.name)}
+                            onClick={() => {
+                                setActive(tab.name)
+                                router.push(tab.url.replace('[username]', username))
+                            }}
                         >{tab.name}</button>
                         )}</div>}
-                </button>
+                </button>}
             </div>
         </div>
     )
